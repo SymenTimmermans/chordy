@@ -1,0 +1,11 @@
+[package]
+name = "chordy"
+version = "0.1.0"
+edition = "2024"
+license = "MPL-2.0"
+
+[dependencies]
+
+[features]
+default = ["utf8_symbols"]  # Enable by default
+utf8_symbols = []           # Feature for UTF-8 musical symbols
