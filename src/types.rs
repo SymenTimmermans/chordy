@@ -58,7 +58,10 @@ impl NoteName {
 
 impl fmt::Display for NoteName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}{}", self.letter, self.accidental)
+        match self.accidental {
+            Accidental::Natural => write!(f, "{}", self.letter),
+            _ => write!(f, "{}{}", self.letter, self.accidental),
+        }
     }
 }
 
@@ -76,8 +79,8 @@ impl Pitch {
 
     /// Returns the full MIDI note number for this pitch
     pub fn midi_number(&self) -> i8 {
-        // MIDI octaves start at -1, where C-1 is note 0
-        self.name.base_midi_number() + ((self.octave + 1) * 12)
+        // MIDI octaves start at -2, where C-2 is note 0
+        self.name.base_midi_number() + ((self.octave + 2) * 12)
     }
     
     /// Checks if two pitches represent the same frequency
@@ -105,6 +108,18 @@ pub struct Chord {
 pub struct Scale {
     tonic: NoteName,
     mode: ScaleType,
+}
+
+impl Scale {
+    pub fn new(tonic: NoteName, mode: ScaleType) -> Self {
+        Scale { tonic, mode }
+    }
+
+    pub fn notes(&self) -> Vec<NoteName> {
+        // Generate notes based on tonic and mode
+        // This is a placeholder implementation
+        vec![self.tonic]
+    }
 }
 
 /// A musical key (combination of tonic and mode)
