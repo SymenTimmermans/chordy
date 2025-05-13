@@ -1,6 +1,4 @@
-use std::fmt;
 
-use crate::error::ParseError;
 
 /// Extensions and alterations that can be added to basic chord triads
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

@@ -1,4 +1,4 @@
-use super::{NoteName, Mode};
+use super::NoteName;
 
 /// A scale with a tonic and mode
 #[derive(Debug, Clone, PartialEq, Eq)]

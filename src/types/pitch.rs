@@ -1,7 +1,6 @@
 use std::fmt;
 use std::ops::{Add, AddAssign};
 
-use crate::error::ParseError;
 use super::{NoteName, Letter, Accidental};
 
 /// A specific pitch with both note name and octave

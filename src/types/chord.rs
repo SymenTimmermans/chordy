@@ -1,6 +1,4 @@
-use std::fmt;
 
-use crate::error::ParseError;
 use super::{NoteName, ChordExtension};
 
 /// A chord with a root note and quality

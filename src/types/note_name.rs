@@ -73,7 +73,7 @@ impl FromStr for NoteName {
     /// the string to be an accidental. 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         // The string should be at least 1 character long
-        if s.len() < 1 {
+        if s.is_empty() {
             return Err(ParseError::InvalidNoteName(s.to_string()));
         }
 

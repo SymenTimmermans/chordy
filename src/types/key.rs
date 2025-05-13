@@ -1,4 +1,4 @@
-use super::{NoteName, ScaleType};
+use super::NoteName;
 
 /// A musical key (combination of tonic and mode)
 #[derive(Debug, Clone, PartialEq, Eq)]
