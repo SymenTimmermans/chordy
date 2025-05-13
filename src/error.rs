@@ -17,6 +17,9 @@ pub enum ParseError {
     
     /// Error when a string doesn't match any known pattern
     UnrecognizedFormat(String),
+
+    /// Error when an invalid pitch is provided
+    InvalidPitch(String),
 }
 
 impl std::fmt::Display for ParseError {
@@ -27,6 +30,7 @@ impl std::fmt::Display for ParseError {
             ParseError::InvalidChordSymbol(s) => write!(f, "Invalid chord symbol: '{}'", s),
             ParseError::InvalidScaleType(s) => write!(f, "Invalid scale type: '{}'", s),
             ParseError::UnrecognizedFormat(s) => write!(f, "Unrecognized format: '{}'", s),
+            ParseError::InvalidPitch(s) => write!(f, "Invalid pitch: '{}'", s),
         }
     }
 }
