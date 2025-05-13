@@ -54,7 +54,7 @@ fn test_pitch_transpose() {
     
     // Special cases for proper enharmonic spelling
     assert_eq!(pitch!("B4").transpose(1), pitch!("C5"));  // B→C not B#
-    // assert_eq!(pitch!("C4").transpose(-1), pitch!("B3")); // C→B not Cb
+    assert_eq!(pitch!("C4").transpose(-1), pitch!("B3")); // C→B not Cb
     assert_eq!(pitch!("F#4").transpose(1), pitch!("G4")); // F#→G not F##
     
     // Larger intervals

@@ -98,12 +98,20 @@ impl Pitch {
             return Pitch::new(letter, Accidental::Natural, octave);
         }
         
-        // Special case: when transposing down a half step from C or F
-        // we should prefer the previous letter with sharp
-        if (self.name.letter == Letter::C || self.name.letter == Letter::F) 
+        // Special case: when transposing down a half step from C
+        // we should get B natural in the lower octave
+        if self.name.letter == Letter::C 
             && semitones == -1 
             && self.name.accidental == Accidental::Natural {
-            return Pitch::new(self.name.letter, Accidental::Sharp, octave);
+            return Pitch::new(Letter::B, Accidental::Natural, octave);
+        }
+        
+        // Special case: when transposing down a half step from F
+        // we should get E natural
+        if self.name.letter == Letter::F 
+            && semitones == -1 
+            && self.name.accidental == Accidental::Natural {
+            return Pitch::new(Letter::E, Accidental::Natural, octave);
         }
         
         Pitch::new(letter, accidental, octave)
