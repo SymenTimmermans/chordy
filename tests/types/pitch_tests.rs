@@ -35,3 +35,12 @@ fn test_pitch_enharmonic() {
 
     assert!(p1.is_enharmonic_with(&p2));
 }
+
+#[test]
+fn test_pitch_transpose() {
+    let pitch = Pitch::new(NoteName::new(Letter::C, Accidental::Natural), 4);
+    let transposed = pitch.transpose(2);
+    let expected = Pitch::new(NoteName::new(Letter::D, Accidental::Natural), 4);
+
+    assert_eq!(transposed, expected);
+}
