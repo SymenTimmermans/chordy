@@ -1,4 +1,6 @@
-/// Error type for parsing failures in the Chordy crate
+/// Error type for parsing failures
+/// 
+/// Included in the crate prelude
 #[derive(Debug, Clone, PartialEq)]
 pub enum ParseError {
     /// Error when an invalid accidental string is provided

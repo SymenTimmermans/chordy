@@ -1,3 +1,7 @@
+//! Musical symbols
+//!
+//! The prelude conditionally exports these based on the `utf8_symbols` feature
+
 #[cfg(feature = "utf8_symbols")]
 pub const FLAT: &str = "♭";
 #[cfg(not(feature = "utf8_symbols"))]
