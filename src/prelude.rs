@@ -49,3 +49,6 @@ pub mod traits {
     pub use std::fmt::Display;
     pub use std::convert::TryFrom;
 }
+
+// Macros
+pub use crate::pitch;

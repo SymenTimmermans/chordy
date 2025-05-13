@@ -1,4 +1,5 @@
 use chordy::types::*;
+use chordy::pitch;
 
 #[test]
 fn test_pitch_creation() {
@@ -45,23 +46,27 @@ fn test_pitch_from_str() {
 
 #[test]
 fn test_pitch_transpose() {
-    let pitch = Pitch::new(Letter::C, Accidental::Natural, 4);
-    let transposed = pitch.transpose(2);
-    assert_eq!(transposed, Pitch::new(Letter::D, Accidental::Natural, 4));
-
-    let pitch = Pitch::new(Letter::A, Accidental::Sharp, 3);
-    let transposed = pitch.transpose(1);
-    assert_eq!(transposed, Pitch::new(Letter::B, Accidental::Natural, 3));
-
-    // B up 1 semitone should be C natural, not B#                                                                                                                                                                   
-    let b = Pitch::new(Letter::B, Accidental::Natural, 4);                                                                                                                                                           
-    assert_eq!(b.transpose(1), Pitch::new(Letter::C, Accidental::Natural, 5));                                                                                                                                       
-                                                                                                                                                                                                                     
-    // C down 1 semitone should be B natural, not Cb                                                                                                                                                                 
-    let c = Pitch::new(Letter::C, Accidental::Natural, 4);                                                                                                                                                           
-    // assert_eq!(c.transpose(-1), Pitch::new(Letter::B, Accidental::Natural, 3));                                                                                                                                      
-                                                                                                                                                                                                                     
-    // F# up 1 semitone should be G natural, not F##                                                                                                                                                                 
-    let f_sharp = Pitch::new(Letter::F, Accidental::Sharp, 4);                                                                                                                                                       
-    assert_eq!(f_sharp.transpose(1), Pitch::new(Letter::G, Accidental::Natural, 4));
+    // Whole step transposition
+    assert_eq!(pitch!("C4").transpose(2), pitch!("D4"));
+    
+    // Half step transposition
+    assert_eq!(pitch!("A#3").transpose(1), pitch!("B3"));
+    
+    // Special cases for proper enharmonic spelling
+    assert_eq!(pitch!("B4").transpose(1), pitch!("C5"));  // B→C not B#
+    // assert_eq!(pitch!("C4").transpose(-1), pitch!("B3")); // C→B not Cb
+    assert_eq!(pitch!("F#4").transpose(1), pitch!("G4")); // F#→G not F##
+    
+    // Larger intervals
+    assert_eq!(pitch!("C4").transpose(12), pitch!("C5")); // Octave up
+    assert_eq!(pitch!("E5").transpose(-12), pitch!("E4")); // Octave down
+    
+    // With accidentals
+    assert_eq!(pitch!("Bb4").transpose(2), pitch!("C5"));
+    assert_eq!(pitch!("D#4").transpose(-1), pitch!("D4"));
+    
+    // Negative octaves
+    let p1 = pitch!("C-2").transpose(12);
+    let p2 = pitch!("C-1");
+    assert_eq!(p1, p2);
 }

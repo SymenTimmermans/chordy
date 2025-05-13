@@ -64,7 +64,7 @@ impl Letter {
         }
     }
 
-    pub fn from_char(c: char) -> Result<Self, ParseError> {
+    pub const fn from_char(c: char) -> Result<Self, &'static str> {
         match c {
             'C' | 'c' => Ok(Letter::C),
             'D' | 'd' => Ok(Letter::D),
@@ -73,7 +73,7 @@ impl Letter {
             'G' | 'g' => Ok(Letter::G),
             'A' | 'a' => Ok(Letter::A),
             'B' | 'b' => Ok(Letter::B),
-            _ => Err(ParseError::InvalidNoteName("Invalid letter".to_string())),
+            _ => Err("Invalid letter"),
         }
     }
 }
@@ -87,5 +87,6 @@ impl FromStr for Letter {
         }
         
         Letter::from_char(s.chars().next().unwrap())
+            .map_err(|_| ParseError::InvalidNoteName(s.to_string()))
     }
 }
