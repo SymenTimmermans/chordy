@@ -52,11 +52,8 @@ pub const fn is_valid_pitch(s: &str) -> bool {
     }
 
     // Validate letter (using direct match since from_char isn't fully const)
-    let valid_letter = match bytes[0] as char {
-        'C' | 'c' | 'D' | 'd' | 'E' | 'e' |
-        'F' | 'f' | 'G' | 'g' | 'A' | 'a' | 'B' | 'b' => true,
-        _ => false,
-    };
+    let valid_letter = matches!(bytes[0] as char, 'C' | 'c' | 'D' | 'd' | 'E' | 'e' |
+        'F' | 'f' | 'G' | 'g' | 'A' | 'a' | 'B' | 'b');
 
     if !valid_letter {
         return false;
