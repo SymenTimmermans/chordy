@@ -7,13 +7,7 @@ use crate::error::ParseError;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(i8)]
 pub enum Letter {
-    C = 0,
-    D = 2,
-    E = 4,
-    F = 5,
-    G = 7,
-    A = 9,
-    B = 11,
+    C, D, E, F, G, A, B,
 }
 
 impl fmt::Display for Letter {
@@ -35,32 +29,30 @@ impl fmt::Display for Letter {
 impl Letter {
     /// Returns the base MIDI note number for this letter in octave 0
     pub fn base_midi_number(&self) -> i8 {
-        *self as i8
-    }
-    
-    /// Gets the next letter in the sequence (wrapping from G to A)
-    pub fn next(&self) -> Self {
         match self {
-            Letter::A => Letter::B,
-            Letter::B => Letter::C,
-            Letter::C => Letter::D,
-            Letter::D => Letter::E,
-            Letter::E => Letter::F,
-            Letter::F => Letter::G,
-            Letter::G => Letter::A,
+            Letter::C => 0,
+            Letter::D => 2,
+            Letter::E => 4,
+            Letter::F => 5,
+            Letter::G => 7,
+            Letter::A => 9,
+            Letter::B => 11,
         }
     }
-    
-    /// Gets the previous letter in the sequence (wrapping from A to G)
-    pub fn _prev(&self) -> Self {
+
+    /// Gets the next letter in the sequence (wrapping from G to A)
+    pub fn next(self) -> Letter {
+        use Letter::*;
         match self {
-            Letter::A => Letter::G,
-            Letter::B => Letter::A,
-            Letter::C => Letter::B,
-            Letter::D => Letter::C,
-            Letter::E => Letter::D,
-            Letter::F => Letter::E,
-            Letter::G => Letter::F,
+            C => D, D => E, E => F, F => G, G => A, A => B, B => C,
+        }
+    }
+
+    /// Gets the previous letter in the sequence (wrapping from A to G)
+    pub fn prev(self) -> Letter {
+        use Letter::*;
+        match self {
+            C => B, D => C, E => D, F => E, G => F, A => G, B => A,
         }
     }
 
@@ -76,6 +68,12 @@ impl Letter {
             _ => Err("Invalid letter"),
         }
     }
+
+    pub fn all() -> [Letter; 7] {
+        [Letter::C, Letter::D, Letter::E, Letter::F, Letter::G, Letter::A, Letter::B]
+    }
+
+
 }
 
 impl FromStr for Letter {
