@@ -74,6 +74,9 @@ impl FromStr for NoteName {
     ///
     /// # Examples
     /// ```
+    /// use chordy::{NoteName, Letter, Accidental};
+    /// use chordy::prelude::traits::FromStr;
+    ///
     /// let c_sharp = NoteName::from_str("C♯").unwrap();
     /// assert_eq!(c_sharp.letter, Letter::C);
     /// assert_eq!(c_sharp.accidental, Accidental::Sharp);
