@@ -22,6 +22,7 @@
 pub mod types;
 pub mod error;
 pub mod symbols;
+pub mod transposition;
 
 /// The chordy prelude
 pub mod prelude;
