@@ -3,7 +3,7 @@ use std::ops::{Add, AddAssign};
 use std::str::FromStr;
 
 use crate::error::ParseError;
-use crate::transposition::{Transposer, ChromaticTransposer};
+use crate::transposition::{ChromaticTransposer, Transposer};
 
 use super::{Accidental, Letter, NoteName};
 
@@ -108,23 +108,39 @@ impl FromStr for Pitch {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // Split into note part and octave part
-        let (note_part, octave_part) = s.split_at(
-            s.rfind(|c: char| !c.is_ascii_digit() && c != '-')
-                .map(|pos| pos + 1)
-                .unwrap_or(0),
-        );
+        // Find the index where the octave part begins
+        let octave_start_index = s
+            .char_indices()
+            .find(|(_, c)| c.is_ascii_digit() || *c == '-')
+            .map(|(i, _)| i)
+            .ok_or_else(|| ParseError::InvalidPitch(s.to_string()))?;
 
+        // If the octave starts with '-', verify the next character is a digit
+        if s[octave_start_index..].starts_with('-')
+            && (s.len() <= octave_start_index + 1
+                || !s[octave_start_index + 1..]
+                    .chars()
+                    .next()
+                    .is_some_and(|c| c.is_ascii_digit()))
+        {
+            return Err(ParseError::InvalidPitch(s.to_string()));
+        }
+
+        // Split the string into note and octave parts using slices (no allocation)
+        let note_part = &s[..octave_start_index];
+        let octave_part = &s[octave_start_index..];
+
+        // Verify parts are non-empty
         if note_part.is_empty() || octave_part.is_empty() {
             return Err(ParseError::InvalidPitch(s.to_string()));
         }
 
-        // Parse octave allowing for negative numbers
+        // Parse the octave
         let octave = octave_part
             .parse::<i8>()
             .map_err(|_| ParseError::InvalidPitch(s.to_string()))?;
 
-        // Parse note name
+        // Parse the note name
         let name = NoteName::from_str(note_part)?;
 
         Ok(Pitch { name, octave })

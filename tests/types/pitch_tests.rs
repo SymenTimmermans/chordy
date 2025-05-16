@@ -34,6 +34,18 @@ fn test_pitch_from_str() {
     assert_eq!("Ab3".parse(), Ok(Pitch::new(Letter::A, Accidental::Flat, 3)));
     assert_eq!("G#4".parse(), Ok(Pitch::new(Letter::G, Accidental::Sharp, 4)));
     assert_eq!("Bbb5".parse(), Ok(Pitch::new(Letter::B, Accidental::DoubleFlat, 5)));
+
+    // Test unicode accidentals
+    assert_eq!("A♭3".parse(), Ok(Pitch::new(Letter::A, Accidental::Flat, 3)));
+    assert_eq!("G♯4".parse(), Ok(Pitch::new(Letter::G, Accidental::Sharp, 4)));
+
+    // Test double unicode accidentals
+    assert_eq!("G♯♯4".parse(), Ok(Pitch::new(Letter::G, Accidental::DoubleSharp, 4)));
+    assert_eq!("B♭♭5".parse(), Ok(Pitch::new(Letter::B, Accidental::DoubleFlat, 5)));
+    //
+    // Test double unicode accidentals
+    assert_eq!("G𝄪4".parse(), Ok(Pitch::new(Letter::G, Accidental::DoubleSharp, 4)));
+    assert_eq!("B𝄫5".parse(), Ok(Pitch::new(Letter::B, Accidental::DoubleFlat, 5)));
     
     // Test invalid cases
     assert!("".parse::<Pitch>().is_err());
