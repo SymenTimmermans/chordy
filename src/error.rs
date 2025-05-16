@@ -20,6 +20,7 @@ pub enum ParseError {
 
     /// Error when an invalid pitch is provided
     InvalidPitch(String),
+    InvalidInterval(String),
 }
 
 impl std::fmt::Display for ParseError {
@@ -31,6 +32,7 @@ impl std::fmt::Display for ParseError {
             ParseError::InvalidScaleType(s) => write!(f, "Invalid scale type: '{}'", s),
             ParseError::UnrecognizedFormat(s) => write!(f, "Unrecognized format: '{}'", s),
             ParseError::InvalidPitch(s) => write!(f, "Invalid pitch: '{}'", s),
+            ParseError::InvalidInterval(s) => write!(f, "Invalid interval: '{}'", s),
         }
     }
 }

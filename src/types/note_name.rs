@@ -2,7 +2,7 @@ use std::fmt;
 use std::str::FromStr;
 
 use crate::error::ParseError;
-use super::{Letter, Accidental};
+use super::{key::KeySignature, Accidental, Letter};
 
 /// Represents a musical note name with a letter and accidental
 /// 
@@ -54,6 +54,10 @@ impl NoteName {
     pub fn is_enharmonic_with(&self, other: &Self) -> bool {
         // Notes are enharmonically equivalent if they represent the same pitch
         self.base_midi_number() % 12 == other.base_midi_number() % 12
+    }
+
+    pub(crate) fn transpose_by_interval(&self, interval: super::Interval, key_sig: &KeySignature) -> NoteName {
+        todo!()
     }
 }
 

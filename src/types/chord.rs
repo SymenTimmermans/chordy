@@ -26,3 +26,10 @@ pub enum ChordQuality {
     Sus4,
     // etc.
 }
+
+pub enum HarmonicFunction {
+    Tonic,
+    Subdominant,
+    Dominant,
+    // etc.
+}
