@@ -117,5 +117,5 @@ fn test_pitch_transpose() {
     //
     assert_eq!(pitch!("C4").transpose(0), pitch!("C4"));  // No change
     //
-    assert_eq!(pitch!("G#4").transpose(-2), pitch!("F#4"));  // C→C#
+    assert_eq!(pitch!("G#4").transpose(-2), pitch!("F#4"));  // G#-F# not Gb
 }

@@ -1,9 +1,0 @@
-# Chordy
-## Musical Theory library
-
-## Features
-
-- **utf8_symbols** (enabled by default): Uses proper UTF-8 musical symbols (♭, ♯, etc.) 
-  in string representations. Disable this feature with `default-features = false` if you
-  need ASCII-only output (for compatibility with terminals or systems that don't support
-  these characters).
