@@ -7,6 +7,27 @@ pub struct Scale {
     mode: ScaleType,
 }
 
+/// A scale is a sequence of notes that defines a musical key.
+/// ```
+/// use chordy::{NoteName, Letter, Accidental, Scale, ScaleType};
+///
+/// // Create a C major scale
+/// let c = NoteName::new(Letter::C, Accidental::Natural);
+/// let c_major = Scale::new(c, ScaleType::Major);
+///
+/// // Get the notes in the scale
+/// let notes = c_major.notes();
+/// // [C, D, E, F, G, A, B]
+/// assert_eq!(notes, vec![
+///     NoteName::new(Letter::C, Accidental::Natural),
+///     NoteName::new(Letter::D, Accidental::Natural),
+///     NoteName::new(Letter::E, Accidental::Natural),
+///     NoteName::new(Letter::F, Accidental::Natural),
+///     NoteName::new(Letter::G, Accidental::Natural),
+///     NoteName::new(Letter::A, Accidental::Natural),
+///     NoteName::new(Letter::B, Accidental::Natural),
+/// ]);
+/// ```
 impl Scale {
     pub fn new(tonic: NoteName, mode: ScaleType) -> Self {
         Scale { tonic, mode }

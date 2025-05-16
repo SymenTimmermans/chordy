@@ -70,7 +70,18 @@ impl FromStr for NoteName {
     type Err = ParseError;
 
     /// Parses a string into a NoteName, taking the first character to be a Letter, and the rest of
-    /// the string to be an accidental. 
+    /// the string to be an accidental.
+    ///
+    /// # Examples
+    /// ```
+    /// let c_sharp = NoteName::from_str("C♯").unwrap();
+    /// assert_eq!(c_sharp.letter, Letter::C);
+    /// assert_eq!(c_sharp.accidental, Accidental::Sharp);
+    ///
+    /// let b_double_sharp = NoteName::from_str("B♯♯").unwrap();
+    /// assert_eq!(b_double_sharp.letter, Letter::B);
+    /// assert_eq!(b_double_sharp.accidental, Accidental::DoubleSharp);
+    /// ```
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         // The string should be at least 1 character long
         if s.is_empty() {
