@@ -9,13 +9,13 @@ use super::{NoteName, Pitch};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Interval {
     /// Interval quality (Perfect, Major, Minor, etc.)
-    quality: IntervalQuality,
+    pub quality: IntervalQuality,
 
     /// Interval size (Unison, Second, Third, etc.)
-    size: IntervalSize,
+    pub size: IntervalSize,
 
     /// Direction (ascending or descending)
-    direction: IntervalDirection,
+    pub direction: IntervalDirection,
 }
 
 /// Represents interval quality (Perfect, Major, Minor, etc.)
@@ -45,6 +45,26 @@ pub enum IntervalSize {
     Twelfth,
     Thirteenth,
     // Compound intervals beyond this can be represented as Octave + n
+}
+
+impl IntervalSize {
+    pub fn letter_steps(&self) -> u8 {
+        match self {
+            IntervalSize::Unison => 0,
+            IntervalSize::Second => 1,
+            IntervalSize::Third => 2,
+            IntervalSize::Fourth => 3,
+            IntervalSize::Fifth => 4,
+            IntervalSize::Sixth => 5,
+            IntervalSize::Seventh => 6,
+            IntervalSize::Octave => 7,
+            IntervalSize::Ninth => 8,
+            IntervalSize::Tenth => 9,
+            IntervalSize::Eleventh => 10,
+            IntervalSize::Twelfth => 11,
+            IntervalSize::Thirteenth => 12,
+        }
+    }
 }
 
 /// Direction of the interval
@@ -334,6 +354,34 @@ impl Interval {
         todo!()
     }
 
+    /// Multiply an interval by a factor (e.g., 2 octaves)
+    pub fn multiply(&self, factor: u8) -> Self {
+        let mut result = *self;
+        for _ in 1..factor {
+            result = result.add(self);
+        }
+        result
+    }
+
+    /// Get the number of letter steps this interval spans
+    pub fn letter_steps(&self) -> u8 {
+        match self.size {
+            IntervalSize::Unison => 0,
+            IntervalSize::Second => 1,
+            IntervalSize::Third => 2,
+            IntervalSize::Fourth => 3,
+            IntervalSize::Fifth => 4,
+            IntervalSize::Sixth => 5,
+            IntervalSize::Seventh => 6,
+            IntervalSize::Octave => 7,
+            IntervalSize::Ninth => 8,
+            IntervalSize::Tenth => 9,
+            IntervalSize::Eleventh => 10,
+            IntervalSize::Twelfth => 11,
+            IntervalSize::Thirteenth => 12,
+        }
+    }
+
     /// Common interval constants for easy use
     pub const UNISON: Interval = Interval {
         quality: IntervalQuality::Perfect,
@@ -376,9 +424,21 @@ impl Interval {
         size: IntervalSize::Fourth,
         direction: IntervalDirection::Ascending,
     };
+
+    pub const DIMINISHED_FIFTH: Interval = Interval {
+        quality: IntervalQuality::Diminished(1),
+        size: IntervalSize::Fifth,
+        direction: IntervalDirection::Ascending,
+    };
     
     pub const PERFECT_FIFTH: Interval = Interval {
         quality: IntervalQuality::Perfect,
+        size: IntervalSize::Fifth,
+        direction: IntervalDirection::Ascending,
+    };
+
+    pub const AUGMENTED_FIFTH: Interval = Interval {
+        quality: IntervalQuality::Augmented(1),
         size: IntervalSize::Fifth,
         direction: IntervalDirection::Ascending,
     };

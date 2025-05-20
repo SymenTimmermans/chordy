@@ -1,3 +1,4 @@
+#![doc = include_str!("../README.md")]
 //! Music theory library for Rust
 //!
 //! For most use cases, import the prelude:
