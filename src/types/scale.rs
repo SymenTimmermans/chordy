@@ -222,7 +222,7 @@ impl Scale {
     }
 
     /// Creates a chord from the given scale degree (1-7)
-    pub fn chord_at_degree(&self, degree: u8, chord_type: ChordQuality) -> Chord {
+    pub fn chord_at_degree(&self, _degree: u8, _chord_type: ChordQuality) -> Chord {
         // Implementation
         todo!()
     }
@@ -261,19 +261,19 @@ impl Scale {
     }
     ///
     /// Determine if a given note belongs to the scale
-    pub fn contains(&self, note: &NoteName) -> bool {
+    pub fn contains(&self, _note: &NoteName) -> bool {
         // Implementation
         todo!()
     }
 
     /// Find the closest scale tone to a given note
-    pub fn closest_tone_to(&self, note: &NoteName) -> NoteName {
+    pub fn closest_tone_to(&self, _note: &NoteName) -> NoteName {
         // Implementation
         todo!()
     }
 
-    /// Calculate the tension/stability of a note in this scale context
     /*
+    /// Calculate the tension/stability of a note in this scale context
     pub fn tension(&self, note: &NoteName) -> TensionRating {
         // Implementation
     }

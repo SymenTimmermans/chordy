@@ -50,6 +50,20 @@ impl Chord {
             .map(|interval| self.root.apply_interval(*interval))
             .collect()
     }
+
+    /// Return a Harte representation (string) of the chord
+    ///
+    /// See: https://ismir2005.ismir.net/proceedings/1080.pdf
+    pub fn to_harte(&self) -> String {
+        todo!()
+    }
+
+    /// Parse a Harte representation (string) of the chord
+    ///
+    /// See: https://ismir2005.ismir.net/proceedings/1080.pdf
+    pub fn from_harte(_harte: &str) -> Self {
+        todo!()
+    }
 }
 
 impl Display for Chord {
@@ -152,10 +166,7 @@ impl HarmonicFunction {
 
     pub fn detect_by_scale_degrees(scale_degrees: &[ScaleDegree]) -> Option<Self> {
         let all = Self::all();
-        let simple_degrees = scale_degrees
-            .iter()
-            .map(|sd| sd.step)
-            .collect::<Vec<u8>>();
+        let simple_degrees = scale_degrees.iter().map(|sd| sd.step).collect::<Vec<u8>>();
         let scores = all.iter().map(|hf| {
             let mut score = 0;
             for degree in simple_degrees.iter() {
@@ -178,8 +189,6 @@ impl HarmonicFunction {
         }
 
         // return the harmonic function with the highest score
-        scores
-            .max_by_key(|(_, score)| *score)
-            .map(|(hf, _)| *hf)
+        scores.max_by_key(|(_, score)| *score).map(|(hf, _)| *hf)
     }
 }

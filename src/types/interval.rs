@@ -237,10 +237,10 @@ impl Interval {
     
     /// Create an interval from two pitches (with octave info)
     pub fn between_pitches(from: &Pitch, to: &Pitch) -> Self {
-        let note_interval = Self::between_notes(&from.name, &to.name);
+        let _note_interval = Self::between_notes(&from.name, &to.name);
         
         // Handle the octave component
-        let octave_diff = to.octave - from.octave;
+        let _octave_diff = to.octave - from.octave;
         
         // Adjust interval size based on octave difference
         // Implementation details would go here
@@ -343,13 +343,13 @@ impl Interval {
     }
     
     /// Apply this interval to a note to get another note
-    pub fn apply_to(&self, note: &NoteName) -> NoteName {
+    pub fn apply_to(&self, _note: &NoteName) -> NoteName {
         // Implementation would handle proper letter naming and accidentals
         todo!()
     }
     
     /// Combine two intervals
-    pub fn add(&self, other: &Interval) -> Interval {
+    pub fn add(&self, _other: &Interval) -> Interval {
         // Implementation would combine intervals musically
         todo!()
     }
