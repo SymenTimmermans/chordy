@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use super::{ChordExtension, Interval, NoteName};
+use super::{scale::ScaleDegree, ChordExtension, Interval, NoteName};
 
 /// A chord with a root note and quality
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -24,7 +24,7 @@ impl Chord {
     /// # Examples
     ///
     /// ```
-    /// use chordy::types::Chord;
+    /// use chordy::types::{Chord, ChordQuality};
     /// use chordy::note;
     ///
     /// let d_minor = Chord::new(note!("D"), ChordQuality::Minor, vec![]);
@@ -77,32 +77,32 @@ impl ChordQuality {
     pub fn get_intervals(&self) -> Vec<Interval> {
         match self {
             ChordQuality::Major => vec![
-                Interval::UNISON,
+                Interval::PERFECT_UNISON,
                 Interval::MAJOR_THIRD,
                 Interval::PERFECT_FIFTH,
             ],
             ChordQuality::Minor => vec![
-                Interval::UNISON,
+                Interval::PERFECT_UNISON,
                 Interval::MINOR_THIRD,
                 Interval::PERFECT_FIFTH,
             ],
             ChordQuality::Diminished => vec![
-                Interval::UNISON,
+                Interval::PERFECT_UNISON,
                 Interval::MINOR_THIRD,
                 Interval::DIMINISHED_FIFTH,
             ],
             ChordQuality::Augmented => vec![
-                Interval::UNISON,
+                Interval::PERFECT_UNISON,
                 Interval::MAJOR_THIRD,
                 Interval::AUGMENTED_FIFTH,
             ],
             ChordQuality::Sus2 => vec![
-                Interval::UNISON,
+                Interval::PERFECT_UNISON,
                 Interval::MAJOR_SECOND,
                 Interval::PERFECT_FIFTH,
             ],
             ChordQuality::Sus4 => vec![
-                Interval::UNISON,
+                Interval::PERFECT_UNISON,
                 Interval::PERFECT_FOURTH,
                 Interval::PERFECT_FIFTH,
             ],
@@ -150,17 +150,21 @@ impl HarmonicFunction {
         }
     }
 
-    pub fn detect_by_scale_degrees(scale_degrees: &[u8]) -> Option<Self> {
+    pub fn detect_by_scale_degrees(scale_degrees: &[ScaleDegree]) -> Option<Self> {
         let all = Self::all();
+        let simple_degrees = scale_degrees
+            .iter()
+            .map(|sd| sd.step)
+            .collect::<Vec<u8>>();
         let scores = all.iter().map(|hf| {
             let mut score = 0;
-            for degree in scale_degrees {
+            for degree in simple_degrees.iter() {
                 if hf.triggers().contains(degree) {
                     score += 8;
                 } else if hf.associates().contains(degree) {
                     score += 4;
                 } else if hf.dissonances().iter().any(|(d, i)| {
-                    d == degree && (i.is_none() || scale_degrees.contains(&i.unwrap()))
+                    d == degree && (i.is_none() || simple_degrees.contains(&i.unwrap()))
                 }) {
                     score += 1;
                 }

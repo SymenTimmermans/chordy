@@ -55,7 +55,7 @@ impl NoteName {
     /// Checks if two note names are enharmonically equivalent
     pub fn is_enharmonic_with(&self, other: &Self) -> bool {
         // Notes are enharmonically equivalent if they represent the same pitch
-        self.base_midi_number() % 12 == other.base_midi_number() % 12
+        (self.base_midi_number() + 12) % 12 == (other.base_midi_number() + 12) % 12
     }
 
     /// Apply an interval to this note to get a new note with correct spelling

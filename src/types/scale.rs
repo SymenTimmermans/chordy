@@ -1,8 +1,17 @@
 use crate::error::TypeError;
 
 use super::{
-    chord::HarmonicFunction, key::KeySignature, Accidental, Chord, ChordQuality, Interval, NoteName,
+    chord::HarmonicFunction, key::KeySignature, Accidental, Chord, ChordQuality, NoteName
 };
+
+pub mod definition;
+pub use definition::ScaleDefinition;
+
+pub mod bitmask;
+pub use bitmask::ScaleBitmask;
+
+#[allow(dead_code)]
+pub mod scales;
 
 /// A scale with a tonic and mode
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -10,21 +19,17 @@ pub struct Scale {
     /// The tonic (starting note) of the scale
     pub tonic: NoteName,
 
-    /// The type of scale (defines the interval pattern)
-    pub scale_type: ScaleType,
-
-    /// Optional key signature for theoretical consistency
-    /// If None, will be inferred from scale_type and tonic
-    pub key_signature: Option<KeySignature>,
+    /// The scale definition
+    pub definition: ScaleDefinition,
 }
 
 /// A scale is a sequence of notes that defines a musical key.
 /// ```
-/// use chordy::{NoteName, Letter, Accidental, Scale, ScaleType};
+/// use chordy::{NoteName, Letter, Accidental, Scale, scales};
 ///
 /// // Create a C major scale
 /// let c = NoteName::new(Letter::C, Accidental::Natural);
-/// let c_major = Scale::new(c, ScaleType::Major);
+/// let c_major = Scale::new(c, scales::IONIAN);
 ///
 /// // Get the notes in the scale
 /// let notes = c_major.notes();
@@ -41,42 +46,22 @@ pub struct Scale {
 /// ```
 impl Scale {
     // Core constructor
-    pub fn new(tonic: NoteName, scale_type: ScaleType) -> Self {
+    pub fn new(tonic: NoteName, definition: ScaleDefinition) -> Self {
         Scale {
             tonic,
-            scale_type,
-            key_signature: None,
-        }
-    }
-
-    // With explicit key signature
-    pub fn with_key_signature(
-        tonic: NoteName,
-        scale_type: ScaleType,
-        key_signature: KeySignature,
-    ) -> Self {
-        Scale {
-            tonic,
-            scale_type,
-            key_signature: Some(key_signature),
+            definition
         }
     }
 
     pub fn notes(&self) -> Vec<NoteName> {
         // First determine proper key signature if not provided
-        let key_sig = self
-            .key_signature
-            .unwrap_or_else(|| self.infer_key_signature());
+        let key_sig = self.infer_key_signature();
 
         // Generate notes based on scale type intervals
-        let intervals = self.scale_type.intervals();
-        let mut result = Vec::with_capacity(intervals.len() + 1);
-
-        // Add tonic
-        result.push(self.tonic);
+        let mut result = Vec::with_capacity(self.definition.intervals.len());
 
         // Add remaining notes with proper spelling based on key signature
-        for &interval in intervals {
+        for &interval in self.definition.intervals {
             let note = self.tonic.transpose_by_interval(interval, &key_sig);
             result.push(note);
         }
@@ -101,77 +86,107 @@ impl Scale {
             ],
         }
     }
-    /// Returns the scale degree (1-7) for a given note
+    /// Returns the scale degree for a given note, accounting for alterations
+    ///
+    /// Returns a ScaleDegree struct containing:
+    /// - step: the base scale degree (1-7)
+    /// - accidental: the alteration from the scale degree (Natural if exact match)
     ///
     /// # Examples
     ///
     /// ```
-    /// use chordy::{Scale, ScaleType, note};
+    /// use chordy::{Scale, scales, note, Accidental, ScaleDegree, HarmonicFunction};
     ///
-    /// let c_major = Scale::new(note!("C"), ScaleType::Major);
-    /// assert_eq!(c_major.degree_of(&note!("C")), Some(1));
-    /// assert_eq!(c_major.degree_of(&note!("G")), Some(5));
-    /// assert_eq!(c_major.degree_of(&note!("F#")), None); // Not in scale
+    /// let c_major = Scale::new(note!("C"), scales::IONIAN);
+    /// // Exact matches return natural accidentals
+    /// assert_eq!(c_major.degree_of(&note!("C")), Some(ScaleDegree::TONIC));
+    /// assert_eq!(c_major.degree_of(&note!("G")), Some(ScaleDegree::DOMINANT));
+    ///
+    /// // Altered notes return appropriate accidentals
+    /// assert_eq!(c_major.degree_of(&note!("C#")), Some(ScaleDegree::new(1, Some(Accidental::Sharp))));
+    /// assert_eq!(c_major.degree_of(&note!("F#")), Some(ScaleDegree::new(4, Some(Accidental::Sharp))));
     ///
     /// // Works with enharmonic equivalents
-    /// let a_minor = Scale::new(note!("A"), ScaleType::NaturalMinor);
-    /// assert_eq!(a_minor.degree_of(&note!("G#")), Some(7)); // Leading tone
-    /// assert_eq!(a_minor.degree_of(&note!("Ab")), None); // Theoretically not in the scale.
+    /// let a_minor = Scale::new(note!("A"), scales::AEOLIAN);
+    /// assert_eq!(a_minor.degree_of(&note!("G#")), Some(ScaleDegree::new(7, Some(Accidental::Sharp)))); // Leading tone
+    /// assert_eq!(a_minor.degree_of(&note!("Ab")), Some(ScaleDegree::new(1, Some(Accidental::Flat))));
     /// ```
-    pub fn degree_of(&self, note: &NoteName) -> Option<u8> {
+    pub fn degree_of(&self, note: &NoteName) -> Option<ScaleDegree> {
         let notes = self.notes();
 
         // First check exact matches
         if let Some(pos) = notes.iter().position(|n| n == note) {
-            return Some((pos + 1) as u8);
+            return Some(ScaleDegree::new((pos + 1) as u8, None));
         }
 
         // Then check enharmonic equivalents
         for (i, scale_note) in notes.iter().enumerate() {
             if scale_note.is_enharmonic_with(note) {
-                return Some((i + 1) as u8);
+                return Some(ScaleDegree::new((i + 1) as u8, None));
             }
         }
 
-        None
-    }
+        // Then check all notes for single accidentals, preferring matching accidental type
+        for (i, scale_note) in notes.iter().enumerate() {
+            let semitone_diff = note.base_midi_number() - scale_note.base_midi_number();
+            let octave_adjusted_diff = (semitone_diff + 12) % 12;
 
-    /// Returns the chromatic degree (accounting for alterations)
-    ///
-    /// Returns a tuple of (degree, alteration) where:
-    /// - degree is the base scale degree (1-7)
-    /// - alteration is the semitone adjustment (-2 to +2)
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use chordy::{Scale, ScaleType, note};
-    ///
-    /// let c_major = Scale::new(note!("C"), ScaleType::Major);
-    /// assert_eq!(c_major.chromatic_degree(&note!("C")), Some((1, 0)));
-    /// assert_eq!(c_major.chromatic_degree(&note!("C#")), Some((1, 1)));
-    /// assert_eq!(c_major.chromatic_degree(&note!("F#")), Some((4, 1))); // #11
-    /// ```
-    pub fn chromatic_degree(&self, note: &NoteName) -> Option<(u8, i8)> {
-        // First try exact degree match
-        if let Some(degree) = self.degree_of(note) {
-            return Some((degree, 0));
+            // Prefer matching the note's accidental type if possible
+            if note.accidental == Accidental::Flat && octave_adjusted_diff == 11 {
+                return Some(ScaleDegree::new((i + 1) as u8, Some(Accidental::Flat)));
+            }
+            if note.accidental == Accidental::Sharp && octave_adjusted_diff == 1 {
+                return Some(ScaleDegree::new((i + 1) as u8, Some(Accidental::Sharp)));
+            }
         }
 
-        // Check chromatic variants
-        for degree in 1..=7 {
-            if let Some(scale_note) = self.notes().get(degree as usize - 1) {
+        // if we can't match on accidental, try to match on letter name
+        for (i, scale_note) in notes.iter().enumerate() {
+            if scale_note.letter == note.letter {
                 let semitone_diff = note.base_midi_number() - scale_note.base_midi_number();
                 let octave_adjusted_diff = (semitone_diff + 12) % 12;
 
-                // Check common chromatic alterations
-                match octave_adjusted_diff {
-                    1 => return Some((degree, 1)),   // Sharp
-                    11 => return Some((degree, -1)), // Flat
-                    2 => return Some((degree, 2)),   // Double sharp
-                    10 => return Some((degree, -2)), // Double flat
-                    _ => continue,
+                // Prefer matching the note's accidental type if possible
+                if octave_adjusted_diff == 11 {
+                    return Some(ScaleDegree::new((i + 1) as u8, Some(Accidental::Flat)));
                 }
+                if octave_adjusted_diff == 1 {
+                    return Some(ScaleDegree::new((i + 1) as u8, Some(Accidental::Sharp)));
+                }
+            }
+        }
+
+        // Fall back to any single accidental if no preferred match found
+        for (i, scale_note) in notes.iter().enumerate() {
+            let semitone_diff = note.base_midi_number() - scale_note.base_midi_number();
+            let octave_adjusted_diff = (semitone_diff + 12) % 12;
+
+            match dbg!(octave_adjusted_diff) {
+                1 => return Some(ScaleDegree::new((i + 1) as u8, Some(Accidental::Sharp))),
+                11 => return Some(ScaleDegree::new((i + 1) as u8, Some(Accidental::Flat))),
+                _ => continue,
+            }
+        }
+
+        // Finally check for double accidentals if nothing else matched
+        for (i, scale_note) in notes.iter().enumerate() {
+            let semitone_diff = note.base_midi_number() - scale_note.base_midi_number();
+            let octave_adjusted_diff = (semitone_diff + 12) % 12;
+
+            match octave_adjusted_diff {
+                2 => {
+                    return Some(ScaleDegree::new(
+                        (i + 1) as u8,
+                        Some(Accidental::DoubleSharp),
+                    ))
+                }
+                10 => {
+                    return Some(ScaleDegree::new(
+                        (i + 1) as u8,
+                        Some(Accidental::DoubleFlat),
+                    ))
+                }
+                _ => continue,
             }
         }
 
@@ -188,22 +203,20 @@ impl Scale {
     /// # Examples
     ///
     /// ```
-    /// use chordy::{Chord, Scale};
+    /// use chordy::{Chord, ChordQuality, Scale, scales, HarmonicFunction, note};
     ///
-    /// let cmaj_scale = Scale::new(note!("C"), ScaleType::Major);
+    /// let c_major_scale = Scale::new(note!("C"), scales::IONIAN);
     /// let g_chord = Chord::new(note!("G"), ChordQuality::Major, vec![]);
-    /// assert_eq!(c_major.harmonic_function(g_chord), HarmonicFunction::Dominant);
+    /// assert_eq!(c_major_scale.harmonic_function(&g_chord), Some(HarmonicFunction::Dominant));
     ///
     /// ```
     pub fn harmonic_function(&self, chord: &Chord) -> Option<HarmonicFunction> {
         let notes = chord.notes();
 
-        let scale_degrees: Vec<u8> = notes
+        let scale_degrees: Vec<ScaleDegree> = notes
             .iter()
             .filter_map(|note| self.degree_of(note))
             .collect();
-
-        println!("Scale degrees for chord {:?}: {:?}", chord, scale_degrees);
 
         HarmonicFunction::detect_by_scale_degrees(&scale_degrees)
     }
@@ -214,28 +227,39 @@ impl Scale {
         todo!()
     }
     /// Returns the relative major/minor of this scale
-    pub fn relative(&self) -> Scale {
-        // Implementation
-        todo!()
+    pub fn relative(&self) -> Option<Scale> {
+        if self.definition == scales::IONIAN {
+            // to get the new tonic, transpose the tonic to the 6th interval
+            let new_tonic = self.tonic.apply_interval(self.definition.intervals[5]);
+
+            // If the scale is Ionian, return the relative minor (Aeolian)
+            let relative_minor = Scale::new(new_tonic, scales::AEOLIAN);
+            Some(relative_minor)
+        } else if self.definition == scales::AEOLIAN {
+            // to get the new tonic, transpose the tonic to the 3rd interval
+            let new_tonic = self.tonic.apply_interval(self.definition.intervals[5]);
+
+            // If the scale is Aeolian, return the relative major (Ionian)
+            let relative_major = Scale::new(new_tonic, scales::IONIAN);
+            Some(relative_major)
+        } else {
+            None
+        }
     }
 
     /// Returns the parallel major/minor of this scale
-    pub fn parallel(&self) -> Scale {
-        // Implementation
-        todo!()
+    pub fn parallel(&self) -> Option<Scale> {
+        if self.definition == scales::IONIAN {
+            let parallel_minor = Scale::new(self.tonic, scales::AEOLIAN);
+            Some(parallel_minor)
+        } else if self.definition == scales::AEOLIAN {
+            let parallel_major = Scale::new(self.tonic, scales::IONIAN);
+            Some(parallel_major)
+        } else {
+            None
+        }
     }
-
-    /// Returns a scale a perfect fifth higher (dominant)
-    pub fn dominant(&self) -> Scale {
-        // Implementation
-        todo!()
-    }
-
-    /// Returns a scale a perfect fifth lower (subdominant)
-    pub fn subdominant(&self) -> Scale {
-        // Implementation
-        todo!()
-    }
+    ///
     /// Determine if a given note belongs to the scale
     pub fn contains(&self, note: &NoteName) -> bool {
         // Implementation
@@ -265,17 +289,17 @@ impl Scale {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ScaleDegree {
     pub step: u8,
-    pub alteration: Accidental,
+    pub alteration: Option<Accidental>,
 }
 
 impl ScaleDegree {
-    /// Create a new scale degree with the given step and alteration
-    pub const fn new(step: u8, alteration: Accidental) -> Self {
+    /// Create a new scale degree with the given step and optional alteration
+    pub const fn new(step: u8, alteration: Option<Accidental>) -> Self {
         // Note: const fn can't use assert! before Rust 1.57
         // Use runtime validation in a separate function if needed
         ScaleDegree { step, alteration }
     }
-    
+
     // Add runtime validation if needed
     pub fn validate(&self) -> Result<(), TypeError> {
         if self.step < 1 || self.step > 7 {
@@ -285,112 +309,24 @@ impl ScaleDegree {
     }
 
     // Constants for common scale degrees
-    pub const TONIC: Self = Self::new(1, Accidental::Natural);
-    pub const SUPERTONIC: Self = Self::new(2, Accidental::Natural);
-    pub const MEDIANT: Self = Self::new(3, Accidental::Natural);
-    pub const SUBDOMINANT: Self = Self::new(4, Accidental::Natural);
-    pub const DOMINANT: Self = Self::new(5, Accidental::Natural);
-    pub const SUBMEDIANT: Self = Self::new(6, Accidental::Natural);
-    pub const LEADING_TONE: Self = Self::new(7, Accidental::Natural);
-    
+    pub const TONIC: Self = Self::new(1, None);
+    pub const SUPERTONIC: Self = Self::new(2, None);
+    pub const MEDIANT: Self = Self::new(3, None);
+    pub const SUBDOMINANT: Self = Self::new(4, None);
+    pub const DOMINANT: Self = Self::new(5, None);
+    pub const SUBMEDIANT: Self = Self::new(6, None);
+    pub const LEADING_TONE: Self = Self::new(7, None);
+    // unaltered 7th scale degree in minor scales
+    pub const SUBTONIC: Self = Self::new(7, None);
+
     // Altered scale degrees
-    pub const FLAT_SECOND: Self = Self::new(2, Accidental::Flat);
-    pub const FLAT_THIRD: Self = Self::new(3, Accidental::Flat);
-    pub const SHARP_FOURTH: Self = Self::new(4, Accidental::Sharp);
-    pub const FLAT_SIXTH: Self = Self::new(6, Accidental::Flat);
-    pub const FLAT_SEVENTH: Self = Self::new(7, Accidental::Flat);
-    
+    pub const FLAT_SECOND: Self = Self::new(2, Some(Accidental::Flat));
+    pub const FLAT_THIRD: Self = Self::new(3, Some(Accidental::Flat));
+    pub const SHARP_FOURTH: Self = Self::new(4, Some(Accidental::Sharp));
+    pub const FLAT_SIXTH: Self = Self::new(6, Some(Accidental::Flat));
+    pub const FLAT_SEVENTH: Self = Self::new(7, Some(Accidental::Flat));
+
     // Special scale degrees with traditional names
-    pub const NEAPOLITAN: Self = Self::new(2, Accidental::Flat);  // ♭II
-    pub const SUBTONIC: Self = Self::new(7, Accidental::Flat);    // ♭VII
+    pub const NEAPOLITAN: Self = Self::new(2, Some(Accidental::Flat)); // ♭II
 }
 
-
-/// Types of musical scales
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ScaleType {
-    Major,
-    NaturalMinor,
-    HarmonicMinor,
-    MelodicMinor,
-    Dorian,
-    Phrygian,
-    Lydian,
-    Mixolydian,
-    Locrian,
-    // etc.
-}
-
-impl ScaleType {
-    /// Returns the interval pattern for this scale type
-    pub fn intervals(&self) -> &[Interval] {
-        match self {
-            ScaleType::Major => &[
-                Interval::MAJOR_SECOND,
-                Interval::MAJOR_THIRD,
-                Interval::PERFECT_FOURTH,
-                Interval::PERFECT_FIFTH,
-                Interval::MAJOR_SIXTH,
-                Interval::MAJOR_SEVENTH,
-            ],
-            ScaleType::NaturalMinor => &[
-                Interval::MAJOR_SECOND,
-                Interval::MINOR_THIRD,
-                Interval::PERFECT_FOURTH,
-                Interval::PERFECT_FIFTH,
-                Interval::MINOR_SIXTH,
-                Interval::MINOR_SEVENTH,
-            ],
-            ScaleType::Dorian => &[
-                Interval::MAJOR_SECOND,
-                Interval::MINOR_THIRD,
-                Interval::PERFECT_FOURTH,
-                Interval::PERFECT_FIFTH,
-                Interval::MAJOR_SIXTH,
-                Interval::MINOR_SEVENTH,
-            ],
-            ScaleType::Phrygian => &[
-                Interval::MINOR_SECOND,
-                Interval::MINOR_THIRD,
-                Interval::PERFECT_FOURTH,
-                Interval::PERFECT_FIFTH,
-                Interval::MINOR_SIXTH,
-                Interval::MINOR_SEVENTH,
-            ],
-            ScaleType::Lydian => &[
-                Interval::MAJOR_SECOND,
-                Interval::MAJOR_THIRD,
-                Interval::TRITONE,
-                Interval::PERFECT_FIFTH,
-                Interval::MAJOR_SIXTH,
-                Interval::MAJOR_SEVENTH,
-            ],
-            ScaleType::Mixolydian => &[
-                Interval::MAJOR_SECOND,
-                Interval::MAJOR_THIRD,
-                Interval::PERFECT_FOURTH,
-                Interval::PERFECT_FIFTH,
-                Interval::MAJOR_SIXTH,
-                Interval::MINOR_SEVENTH,
-            ],
-            ScaleType::Locrian => &[
-                Interval::MINOR_SECOND,
-                Interval::MINOR_THIRD,
-                Interval::PERFECT_FOURTH,
-                Interval::DIMINISHED_FIFTH,
-                Interval::MINOR_SIXTH,
-                Interval::MINOR_SEVENTH,
-            ],
-            ScaleType::HarmonicMinor => &[
-                Interval::MAJOR_SECOND,
-                Interval::MINOR_THIRD,
-                Interval::PERFECT_FOURTH,
-                Interval::PERFECT_FIFTH,
-                Interval::MINOR_SIXTH,
-                Interval::MAJOR_SEVENTH,
-            ],
-            // Other scale types would be defined similarly
-            _ => todo!(),
-        }
-    }
-}

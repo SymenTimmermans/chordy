@@ -17,7 +17,17 @@ fn test_pitch_creation() {
     assert_eq!(pitch.to_string(), "B♭5");
     #[cfg(not(feature = "utf8_symbols"))]
     assert_eq!(note.to_string(), "Bb5");
+}
 
+#[test]
+fn test_midi_number() {
+    assert_eq!(pitch!("B#2").midi_number(), 60);
+    assert_eq!(pitch!("C3").midi_number(), 60);
+    assert_eq!(pitch!("G#5").midi_number(), 92);
+    assert_eq!(pitch!("Ab-1").midi_number(), 20);
+    assert_eq!(pitch!("Cbb3").midi_number(), 58);
+    assert_eq!(pitch!("Dbb3").midi_number(), 60);
+    assert_eq!(pitch!("Dbb4").midi_number(), 72);
 }
 
 #[test]
@@ -54,6 +64,17 @@ fn test_pitch_from_str() {
     assert!("H4".parse::<Pitch>().is_err()); // Invalid letter
     assert!("C#".parse::<Pitch>().is_err()); // Missing octave
     assert!("C4.5".parse::<Pitch>().is_err()); // Invalid octave
+}
+
+
+#[test]
+fn test_pitch_double_flat_transpose() {
+    assert_eq!(pitch!("Cbb4").transpose(2), pitch!("Dbb4")); 
+}
+
+#[test]
+fn test_pitch_b_sharp_to_c_sharp_transpose() {
+    assert_eq!(pitch!("B#3").transpose(1), pitch!("C#4")); // B#→C#
 }
 
 #[test]

@@ -25,7 +25,8 @@ pub use crate::types::{
 
     // Scale/key types
     Scale,
-    ScaleType,
+    ScaleDefinition,
+    ScaleDegree,
     Key,
     Mode
 };

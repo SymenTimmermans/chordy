@@ -17,10 +17,11 @@ mod accidental;
 pub use accidental::Accidental;
 
 mod scale;
-pub use scale::{Scale, ScaleType};
+pub use scale::*;
 
 mod key;
 pub use key::{Key, Mode};
 
 mod interval;
 pub use interval::*;
+

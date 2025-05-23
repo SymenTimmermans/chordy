@@ -383,7 +383,7 @@ impl Interval {
     }
 
     /// Common interval constants for easy use
-    pub const UNISON: Interval = Interval {
+    pub const PERFECT_UNISON: Interval = Interval {
         quality: IntervalQuality::Perfect,
         size: IntervalSize::Unison,
         direction: IntervalDirection::Ascending,
@@ -419,7 +419,7 @@ impl Interval {
         direction: IntervalDirection::Ascending,
     };
     
-    pub const TRITONE: Interval = Interval {
+    pub const AUGMENTED_FOURTH: Interval = Interval {
         quality: IntervalQuality::Augmented(1),
         size: IntervalSize::Fourth,
         direction: IntervalDirection::Ascending,
@@ -451,6 +451,12 @@ impl Interval {
     
     pub const MAJOR_SIXTH: Interval = Interval {
         quality: IntervalQuality::Major,
+        size: IntervalSize::Sixth,
+        direction: IntervalDirection::Ascending,
+    };
+
+    pub const AUGMENTED_SIXTH: Interval = Interval {
+        quality: IntervalQuality::Augmented(1),
         size: IntervalSize::Sixth,
         direction: IntervalDirection::Ascending,
     };
