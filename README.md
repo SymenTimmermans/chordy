@@ -108,9 +108,19 @@ ongoing work on scales, chords, and more advanced music theory concepts.
 - [x] Basic interval representation 
 - [ ] Scales and modes
 - [ ] Chords and harmony
+    - [ ] Deriving basic triads from scales
+    - [ ] Deriving extended chords from scales
+    - [ ] Deriving chords from multiple scales
+    - [ ] Piano chord voicings based on hand ergonomics
 - [ ] Voice leading
 - [ ] Advanced analysis tools
 - [ ] MIDI integration
+- [ ] Staff writing via MusicXML or similar
+- [ ] HTML representation
+    - [ ] Staff writing as SVG
+    - [ ] Keyboard diagrams
+- [ ] Guitar chord diagrams
+    - [ ] Alternate tunings
 
 ## Design Philosophy
 
