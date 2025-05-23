@@ -84,6 +84,13 @@ scale_test!(
     note_vec!("F#", "G#", "A#", "B#", "C#", "D#", "E#")
 );
 
+scale_test!(
+    test_altered_scale_c,
+    note!("C"),
+    scales::ALTERED,
+    note_vec!("C", "Db", "Eb", "Fb", "Gb", "Ab", "Bb")
+);
+
 // More comprehensive tests
 #[test]
 fn test_scale_degree_functions() {

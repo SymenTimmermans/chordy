@@ -90,6 +90,14 @@ pub const HUNGARIAN_MINOR: ScaleDefinition = ScaleDefinition {
     degree_offset: None,
 };
 
+pub const ALTERED: ScaleDefinition = ScaleDefinition {
+    name: "Altered",
+    intervals: &[Interval::PERFECT_UNISON, Interval::MINOR_SECOND, Interval::MINOR_THIRD, Interval::DIMINISHED_FOURTH, Interval::DIMINISHED_FIFTH, Interval::MINOR_SIXTH, Interval::MINOR_SEVENTH],
+    bitmask: ScaleBitmask(0b010101011011),
+    mode_of: None,
+    degree_offset: None,
+};
+
 pub const REGISTRY: &[ScaleDefinition] = &[
     IONIAN,
     DORIAN,
@@ -102,4 +110,5 @@ pub const REGISTRY: &[ScaleDefinition] = &[
     LOCRIAN,
     WHOLE_TONE,
     HUNGARIAN_MINOR,
+    ALTERED,
 ];

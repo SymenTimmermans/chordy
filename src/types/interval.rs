@@ -412,7 +412,13 @@ impl Interval {
         size: IntervalSize::Third,
         direction: IntervalDirection::Ascending,
     };
-    
+
+    pub const DIMINISHED_FOURTH: Interval = Interval {
+        quality: IntervalQuality::Diminished(1),
+        size: IntervalSize::Fourth,
+        direction: IntervalDirection::Ascending,
+    };
+
     pub const PERFECT_FOURTH: Interval = Interval {
         quality: IntervalQuality::Perfect,
         size: IntervalSize::Fourth,
