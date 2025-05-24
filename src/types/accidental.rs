@@ -69,8 +69,8 @@ impl FromStr for Accidental {
             "b" | "♭" => Ok(Accidental::Flat),
             "#" | "♯" => Ok(Accidental::Sharp),
             "n" | "♮" => Ok(Accidental::Natural),
-            "bb" | "𝄫" => Ok(Accidental::DoubleFlat),
-            "##" | "𝄪" => Ok(Accidental::DoubleSharp),
+            "♭♭" | "bb" | "𝄫" => Ok(Accidental::DoubleFlat),
+            "♯♯" | "##" | "𝄪" => Ok(Accidental::DoubleSharp),
             _ => Err(ParseError::InvalidAccidental(s.to_string())),
         }
     }

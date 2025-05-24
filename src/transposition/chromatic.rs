@@ -12,6 +12,7 @@ impl Transposer for ChromaticTransposer {
         }
 
         let target_midi = pitch.midi_number() + semitone_offset;
+        println!("Target MIDI: {}", target_midi);
 
         let mut best_pitch = None;
         let mut best_score = i32::MAX;
@@ -25,6 +26,8 @@ impl Transposer for ChromaticTransposer {
                     base_index + accidental.semitone_offset() + 12 * (candidate_octave + 2);
                 let mut pitch_guess = Pitch::new(letter, accidental, candidate_octave);
 
+                println!("Pitch guess: {:?}", pitch_guess);
+
                 let diff = semitone - target_midi;
                 if diff > 6 {
                     pitch_guess.octave -= 1;
@@ -36,6 +39,7 @@ impl Transposer for ChromaticTransposer {
                 if final_midi != target_midi {
                     continue;
                 }
+                println!("Compatible guess: {:?}", pitch_guess);
 
                 let interval_class_penalty = interval_penalty(&pitch, &pitch_guess);
                 let spelling_penalty = if pitch.name.accidental != accidental {

@@ -25,13 +25,15 @@ pub use crate::types::{
 
     // Scale/key types
     Scale,
-    ScaleType,
+    ScaleDefinition,
+    ScaleDegree,
     Key,
     Mode
 };
 
 // Error handling
 pub use crate::error::ParseError;
+pub use crate::error::TypeError;
 
 // Musical symbols (ASCII or UTF-8 based on feature flag)
 pub use crate::symbols::{

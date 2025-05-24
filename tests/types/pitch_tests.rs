@@ -17,7 +17,17 @@ fn test_pitch_creation() {
     assert_eq!(pitch.to_string(), "B♭5");
     #[cfg(not(feature = "utf8_symbols"))]
     assert_eq!(note.to_string(), "Bb5");
+}
 
+#[test]
+fn test_midi_number() {
+    assert_eq!(pitch!("B#2").midi_number(), 60);
+    assert_eq!(pitch!("C3").midi_number(), 60);
+    assert_eq!(pitch!("G#5").midi_number(), 92);
+    assert_eq!(pitch!("Ab-1").midi_number(), 20);
+    assert_eq!(pitch!("Cbb3").midi_number(), 58);
+    assert_eq!(pitch!("Dbb3").midi_number(), 60);
+    assert_eq!(pitch!("Dbb4").midi_number(), 72);
 }
 
 #[test]
@@ -34,6 +44,18 @@ fn test_pitch_from_str() {
     assert_eq!("Ab3".parse(), Ok(Pitch::new(Letter::A, Accidental::Flat, 3)));
     assert_eq!("G#4".parse(), Ok(Pitch::new(Letter::G, Accidental::Sharp, 4)));
     assert_eq!("Bbb5".parse(), Ok(Pitch::new(Letter::B, Accidental::DoubleFlat, 5)));
+
+    // Test unicode accidentals
+    assert_eq!("A♭3".parse(), Ok(Pitch::new(Letter::A, Accidental::Flat, 3)));
+    assert_eq!("G♯4".parse(), Ok(Pitch::new(Letter::G, Accidental::Sharp, 4)));
+
+    // Test double unicode accidentals
+    assert_eq!("G♯♯4".parse(), Ok(Pitch::new(Letter::G, Accidental::DoubleSharp, 4)));
+    assert_eq!("B♭♭5".parse(), Ok(Pitch::new(Letter::B, Accidental::DoubleFlat, 5)));
+    //
+    // Test double unicode accidentals
+    assert_eq!("G𝄪4".parse(), Ok(Pitch::new(Letter::G, Accidental::DoubleSharp, 4)));
+    assert_eq!("B𝄫5".parse(), Ok(Pitch::new(Letter::B, Accidental::DoubleFlat, 5)));
     
     // Test invalid cases
     assert!("".parse::<Pitch>().is_err());
@@ -42,6 +64,17 @@ fn test_pitch_from_str() {
     assert!("H4".parse::<Pitch>().is_err()); // Invalid letter
     assert!("C#".parse::<Pitch>().is_err()); // Missing octave
     assert!("C4.5".parse::<Pitch>().is_err()); // Invalid octave
+}
+
+
+#[test]
+fn test_pitch_double_flat_transpose() {
+    assert_eq!(pitch!("Cbb4").transpose(2), pitch!("Dbb4")); 
+}
+
+#[test]
+fn test_pitch_b_sharp_to_c_sharp_transpose() {
+    assert_eq!(pitch!("B#3").transpose(1), pitch!("C#4")); // B#→C#
 }
 
 #[test]

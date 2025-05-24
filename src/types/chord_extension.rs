@@ -1,5 +1,9 @@
 
 
+use crate::IntervalDirection;
+
+use super::interval::{Interval, IntervalSize, IntervalQuality};
+
 /// Extensions and alterations that can be added to basic chord triads
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ChordExtension {
@@ -137,4 +141,57 @@ pub enum OmittedNote {
     
     /// Omitted 5th
     No5,
+}
+
+impl ChordExtension {
+    /// Returns the intervals this extension adds to a chord
+    pub fn get_intervals(&self) -> Vec<Interval> {
+        use IntervalSize::*;
+        use IntervalQuality::*;
+
+        match self {
+            ChordExtension::Seventh(seventh_type) => match seventh_type {
+                SeventhType::Dominant => vec![Interval::new(Minor, Seventh, IntervalDirection::Ascending)],
+                SeventhType::Major => vec![Interval::new(Major, Seventh, IntervalDirection::Ascending)],
+                SeventhType::Minor => vec![Interval::new(Minor, Seventh, IntervalDirection::Ascending)],
+                SeventhType::HalfDiminished => vec![Interval::new(Minor, Seventh, IntervalDirection::Ascending)],
+                SeventhType::Diminished => vec![Interval::new(Diminished(1), Seventh, IntervalDirection::Ascending)],
+            },
+            ChordExtension::Ninth(ninth_type) => match ninth_type {
+                NinthType::Natural => vec![Interval::new(Major, Ninth, IntervalDirection::Ascending)],
+                NinthType::Flat => vec![Interval::new(Minor, Ninth, IntervalDirection::Ascending)],
+                NinthType::Sharp => vec![Interval::new(Augmented(1), Ninth, IntervalDirection::Ascending)],
+            },
+            ChordExtension::Eleventh(eleventh_type) => match eleventh_type {
+                EleventhType::Natural => vec![Interval::new(Perfect, Eleventh, IntervalDirection::Ascending)],
+                EleventhType::Sharp => vec![Interval::new(Augmented(1), Eleventh, IntervalDirection::Ascending)],
+            },
+            ChordExtension::Thirteenth(thirteenth_type) => match thirteenth_type {
+                ThirteenthType::Natural => vec![Interval::new(Major, Thirteenth, IntervalDirection::Ascending)],
+                ThirteenthType::Flat => vec![Interval::new(Minor, Thirteenth, IntervalDirection::Ascending)],
+            },
+            ChordExtension::Add(added_note) => match added_note {
+                AddedNote::Add2 => vec![Interval::new(Major, Second, IntervalDirection::Ascending)],
+                AddedNote::Add4 => vec![Interval::new(Perfect, Fourth, IntervalDirection::Ascending)],
+                AddedNote::Add6 => vec![Interval::new(Major, Sixth, IntervalDirection::Ascending)],
+                AddedNote::AddFlat6 => vec![Interval::new(Minor, Sixth, IntervalDirection::Ascending)],
+            },
+            ChordExtension::Sus(sus_type) => match sus_type {
+                SuspendedType::Sus2 => vec![Interval::new(Major, Second, IntervalDirection::Ascending)],
+                SuspendedType::Sus4 => vec![Interval::new(Perfect, Fourth, IntervalDirection::Ascending)],
+            },
+            ChordExtension::AlteredFifth(alt_fifth) => match alt_fifth {
+                AlteredFifthType::Flat => vec![Interval::new(Diminished(1), Fifth, IntervalDirection::Ascending)],
+                AlteredFifthType::Sharp => vec![Interval::new(Augmented(1), Fifth, IntervalDirection::Ascending)],
+            },
+            ChordExtension::AlteredNinth(alt_ninth) => match alt_ninth {
+                AlteredNinthType::Flat => vec![Interval::new(Minor, Ninth, IntervalDirection::Ascending)],
+                AlteredNinthType::Sharp => vec![Interval::new(Augmented(1), Ninth, IntervalDirection::Ascending)],
+            },
+            ChordExtension::Omit(omit) => match omit {
+                OmittedNote::No3 => vec![],
+                OmittedNote::No5 => vec![],
+            },
+        }
+    }
 }
