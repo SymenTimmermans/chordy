@@ -42,12 +42,12 @@ impl Chord {
 
         // Remove duplicates (e.g., if an extension replaces a note in the base triad)
         all_intervals.sort_by_key(|interval| interval.semitones());
-        all_intervals.dedup_by_key(|interval| interval.size);
+        all_intervals.dedup_by_key(|interval| interval.fifths());
 
         // Build the chord by applying each interval to the root
         all_intervals
             .iter()
-            .map(|interval| self.root.apply_interval(*interval))
+            .map(|interval| self.root + *interval)
             .collect()
     }
 

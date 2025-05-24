@@ -75,7 +75,7 @@ impl Pitch {
 
     pub fn is_suspicious_spelling(&self) -> bool {
         matches!(
-            (self.name.letter, self.name.accidental),
+            (self.name.letter(), self.name.accidental()),
             (Letter::B, Accidental::Sharp)
                 | (Letter::E, Accidental::Sharp)
                 | (Letter::C, Accidental::Flat)

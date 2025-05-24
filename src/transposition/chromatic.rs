@@ -42,14 +42,14 @@ impl Transposer for ChromaticTransposer {
                 println!("Compatible guess: {:?}", pitch_guess);
 
                 let interval_class_penalty = interval_penalty(&pitch, &pitch_guess);
-                let spelling_penalty = if pitch.name.accidental != accidental {
+                let spelling_penalty = if pitch.name.accidental() != accidental {
                     accidental.penalty()
                 } else {
                     0
                 };
 
                 let letter_distance =
-                    (pitch_guess.name.letter as i8 - pitch.name.letter as i8).rem_euclid(7);
+                    (pitch_guess.name.letter() as i8 - pitch.name.letter() as i8).rem_euclid(7);
                 let unnatural_motion_penalty = if letter_distance == 6 || letter_distance == 0 {
                     2
                 } else {
@@ -61,7 +61,7 @@ impl Transposer for ChromaticTransposer {
                     0
                 };
 
-                let expected = expected_letter(pitch.name.letter, semitone_offset);
+                let expected = expected_letter(pitch.name.letter(), semitone_offset);
                 let letter_bias_penalty = if letter != expected { 2 } else { 0 };
                 let direction_bias_penalty = flat_vs_sharp_bias(accidental, semitone_offset);
                 let total_penalty = interval_class_penalty
@@ -73,12 +73,12 @@ impl Transposer for ChromaticTransposer {
 
                 if total_penalty <= best_score {
                     if semitone_offset < 0
-                        && (!accidental.is_sharp() || pitch.name.accidental.is_sharp())
+                        && (!accidental.is_sharp() || pitch.name.accidental().is_sharp())
                     {
                         best_pitch = Some(pitch_guess);
                     }
                     if semitone_offset > 0
-                        && (!accidental.is_flat() || pitch.name.accidental.is_flat())
+                        && (!accidental.is_flat() || pitch.name.accidental().is_flat())
                     {
                         best_pitch = Some(pitch_guess);
                     }
@@ -101,8 +101,8 @@ impl Transposer for ChromaticTransposer {
 }
 
 fn interval_penalty(from: &Pitch, to: &Pitch) -> i32 {
-    let from_letter = from.name.letter as i8;
-    let to_letter = to.name.letter as i8;
+    let from_letter = from.name.letter() as i8;
+    let to_letter = to.name.letter() as i8;
 
     let letter_diff = (to_letter - from_letter).rem_euclid(7);
     let semitone_diff = to.midi_number() - from.midi_number();

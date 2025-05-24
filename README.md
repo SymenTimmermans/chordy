@@ -69,14 +69,14 @@ let f = Pitch::new(Letter::F, Accidental::Natural, 4);
 
 // Transpose up a perfect fifth (7 semitones)
 let c = f.transpose(7);
-assert_eq!(c.name.letter, Letter::C);
-assert_eq!(c.name.accidental, Accidental::Natural);
+assert_eq!(c.name.letter(), Letter::C);
+assert_eq!(c.name.accidental(), Accidental::Natural);
 
 // Chordy handles enharmonic spelling correctly
 let c_sharp = Pitch::new(Letter::C, Accidental::Sharp, 4);
 let e_sharp = c_sharp.transpose(4);
-assert_eq!(e_sharp.name.letter, Letter::E);
-assert_eq!(e_sharp.name.accidental, Accidental::Sharp);
+assert_eq!(e_sharp.name.letter(), Letter::E);
+assert_eq!(e_sharp.name.accidental(), Accidental::Sharp);
 ```
 
 ### Scales and Chords

@@ -54,15 +54,12 @@ impl Scale {
     }
 
     pub fn notes(&self) -> Vec<NoteName> {
-        // First determine proper key signature if not provided
-        let key_sig = self.infer_key_signature();
-
         // Generate notes based on scale type intervals
         let mut result = Vec::with_capacity(self.definition.intervals.len());
 
         // Add remaining notes with proper spelling based on key signature
         for &interval in self.definition.intervals {
-            let note = self.tonic.transpose_by_interval(interval, &key_sig);
+            let note = self.tonic + interval;
             result.push(note);
         }
 
@@ -132,17 +129,17 @@ impl Scale {
             let octave_adjusted_diff = (semitone_diff + 12) % 12;
 
             // Prefer matching the note's accidental type if possible
-            if note.accidental == Accidental::Flat && octave_adjusted_diff == 11 {
+            if note.accidental() == Accidental::Flat && octave_adjusted_diff == 11 {
                 return Some(ScaleDegree::new((i + 1) as u8, Some(Accidental::Flat)));
             }
-            if note.accidental == Accidental::Sharp && octave_adjusted_diff == 1 {
+            if note.accidental() == Accidental::Sharp && octave_adjusted_diff == 1 {
                 return Some(ScaleDegree::new((i + 1) as u8, Some(Accidental::Sharp)));
             }
         }
 
         // if we can't match on accidental, try to match on letter name
         for (i, scale_note) in notes.iter().enumerate() {
-            if scale_note.letter == note.letter {
+            if scale_note.letter() == note.letter() {
                 let semitone_diff = note.base_midi_number() - scale_note.base_midi_number();
                 let octave_adjusted_diff = (semitone_diff + 12) % 12;
 
@@ -230,14 +227,14 @@ impl Scale {
     pub fn relative(&self) -> Option<Scale> {
         if self.definition == scales::IONIAN {
             // to get the new tonic, transpose the tonic to the 6th interval
-            let new_tonic = self.tonic.apply_interval(self.definition.intervals[5]);
+            let new_tonic = self.tonic + self.definition.intervals[5];
 
             // If the scale is Ionian, return the relative minor (Aeolian)
             let relative_minor = Scale::new(new_tonic, scales::AEOLIAN);
             Some(relative_minor)
         } else if self.definition == scales::AEOLIAN {
             // to get the new tonic, transpose the tonic to the 3rd interval
-            let new_tonic = self.tonic.apply_interval(self.definition.intervals[5]);
+            let new_tonic = self.tonic + self.definition.intervals[5];
 
             // If the scale is Aeolian, return the relative major (Ionian)
             let relative_major = Scale::new(new_tonic, scales::IONIAN);
