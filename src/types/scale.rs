@@ -1,7 +1,7 @@
 use crate::error::TypeError;
 
 use super::{
-    chord::HarmonicFunction, key::KeySignature, Accidental, Chord, ChordQuality, NoteName
+    chord::HarmonicFunction, Accidental, Chord, ChordQuality, NoteName
 };
 
 pub mod definition;
@@ -66,23 +66,6 @@ impl Scale {
         result
     }
 
-    /// Infers the most appropriate key signature for this scale
-    fn infer_key_signature(&self) -> KeySignature {
-        // Implement key signature inference logic based on scale type and tonic
-        // For example, C Major uses no accidentals, while F Major uses one flat
-        KeySignature {
-            accidentals: 0, // Placeholder
-            letter_map: [
-                Accidental::Natural,
-                Accidental::Natural,
-                Accidental::Natural,
-                Accidental::Natural,
-                Accidental::Natural,
-                Accidental::Natural,
-                Accidental::Natural,
-            ],
-        }
-    }
     /// Returns the scale degree for a given note, accounting for alterations
     ///
     /// Returns a ScaleDegree struct containing:

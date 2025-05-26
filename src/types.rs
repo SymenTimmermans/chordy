@@ -20,7 +20,7 @@ mod scale;
 pub use scale::*;
 
 mod key;
-pub use key::{Key, Mode};
+pub use key::Key;
 
 mod interval;
 pub use interval::*;

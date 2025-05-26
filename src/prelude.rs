@@ -28,7 +28,6 @@ pub use crate::types::{
     ScaleDefinition,
     ScaleDegree,
     Key,
-    Mode
 };
 
 // Error handling
