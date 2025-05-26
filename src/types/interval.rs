@@ -30,12 +30,15 @@ pub struct Interval {
 impl Interval {
     pub const PERFECT_UNISON: Self = Self { fifths: 0, octaves: 0};
 
+    pub const DIMINISHED_SECOND: Self = Self { fifths: -12, octaves: 0};
     pub const MINOR_SECOND: Self = Self { fifths: -5, octaves: 0};
     pub const MAJOR_SECOND: Self = Self { fifths: 2, octaves: 0};
     pub const AUGMENTED_SECOND: Self = Self { fifths: 9, octaves: 0};
 
+    pub const DIMINISHED_THIRD: Self = Self { fifths: -10, octaves: 0};
     pub const MINOR_THIRD: Self = Self { fifths: -3, octaves: 0};
     pub const MAJOR_THIRD: Self = Self { fifths: 4, octaves: 0};
+    pub const AUGMENTED_THIRD: Self = Self { fifths: 11, octaves: 0};
 
     pub const DIMINISHED_FOURTH: Self = Self { fifths: -8, octaves: 0};
     pub const PERFECT_FOURTH: Self = Self { fifths: -1, octaves: 0};
@@ -45,6 +48,7 @@ impl Interval {
     pub const PERFECT_FIFTH: Self = Self { fifths: 1, octaves: 0};
     pub const AUGMENTED_FIFTH: Self = Self { fifths: 8, octaves: 0};
 
+    pub const DIMINISHED_SIXTH: Self = Self { fifths: -11, octaves: 0};
     pub const MINOR_SIXTH: Self = Self { fifths: -4, octaves: 0};
     pub const MAJOR_SIXTH: Self = Self { fifths: 3, octaves: 0};
     pub const AUGMENTED_SIXTH: Self = Self { fifths: 10, octaves: 0};
@@ -52,15 +56,21 @@ impl Interval {
     pub const DIMINISHED_SEVENTH: Self = Self { fifths: -9, octaves: 0};
     pub const MINOR_SEVENTH: Self = Self { fifths: -2, octaves: 0};
     pub const MAJOR_SEVENTH: Self = Self { fifths: 5, octaves: 0};
+    pub const AUGMENTED_SEVENTH: Self = Self { fifths: 12, octaves: 0};
 
+    pub const DIMINISHED_OCTAVE: Self = Self { fifths: -7, octaves: 0};
     pub const OCTAVE: Self = Self { fifths: 0, octaves: 1};
+    pub const AUGMENTED_OCTAVE: Self = Self { fifths: 7, octaves: 1};
 
+    pub const DIMINISHED_NINTH: Self = Self { fifths: -11, octaves: 1};
     pub const MINOR_NINTH: Self = Self { fifths: -5, octaves: 1};
     pub const MAJOR_NINTH: Self = Self { fifths: 2, octaves: 1};
     pub const AUGMENTED_NINTH: Self = Self { fifths: 9, octaves: 1};
 
+    pub const DIMINISHED_TENTH: Self = Self { fifths: -10, octaves: 1};
     pub const MINOR_TENTH: Self = Self { fifths: -3, octaves: 1};
     pub const MAJOR_TENTH: Self = Self { fifths: 4, octaves: 1};
+    pub const AUGMENTED_TENTH: Self = Self { fifths: 11, octaves: 1};
 
     pub const DIMINISHED_ELEVENTH: Self = Self { fifths: -8, octaves: 1};
     pub const PERFECT_ELEVENTH: Self = Self { fifths: -1, octaves: 1};
@@ -77,6 +87,7 @@ impl Interval {
     pub const DIMINISHED_FOURTEENTH: Self = Self { fifths: -9, octaves: 1};
     pub const MINOR_FOURTEENTH: Self = Self { fifths: -2, octaves: 1};
     pub const MAJOR_FOURTEENTH: Self = Self { fifths: 5, octaves: 1};
+    pub const AUGMENTED_FOURTEENTH: Self = Self { fifths: 12, octaves: 1};
     
 
     pub fn new(fifths: i8, octaves: i8) -> Self {
