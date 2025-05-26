@@ -3,7 +3,7 @@ use std::str::FromStr;
 use std::ops::{Add, Sub};
 
 use super::{
-    key::KeySignature, Accidental, Interval, Letter, Pitch,
+    Accidental, Interval, Letter, Pitch,
 };
 use crate::error::ParseError;
 use crate::traits::Torsor;

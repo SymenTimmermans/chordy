@@ -3,8 +3,6 @@ use std::str::FromStr;
 
 use crate::error::ParseError;
 
-use super::{NoteName, Pitch};
-
 use std::ops::{Add, Sub};
 
 /// Intervals form a group - they can be added, subtracted, negated
