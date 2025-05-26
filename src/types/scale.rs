@@ -1,7 +1,7 @@
 use crate::error::TypeError;
 
 use super::{
-    chord::HarmonicFunction, Accidental, Chord, ChordQuality, NoteName
+    chord::HarmonicFunction, Accidental, Chord, NoteName
 };
 
 pub mod definition;
@@ -183,10 +183,10 @@ impl Scale {
     /// # Examples
     ///
     /// ```
-    /// use chordy::{Chord, ChordQuality, Scale, scales, HarmonicFunction, note};
+    /// use chordy::{Chord, Scale, scales, HarmonicFunction, note};
     ///
     /// let c_major_scale = Scale::new(note!("C"), scales::IONIAN);
-    /// let g_chord = Chord::new(note!("G"), ChordQuality::Major, vec![]);
+    /// let g_chord = Chord::major(note!("G"));
     /// assert_eq!(c_major_scale.harmonic_function(&g_chord), Some(HarmonicFunction::Dominant));
     ///
     /// ```
@@ -202,7 +202,7 @@ impl Scale {
     }
 
     /// Creates a chord from the given scale degree (1-7)
-    pub fn chord_at_degree(&self, _degree: u8, _chord_type: ChordQuality) -> Chord {
+    pub fn chord_at_degree(&self, _degree: u8) -> Chord {
         // Implementation
         todo!()
     }

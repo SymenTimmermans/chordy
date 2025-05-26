@@ -1,126 +1,147 @@
 use std::fmt::Display;
 
-use super::{scale::ScaleDegree, ChordExtension, Interval, NoteName};
+use super::{scale::ScaleDegree, Interval, NoteName};
+use crate::note;
 
-/// A chord with a root note and quality
+/// A chord represented by a root note and intervals from that root
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Chord {
     pub root: NoteName,
-    pub quality: ChordQuality,
-    pub extensions: Vec<ChordExtension>,
+    pub intervals: Vec<Interval>,
 }
 
 impl Chord {
-    pub fn new(root: NoteName, quality: ChordQuality, extensions: Vec<ChordExtension>) -> Self {
-        Chord {
-            root,
-            quality,
-            extensions,
-        }
+    /// Create a new chord from root and intervals
+    pub fn new(root: NoteName, intervals: Vec<Interval>) -> Self {
+        Chord { root, intervals }
     }
 
+    /// Create a chord from a list of notes
+    pub fn from_notes(notes: &[NoteName]) -> Self {
+        // We could get notes in any order, so we need to determine the root
+        // In order to do this, we will create interval sets from each note.
+        // The interval set that contains a fifth and some third will be the root.
+        let candidate: Option<NoteName> = notes.first().cloned();
+        let score: i32 = i32::MIN;
+        let outcome = notes.iter().fold((candidate, score), |(mut candidate, mut score), note| {
+            let note_intervals = notes.iter()
+                .filter(|&&n| n != *note)
+                .map(|&n| note.interval_to(n))
+                .collect::<Vec<Interval>>();
+            let note_score = note_intervals.iter().fold(0, |acc, interval| {
+                if interval.is_fifth() {
+                    acc + 5
+                } else if interval.is_third() {
+                    acc + 3
+                } else {
+                    acc
+                }
+            });
+            if note_score > score {
+                candidate = Some(*note);
+                score = note_score;
+            } else if note_score == score {
+                // If scores are equal, prefer the lower note
+                if let Some(c) = candidate {
+                    if note.base_midi_number() < c.base_midi_number() {
+                        candidate = Some(*note);
+                    }
+                } else {
+                    candidate = Some(*note);
+                }
+            }
+            (candidate, score)
+        });
+
+        // if we have a candidate, create the chord
+        let root = candidate.unwrap_or(notes.first().cloned().unwrap_or(note!("C")));
+
+
+
+        Self::from_notes_and_root(notes, root)
+    }
+
+    /// Create a chord from a list of notes and a specified root
+    pub fn from_notes_and_root(notes: &[NoteName], root: NoteName) -> Chord {
+        Self::new(root, notes.iter()
+            .map(|&n| root.interval_to(n))
+            .collect())
+    }
+
+
+
     /// Returns the notes in the chord with proper theoretical spelling
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use chordy::types::{Chord, ChordQuality};
-    /// use chordy::note;
-    ///
-    /// let d_minor = Chord::new(note!("D"), ChordQuality::Minor, vec![]);
-    /// assert_eq!(d_minor.notes(), vec![note!("D"), note!("F"), note!("A")]);
-    /// ```
     pub fn notes(&self) -> Vec<NoteName> {
-        // Start with the intervals that define the chord quality
-        let base_intervals = self.quality.get_intervals();
-
-        // Add extensions if present
-        let mut all_intervals = base_intervals.clone();
-        for extension in &self.extensions {
-            all_intervals.extend(extension.get_intervals());
-        }
-
-        // Remove duplicates (e.g., if an extension replaces a note in the base triad)
-        all_intervals.sort_by_key(|interval| interval.semitones());
-        all_intervals.dedup_by_key(|interval| interval.fifths());
-
-        // Build the chord by applying each interval to the root
-        all_intervals
+        self.intervals
             .iter()
             .map(|interval| self.root + *interval)
             .collect()
     }
 
+    // Common chord constructors
+    
+    pub fn major(root: NoteName) -> Self {
+        Self::new(root, vec![
+            Interval::PERFECT_UNISON,
+            Interval::MAJOR_THIRD,
+            Interval::PERFECT_FIFTH,
+        ])
+    }
+
+    pub fn minor(root: NoteName) -> Self {
+        Self::new(root, vec![
+            Interval::PERFECT_UNISON,
+            Interval::MINOR_THIRD,
+            Interval::PERFECT_FIFTH,
+        ])
+    }
+
+    pub fn diminished(root: NoteName) -> Self {
+        Self::new(root, vec![
+            Interval::PERFECT_UNISON,
+            Interval::MINOR_THIRD,
+            Interval::DIMINISHED_FIFTH,
+        ])
+    }
+
+    pub fn augmented(root: NoteName) -> Self {
+        Self::new(root, vec![
+            Interval::PERFECT_UNISON,
+            Interval::MAJOR_THIRD,
+            Interval::AUGMENTED_FIFTH,
+        ])
+    }
+
+    pub fn dominant_7th(root: NoteName) -> Self {
+        Self::new(root, vec![
+            Interval::PERFECT_UNISON,
+            Interval::MAJOR_THIRD,
+            Interval::PERFECT_FIFTH,
+            Interval::MINOR_SEVENTH,
+        ])
+    }
+
+    // More chord constructors can be added as needed...
+
     /// Return a Harte representation (string) of the chord
-    ///
-    /// See: https://ismir2005.ismir.net/proceedings/1080.pdf
     pub fn to_harte(&self) -> String {
         todo!()
     }
 
     /// Parse a Harte representation (string) of the chord
-    ///
-    /// See: https://ismir2005.ismir.net/proceedings/1080.pdf
     pub fn from_harte(_harte: &str) -> Self {
         todo!()
+    }
+
+    /// Returns true if the intervals contain the major third
+    pub fn is_major(&self) -> bool {
+        self.intervals.contains(&Interval::MAJOR_THIRD)
     }
 }
 
 impl Display for Chord {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {:?}", self.root, self.quality)
-    }
-}
-
-/// The quality/type of a chord (major, minor, etc.)
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ChordQuality {
-    Major,
-    Minor,
-    Diminished,
-    Augmented,
-    Sus2,
-    Sus4,
-    // etc.
-}
-
-impl ChordQuality {
-    /// Returns the intervals that make up the chord quality.
-    /// This also includes the root note, in order to support rootless chords, where we could omit
-    /// it.
-    pub fn get_intervals(&self) -> Vec<Interval> {
-        match self {
-            ChordQuality::Major => vec![
-                Interval::PERFECT_UNISON,
-                Interval::MAJOR_THIRD,
-                Interval::PERFECT_FIFTH,
-            ],
-            ChordQuality::Minor => vec![
-                Interval::PERFECT_UNISON,
-                Interval::MINOR_THIRD,
-                Interval::PERFECT_FIFTH,
-            ],
-            ChordQuality::Diminished => vec![
-                Interval::PERFECT_UNISON,
-                Interval::MINOR_THIRD,
-                Interval::DIMINISHED_FIFTH,
-            ],
-            ChordQuality::Augmented => vec![
-                Interval::PERFECT_UNISON,
-                Interval::MAJOR_THIRD,
-                Interval::AUGMENTED_FIFTH,
-            ],
-            ChordQuality::Sus2 => vec![
-                Interval::PERFECT_UNISON,
-                Interval::MAJOR_SECOND,
-                Interval::PERFECT_FIFTH,
-            ],
-            ChordQuality::Sus4 => vec![
-                Interval::PERFECT_UNISON,
-                Interval::PERFECT_FOURTH,
-                Interval::PERFECT_FIFTH,
-            ],
-        }
+        write!(f, "{} {:?}", self.root, self.intervals)
     }
 }
 

@@ -174,6 +174,19 @@ impl Interval {
         let base_number = ((number - 1) % 7) + 1;
         matches!(base_number, 1 | 4 | 5)
     }
+
+    pub fn is_fifth(&self) -> bool {
+        *self == Self::PERFECT_FIFTH || 
+        *self == Self::AUGMENTED_FIFTH || 
+        *self == Self::DIMINISHED_FIFTH
+    }
+
+    pub fn is_third(&self) -> bool {
+        *self == Self::MAJOR_THIRD || 
+        *self == Self::MINOR_THIRD || 
+        *self == Self::AUGMENTED_THIRD || 
+        *self == Self::DIMINISHED_THIRD
+    }
 }
 
 // Intervals form a group

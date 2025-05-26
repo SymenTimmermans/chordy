@@ -16,12 +16,6 @@ pub use crate::types::{
 
     // Chord types
     Chord,
-    ChordQuality,
-    ChordExtension,
-    SeventhType,
-    NinthType,
-    EleventhType,
-    ThirteenthType,
 
     // Scale/key types
     Scale,

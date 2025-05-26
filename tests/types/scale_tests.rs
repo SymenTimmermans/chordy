@@ -160,33 +160,30 @@ fn test_scale_degree_functions() {
 
 #[test]
 fn test_chord_functions() {
-    use chordy::types::ChordQuality::*;
     use chordy::types::HarmonicFunction::*;
 
     let c_major = Scale::new(note!("C"), scales::IONIAN);
 
-    let tests: Vec<(NoteName, ChordQuality, HarmonicFunction)> = vec![
+    let tests: Vec<(Chord, HarmonicFunction)> = vec![
         // Diatonic chords
-        (note!("C"), Major, Tonic),
-        (note!("D"), Minor, Subdominant),
-        (note!("E"), Minor, Dominant),
-        (note!("F"), Major, Subdominant),
-        (note!("G"), Major, Dominant),
-        (note!("A"), Minor, Tonic),
-        (note!("B"), Diminished, Dominant),
+        (Chord::major(note!("C")), Tonic),
+        (Chord::minor(note!("D")), Subdominant),
+        (Chord::minor(note!("E")), Dominant),
+        (Chord::major(note!("F")), Subdominant),
+        (Chord::major(note!("G")), Dominant),
+        (Chord::minor(note!("A")), Tonic),
+        (Chord::diminished(note!("B")), Dominant),
         // Some other chords
-        (note!("Db"), Major, Subdominant),
-        (note!("Eb"), Minor, Dominant),
+        (Chord::major(note!("Db")), Subdominant),
+        (Chord::minor(note!("Eb")), Dominant),
     ];
 
-    tests.iter().for_each(|(root, quality, expected_function)| {
-        let chord = Chord::new(*root, *quality, vec![]);
+    tests.iter().for_each(|(chord,  expected_function)| {
         assert_eq!(
             c_major.harmonic_function(&chord),
             Some(*expected_function),
-            "Test failed for chord: {:?} {:?}, expected function: {:?}",
-            root,
-            quality,
+            "Test failed for chord: {:?}, expected function: {:?}",
+            chord.root,
             expected_function
         );
     });
