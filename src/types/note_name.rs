@@ -24,7 +24,7 @@ use crate::traits::Torsor;
 /// assert!(c_sharp.is_enharmonic_with(&d_flat));
 /// assert_ne!(c_sharp, d_flat); // Different note names
 /// ```
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct NoteName(i8);
 
 impl NoteName {
@@ -208,6 +208,14 @@ impl Add<Interval> for NoteName {
     }
 }
 
+impl Sub<Interval> for NoteName {
+    type Output = Self;
+    
+    fn sub(self, interval: Interval) -> Self {
+        Self(self.0 - interval.fifths)
+    }
+}
+
 // Torsor difference: Note - Note → Interval
 impl Sub<NoteName> for NoteName {
     type Output = Interval;
@@ -233,6 +241,12 @@ impl fmt::Display for NoteName {
             Accidental::Natural => write!(f, "{}", self.letter()),
             _ => write!(f, "{}{}", self.letter(), self.accidental()),
         }
+    }
+}
+
+impl fmt::Debug for NoteName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self)
     }
 }
 

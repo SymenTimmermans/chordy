@@ -35,6 +35,7 @@ pub mod types;
 pub mod error;
 pub mod symbols;
 pub mod transposition;
+pub mod transformation;
 mod traits;
 
 /// The chordy prelude

@@ -5,9 +5,9 @@ use super::{scale::ScaleDegree, ChordExtension, Interval, NoteName};
 /// A chord with a root note and quality
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Chord {
-    root: NoteName,
-    quality: ChordQuality,
-    extensions: Vec<ChordExtension>,
+    pub root: NoteName,
+    pub quality: ChordQuality,
+    pub extensions: Vec<ChordExtension>,
 }
 
 impl Chord {
