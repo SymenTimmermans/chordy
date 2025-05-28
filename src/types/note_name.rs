@@ -1,10 +1,8 @@
 use std::fmt;
-use std::str::FromStr;
 use std::ops::{Add, Sub};
+use std::str::FromStr;
 
-use super::{
-    Accidental, Interval, Letter, Pitch,
-};
+use super::{Accidental, Interval, Letter, Pitch};
 use crate::error::ParseError;
 use crate::traits::Torsor;
 
@@ -74,7 +72,7 @@ impl NoteName {
     pub fn from_fifths(fifths: i8) -> Self {
         Self(fifths)
     }
-    
+
     pub fn fifths(&self) -> i8 {
         self.0
     }
@@ -143,7 +141,7 @@ impl NoteName {
     pub fn transpose(self, interval: Interval) -> Self {
         self.act(interval)
     }
-    
+
     /// Find the interval between two notes
     pub fn interval_to(self, other: Self) -> Interval {
         other.difference(&self)
@@ -153,7 +151,7 @@ impl NoteName {
 // Torsor action: Note + Interval → Note
 impl Add<Interval> for NoteName {
     type Output = Self;
-    
+
     fn add(self, interval: Interval) -> Self {
         Self(self.0 + interval.fifths)
     }
@@ -161,7 +159,7 @@ impl Add<Interval> for NoteName {
 
 impl Sub<Interval> for NoteName {
     type Output = Self;
-    
+
     fn sub(self, interval: Interval) -> Self {
         Self(self.0 - interval.fifths)
     }
@@ -170,7 +168,7 @@ impl Sub<Interval> for NoteName {
 // Torsor difference: Note - Note → Interval
 impl Sub<NoteName> for NoteName {
     type Output = Interval;
-    
+
     fn sub(self, other: NoteName) -> Interval {
         Interval::with_fifths(self.0 - other.0)
     }
@@ -180,7 +178,7 @@ impl Torsor<Interval> for NoteName {
     fn act(&self, interval: Interval) -> Self {
         *self + interval
     }
-    
+
     fn difference(&self, other: &Self) -> Interval {
         *self - *other
     }

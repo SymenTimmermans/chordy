@@ -8,7 +8,10 @@ impl ScaleBitmask {
         let mut mask = 0u16;
         let mut semitones = 0u8;
         for interval in intervals {
-            assert!(interval.semitones() >= 0, "Cannot have negative intervals in a bitmask");
+            assert!(
+                interval.semitones() >= 0,
+                "Cannot have negative intervals in a bitmask"
+            );
             semitones = semitones.wrapping_add(interval.semitones() as u8);
             mask |= 1 << (semitones % 12);
         }

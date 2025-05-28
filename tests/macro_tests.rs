@@ -1,5 +1,5 @@
-use chordy::pitch;
 use chordy::note;
+use chordy::pitch;
 use chordy::types::*;
 
 #[test]
@@ -12,7 +12,7 @@ fn test_pitch_macro_basic() {
 fn test_pitch_macro_accidentals() {
     let p = pitch!("A#3");
     assert_eq!(p, Pitch::new(Letter::A, Accidental::Sharp, 3));
-    
+
     let p = pitch!("Bb4");
     assert_eq!(p, Pitch::new(Letter::B, Accidental::Flat, 4));
 }
@@ -21,7 +21,7 @@ fn test_pitch_macro_accidentals() {
 fn test_pitch_macro_unicode_accidentals() {
     let p = pitch!("G♯4");
     assert_eq!(p, Pitch::new(Letter::G, Accidental::Sharp, 4));
-    
+
     let p = pitch!("E♭7");
     assert_eq!(p, Pitch::new(Letter::E, Accidental::Flat, 7));
 }
@@ -30,7 +30,7 @@ fn test_pitch_macro_unicode_accidentals() {
 fn test_pitch_macro_double_accidentals() {
     let p = pitch!("A##2");
     assert_eq!(p, Pitch::new(Letter::A, Accidental::DoubleSharp, 2));
-    
+
     let p = pitch!("Bbb5");
     assert_eq!(p, Pitch::new(Letter::B, Accidental::DoubleFlat, 5));
 }
@@ -39,7 +39,7 @@ fn test_pitch_macro_double_accidentals() {
 fn test_pitch_macro_double_unicode_accidentals() {
     let p = pitch!("C♯♯4");
     assert_eq!(p, Pitch::new(Letter::C, Accidental::DoubleSharp, 4));
-    
+
     let p = pitch!("D♭♭7");
     assert_eq!(p, Pitch::new(Letter::D, Accidental::DoubleFlat, 7));
 }
@@ -48,11 +48,10 @@ fn test_pitch_macro_double_unicode_accidentals() {
 fn test_pitch_macro_unicode_double_accidentals() {
     let p = pitch!("B𝄪4");
     assert_eq!(p, Pitch::new(Letter::B, Accidental::DoubleSharp, 4));
-    
+
     let p = pitch!("F𝄫7");
     assert_eq!(p, Pitch::new(Letter::F, Accidental::DoubleFlat, 7));
 }
-
 
 #[test]
 fn test_pitch_macro_negative_octave() {

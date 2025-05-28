@@ -12,7 +12,11 @@ pub fn transform_r(chord: &Chord) -> Chord {
         reflect_across_axis(chord, chord.root, chord.root + Interval::MAJOR_THIRD)
     } else {
         // if the chord is minor, the axis is the the minor third and the fifth
-        reflect_across_axis(chord, chord.root + Interval::MINOR_THIRD, chord.root + Interval::PERFECT_FIFTH)
+        reflect_across_axis(
+            chord,
+            chord.root + Interval::MINOR_THIRD,
+            chord.root + Interval::PERFECT_FIFTH,
+        )
     }
 }
 
@@ -28,10 +32,12 @@ fn reflect_across_axis(chord: &Chord, axis_note1: NoteName, axis_note2: NoteName
                 println!("Note {:?} is on the axis, not reflecting", note);
                 note // Notes on the axis stay fixed
             } else {
-
                 // Calculate reflection of note across the axis
                 let new_note = reflect_point_across_line(note, axis_note1, axis_note2);
-                println!("Reflecting note {:?} across axis {:?} - {:?} ==> {:?}", note, axis_note1, axis_note2, new_note);
+                println!(
+                    "Reflecting note {:?} across axis {:?} - {:?} ==> {:?}",
+                    note, axis_note1, axis_note2, new_note
+                );
                 new_note
             }
         })

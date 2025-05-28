@@ -19,7 +19,7 @@ fn parse_interval_code(code: &str) -> u8 {
         "P5" => 7,
         "m6" | "A5" => 8,
         "M6" => 9,
-        "m7" | "A6"=> 10,
+        "m7" | "A6" => 10,
         "M7" => 11,
         _ => panic!("Unknown interval code: {}", code),
     }
@@ -36,7 +36,10 @@ fn to_bitmask(intervals: &[&str]) -> u16 {
 /// Convert a list of interval strings to Interval const names
 /// These should always be in line with the consts defined in types/interval.rs
 fn to_interval_const_name(interval: &str) -> String {
-    assert!(interval.len() == 2, "Interval code must be 2 characters long");
+    assert!(
+        interval.len() == 2,
+        "Interval code must be 2 characters long"
+    );
 
     let quality = match interval.chars().next().unwrap() {
         'P' => "PERFECT",
@@ -59,7 +62,7 @@ fn to_interval_const_name(interval: &str) -> String {
     };
 
     format!("Interval::{}_{}", quality, size)
-} 
+}
 
 fn main() {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
@@ -75,50 +78,59 @@ fn main() {
 
     let mut registry_entries = Vec::new();
 
-    reader.lines()
+    reader
+        .lines()
         .map_while(Result::ok)
         .skip(1) // Skip header line
         .filter(|l| !l.trim().is_empty())
         .for_each(|line| {
-        let parts: Vec<_> = line.split(';').collect();
-        if parts.len() < 4 {
-            panic!("Malformed line: {}", line);
-        }
+            let parts: Vec<_> = line.split(';').collect();
+            if parts.len() < 4 {
+                panic!("Malformed line: {}", line);
+            }
 
-        let name = parts[0].trim();
-        let interval_strs: Vec<&str> = parts[1].split(',').map(str::trim).collect();
-        let intervals_formatted = interval_strs
-            .iter()
-            .map(|s| to_interval_const_name(s))
-            .collect::<Vec<_>>()
-            .join(", ");
+            let name = parts[0].trim();
+            let interval_strs: Vec<&str> = parts[1].split(',').map(str::trim).collect();
+            let intervals_formatted = interval_strs
+                .iter()
+                .map(|s| to_interval_const_name(s))
+                .collect::<Vec<_>>()
+                .join(", ");
 
-        let parent = parts[2].trim();
-        let offset = parts[3].trim();
+            let parent = parts[2].trim();
+            let offset = parts[3].trim();
 
-        let bitmask = to_bitmask(&interval_strs);
-        let const_name = name
-            .to_uppercase()
-            .replace(|c: char| !c.is_alphanumeric(), "_");
+            let bitmask = to_bitmask(&interval_strs);
+            let const_name = name
+                .to_uppercase()
+                .replace(|c: char| !c.is_alphanumeric(), "_");
 
-        generated.push_str(&format!(
-            "pub const {}: ScaleDefinition = ScaleDefinition {{
+            generated.push_str(&format!(
+                "pub const {}: ScaleDefinition = ScaleDefinition {{
     name: \"{}\",
     intervals: &[{}],
     bitmask: ScaleBitmask(0b{:012b}),
     mode_of: {},
     degree_offset: {},
 }};\n\n",
-            const_name,
-            name,
-            intervals_formatted,
-            bitmask,
-            if parent.is_empty() { "None".to_string() } else { format!("Some(\"{}\")", parent) },
-            if offset.is_empty() { "None".to_string() } else { format!("Some({})", offset) }
-        ));
+                const_name,
+                name,
+                intervals_formatted,
+                bitmask,
+                if parent.is_empty() {
+                    "None".to_string()
+                } else {
+                    format!("Some(\"{}\")", parent)
+                },
+                if offset.is_empty() {
+                    "None".to_string()
+                } else {
+                    format!("Some({})", offset)
+                }
+            ));
 
-        registry_entries.push(const_name);
-    });
+            registry_entries.push(const_name);
+        });
 
     generated.push_str("pub const REGISTRY: &[ScaleDefinition] = &[\n");
     for name in &registry_entries {
@@ -127,7 +139,7 @@ fn main() {
     generated.push_str("];\n");
 
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let out_file= Path::new(&manifest_dir).join("src/types/scale/scales.rs");
+    let out_file = Path::new(&manifest_dir).join("src/types/scale/scales.rs");
 
     fs::write(&out_file, &generated).expect("Failed to write scales registry module.");
 }

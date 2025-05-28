@@ -1,5 +1,5 @@
-use chordy::{note, Interval};
 use chordy::types::{Accidental, Letter, NoteName};
+use chordy::{note, Interval};
 
 #[test]
 fn test_note_name_creation() {

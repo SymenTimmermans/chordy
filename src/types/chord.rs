@@ -23,56 +23,53 @@ impl Chord {
         // The interval set that contains a fifth and some third will be the root.
         let candidate: Option<NoteName> = notes.first().cloned();
         let score: i32 = i32::MIN;
-        notes.iter().fold((candidate, score), |(mut candidate, mut score), note| {
-            let note_intervals = notes.iter()
-                .filter(|&&n| n != *note)
-                .map(|&n| note.interval_to(n))
-                .collect::<Vec<Interval>>();
-            let note_score = note_intervals.iter().fold(0, |acc, interval| {
-                if interval.is_fifth() {
-                    acc + 5
-                } else if interval.is_third() {
-                    acc + 3
-                } else {
-                    acc
-                }
-            });
-            match note_score.cmp(&score) {
-                // equal score, prefer lower note
-                std::cmp::Ordering::Equal => {
-                    if let Some(c) = candidate {
-                        if note.base_midi_number() < c.base_midi_number() {
+        notes
+            .iter()
+            .fold((candidate, score), |(mut candidate, mut score), note| {
+                let note_intervals = notes
+                    .iter()
+                    .filter(|&&n| n != *note)
+                    .map(|&n| note.interval_to(n))
+                    .collect::<Vec<Interval>>();
+                let note_score = note_intervals.iter().fold(0, |acc, interval| {
+                    if interval.is_fifth() {
+                        acc + 5
+                    } else if interval.is_third() {
+                        acc + 3
+                    } else {
+                        acc
+                    }
+                });
+                match note_score.cmp(&score) {
+                    // equal score, prefer lower note
+                    std::cmp::Ordering::Equal => {
+                        if let Some(c) = candidate {
+                            if note.base_midi_number() < c.base_midi_number() {
+                                candidate = Some(*note);
+                            }
+                        } else {
                             candidate = Some(*note);
                         }
-                    } else {
-                        candidate = Some(*note);
                     }
-                },
-                std::cmp::Ordering::Greater => {
-                    candidate = Some(*note);
-                    score = note_score;
-                },
-                _ => {}
-            }
-            (candidate, score)
-        });
+                    std::cmp::Ordering::Greater => {
+                        candidate = Some(*note);
+                        score = note_score;
+                    }
+                    _ => {}
+                }
+                (candidate, score)
+            });
 
         // if we have a candidate, create the chord
         let root = candidate.unwrap_or(notes.first().cloned().unwrap_or(note!("C")));
-
-
 
         Self::from_notes_and_root(notes, root)
     }
 
     /// Create a chord from a list of notes and a specified root
     pub fn from_notes_and_root(notes: &[NoteName], root: NoteName) -> Chord {
-        Self::new(root, notes.iter()
-            .map(|&n| root.interval_to(n))
-            .collect())
+        Self::new(root, notes.iter().map(|&n| root.interval_to(n)).collect())
     }
-
-
 
     /// Returns the notes in the chord with proper theoretical spelling
     pub fn notes(&self) -> Vec<NoteName> {
@@ -83,46 +80,61 @@ impl Chord {
     }
 
     // Common chord constructors
-    
+
     pub fn major(root: NoteName) -> Self {
-        Self::new(root, vec![
-            Interval::PERFECT_UNISON,
-            Interval::MAJOR_THIRD,
-            Interval::PERFECT_FIFTH,
-        ])
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::PERFECT_FIFTH,
+            ],
+        )
     }
 
     pub fn minor(root: NoteName) -> Self {
-        Self::new(root, vec![
-            Interval::PERFECT_UNISON,
-            Interval::MINOR_THIRD,
-            Interval::PERFECT_FIFTH,
-        ])
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MINOR_THIRD,
+                Interval::PERFECT_FIFTH,
+            ],
+        )
     }
 
     pub fn diminished(root: NoteName) -> Self {
-        Self::new(root, vec![
-            Interval::PERFECT_UNISON,
-            Interval::MINOR_THIRD,
-            Interval::DIMINISHED_FIFTH,
-        ])
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MINOR_THIRD,
+                Interval::DIMINISHED_FIFTH,
+            ],
+        )
     }
 
     pub fn augmented(root: NoteName) -> Self {
-        Self::new(root, vec![
-            Interval::PERFECT_UNISON,
-            Interval::MAJOR_THIRD,
-            Interval::AUGMENTED_FIFTH,
-        ])
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::AUGMENTED_FIFTH,
+            ],
+        )
     }
 
     pub fn dominant_7th(root: NoteName) -> Self {
-        Self::new(root, vec![
-            Interval::PERFECT_UNISON,
-            Interval::MAJOR_THIRD,
-            Interval::PERFECT_FIFTH,
-            Interval::MINOR_SEVENTH,
-        ])
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MINOR_SEVENTH,
+            ],
+        )
     }
 
     // More chord constructors can be added as needed...

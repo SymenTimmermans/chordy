@@ -14,7 +14,7 @@ pub use chromatic::ChromaticTransposer;
 pub trait Transposer {
     /// Transposes a pitch by the given interval
     fn transpose(pitch: Pitch, interval: i8) -> Pitch;
-    
+
     /// Returns the transposer's name for debugging
     fn name() -> &'static str;
 }

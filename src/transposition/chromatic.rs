@@ -1,6 +1,6 @@
 use super::Transposer;
-use crate::Pitch;
 use crate::types::{Accidental, Letter};
+use crate::Pitch;
 
 /// Chromatic (semitone-based) transposition with smart enharmonic spelling
 pub struct ChromaticTransposer;

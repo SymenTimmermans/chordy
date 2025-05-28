@@ -11,32 +11,32 @@
 //! The `pitch!` and `note!` macros provide compile-time pitch and note creation:
 //! ```
 //! use chordy::{pitch, note};
-//! 
+//!
 //! // Creates a Pitch at compile time (validated during compilation)
 //! let my_pitch = pitch!("C#4");
 //! assert_eq!(my_pitch.to_string(), "C♯4");
-//! 
+//!
 //! // Creates a NoteName at compile time
 //! let my_note = note!("Ab");
 //! assert_eq!(my_note.to_string(), "A♭");
-//! 
+//!
 //! // Supports double accidentals
 //! let double_flat = note!("Bbb");
 //! assert_eq!(double_flat.to_string(), "B𝄫");
 //! let double_sharp = note!("F##");
 //! assert_eq!(double_sharp.to_string(), "F𝄪");
-//! 
+//!
 //! // The following would fail to compile:
 //! // let invalid_pitch = pitch!("H4");
 //! // let invalid_note = note!("H#");
 //! ```
 
-pub mod types;
 pub mod error;
 pub mod symbols;
-pub mod transposition;
-pub mod transformation;
 mod traits;
+pub mod transformation;
+pub mod transposition;
+pub mod types;
 
 /// The chordy prelude
 pub mod prelude;
@@ -67,7 +67,9 @@ macro_rules! pitch {
         const _VALIDATE: () = {
             if !$crate::is_valid_note($s, true) {
                 panic!(concat!(
-                    "Invalid pitch string '", $s, "'. ",
+                    "Invalid pitch string '",
+                    $s,
+                    "'. ",
                     "Must be a note (A-G with optional accidental) followed by octave number"
                 ));
             }
@@ -85,8 +87,10 @@ pub const fn is_valid_note(s: &str, check_octave: bool) -> bool {
     }
 
     // Validate letter
-    let valid_letter = matches!(bytes[0] as char, 'C' | 'c' | 'D' | 'd' | 'E' | 'e' |
-        'F' | 'f' | 'G' | 'g' | 'A' | 'a' | 'B' | 'b');
+    let valid_letter = matches!(
+        bytes[0] as char,
+        'C' | 'c' | 'D' | 'd' | 'E' | 'e' | 'F' | 'f' | 'G' | 'g' | 'A' | 'a' | 'B' | 'b'
+    );
 
     if !valid_letter {
         return false;
@@ -122,7 +126,9 @@ pub const fn is_valid_note(s: &str, check_octave: bool) -> bool {
                 if note_end > 2 {
                     let next_char = bytes[2] as char;
                     if !((next_char == bytes[1] as char && note_end == 3) ||  // Two identical singles
-                        (next_char == '𝄫' || next_char == '𝄪') && note_end == 4) {  // Single double
+                        (next_char == '𝄫' || next_char == '𝄪') && note_end == 4)
+                    {
+                        // Single double
                         return false;
                     }
                 } else if note_end != 2 {
@@ -139,7 +145,7 @@ pub const fn is_valid_note(s: &str, check_octave: bool) -> bool {
                     return false;
                 }
             }
-            _ => return false
+            _ => return false,
         }
     } else if check_octave {
         return false; // Must have accidental if checking octave
@@ -148,7 +154,7 @@ pub const fn is_valid_note(s: &str, check_octave: bool) -> bool {
     // If checking octave, validate the remaining part is a valid number
     if check_octave && note_end < bytes.len() {
         let mut pos = note_end;
-        
+
         // Check for negative
         if bytes[pos] == b'-' {
             pos += 1;
@@ -168,6 +174,3 @@ pub const fn is_valid_note(s: &str, check_octave: bool) -> bool {
 
     true
 }
-
-
-

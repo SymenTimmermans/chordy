@@ -1,8 +1,6 @@
 use crate::error::TypeError;
 
-use super::{
-    chord::HarmonicFunction, Accidental, Chord, NoteName
-};
+use super::{chord::HarmonicFunction, Accidental, Chord, NoteName};
 
 pub mod definition;
 pub use definition::ScaleDefinition;
@@ -47,10 +45,7 @@ pub struct Scale {
 impl Scale {
     // Core constructor
     pub fn new(tonic: NoteName, definition: ScaleDefinition) -> Self {
-        Scale {
-            tonic,
-            definition
-        }
+        Scale { tonic, definition }
     }
 
     pub fn notes(&self) -> Vec<NoteName> {
@@ -309,4 +304,3 @@ impl ScaleDegree {
     // Special scale degrees with traditional names
     pub const NEAPOLITAN: Self = Self::new(2, Some(Accidental::Flat)); // ♭II
 }
-

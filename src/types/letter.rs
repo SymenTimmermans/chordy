@@ -7,13 +7,19 @@ use crate::error::ParseError;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(i8)]
 pub enum Letter {
-    C, D, E, F, G, A, B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    A,
+    B,
 }
 
 impl fmt::Display for Letter {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use crate::symbols::*;
-        
+
         match self {
             Letter::C => write!(f, "{}", C),
             Letter::D => write!(f, "{}", D),
@@ -44,7 +50,13 @@ impl Letter {
     pub fn next(self) -> Letter {
         use Letter::*;
         match self {
-            C => D, D => E, E => F, F => G, G => A, A => B, B => C,
+            C => D,
+            D => E,
+            E => F,
+            F => G,
+            G => A,
+            A => B,
+            B => C,
         }
     }
 
@@ -52,7 +64,13 @@ impl Letter {
     pub fn prev(self) -> Letter {
         use Letter::*;
         match self {
-            C => B, D => C, E => D, F => E, G => F, A => G, B => A,
+            C => B,
+            D => C,
+            E => D,
+            F => E,
+            G => F,
+            A => G,
+            B => A,
         }
     }
 
@@ -70,10 +88,16 @@ impl Letter {
     }
 
     pub fn all() -> [Letter; 7] {
-        [Letter::C, Letter::D, Letter::E, Letter::F, Letter::G, Letter::A, Letter::B]
+        [
+            Letter::C,
+            Letter::D,
+            Letter::E,
+            Letter::F,
+            Letter::G,
+            Letter::A,
+            Letter::B,
+        ]
     }
-
-
 }
 
 impl FromStr for Letter {
@@ -83,7 +107,7 @@ impl FromStr for Letter {
         if s.len() != 1 {
             return Err(ParseError::InvalidNoteName(s.to_string()));
         }
-        
+
         Letter::from_char(s.chars().next().unwrap())
             .map_err(|_| ParseError::InvalidNoteName(s.to_string()))
     }

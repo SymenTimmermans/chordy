@@ -1,5 +1,5 @@
-use chordy::Chord;
 use chordy::note;
+use chordy::Chord;
 
 #[test]
 fn test_p_transformations() {

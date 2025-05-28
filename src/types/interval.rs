@@ -230,12 +230,15 @@ impl fmt::Display for Interval {
                 let generic_num = self.generic_interval_number();
                 let semitones = self.total_semitones();
                 // Calculate quality based on semitones vs expected
-                write!(f, "interval({}f,{}o,g:{},s:{})", self.fifths, self.octaves, generic_num, semitones)
+                write!(
+                    f,
+                    "interval({}f,{}o,g:{},s:{})",
+                    self.fifths, self.octaves, generic_num, semitones
+                )
             }
         }
     }
 }
-
 
 impl FromStr for Interval {
     type Err = ParseError;
@@ -248,7 +251,7 @@ impl FromStr for Interval {
         // Parse quality (can be multiple chars for multiple augmented/diminished)
         let mut chars = s.chars();
         let first_char = chars.next().unwrap();
-        
+
         let (quality_type, quality_count) = match first_char {
             'P' => ('P', 1),
             'M' => ('M', 1),
@@ -265,7 +268,7 @@ impl FromStr for Interval {
                     }
                 }
                 ('A', count)
-            },
+            }
             'd' => {
                 // Count consecutive d's for multiple diminished
                 let mut count = 1;
@@ -278,7 +281,7 @@ impl FromStr for Interval {
                     }
                 }
                 ('d', count)
-            },
+            }
             _ => return Err(ParseError::InvalidInterval(s.to_string())),
         };
 
@@ -288,9 +291,10 @@ impl FromStr for Interval {
         } else {
             1
         };
-        
+
         let number_str = &s[number_start..];
-        let interval_number: u8 = number_str.parse()
+        let interval_number: u8 = number_str
+            .parse()
             .map_err(|_| ParseError::InvalidInterval(s.to_string()))?;
 
         if interval_number == 0 {
@@ -299,7 +303,7 @@ impl FromStr for Interval {
 
         // Calculate base fifths and octaves for the interval number
         let (base_fifths, octaves) = Self::interval_number_to_fifths_and_octaves(interval_number);
-        
+
         // Adjust for quality
         let adjusted_fifths = match quality_type {
             'P' => {
@@ -308,38 +312,37 @@ impl FromStr for Interval {
                     return Err(ParseError::InvalidInterval(s.to_string()));
                 }
                 base_fifths
-            },
+            }
             'M' => {
                 // Validate that this interval can be major
                 if Self::can_be_perfect(interval_number) {
                     return Err(ParseError::InvalidInterval(s.to_string()));
                 }
                 base_fifths
-            },
+            }
             'm' => {
                 // Validate that this interval can be minor
                 if Self::can_be_perfect(interval_number) {
                     return Err(ParseError::InvalidInterval(s.to_string()));
                 }
-                base_fifths - 7  // Minor is 7 fifths flat from major
-            },
+                base_fifths - 7 // Minor is 7 fifths flat from major
+            }
             'A' => {
                 // Augmented: add 7 fifths per augmentation
                 base_fifths + (7 * quality_count as i8)
-            },
+            }
             'd' => {
                 // Diminished: subtract 7 fifths per diminution
                 let base = if Self::can_be_perfect(interval_number) {
-                    base_fifths  // Start from perfect
+                    base_fifths // Start from perfect
                 } else {
-                    base_fifths - 7  // Start from minor for major/minor intervals
+                    base_fifths - 7 // Start from minor for major/minor intervals
                 };
                 base - (7 * quality_count as i8)
-            },
+            }
             _ => unreachable!(),
         };
 
         Ok(Interval::new(adjusted_fifths, octaves))
     }
 }
-
