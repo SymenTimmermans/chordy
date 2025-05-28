@@ -130,25 +130,6 @@ impl Interval {
         (((self.fifths * 7) % 12 + 12) % 12) + (self.octaves * 12)
     }
 
-    /// Get the expected semitones for a "neutral" version of this interval
-    fn expected_semitones_for_size(size: i8) -> i8 {
-        let base_size = ((size - 1) % 7) + 1;  // Normalize to 1-7 range
-        let octaves = (size - 1) / 7;
-        
-        let base_semitones = match base_size {
-            1 => 0,  // Unison
-            2 => 2,  // Major second
-            3 => 4,  // Major third
-            4 => 5,  // Perfect fourth
-            5 => 7,  // Perfect fifth
-            6 => 9,  // Major sixth
-            7 => 11, // Major seventh
-            _ => unreachable!(),
-        };
-        
-        base_semitones + (octaves * 12)
-    }
-
     /// Convert interval number (1-14, etc.) to base fifths and octaves
     /// This gives the "major" or "perfect" version of each interval
     fn interval_number_to_fifths_and_octaves(number: u8) -> (i8, i8) {

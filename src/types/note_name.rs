@@ -130,55 +130,6 @@ impl NoteName {
         (self.base_midi_number() + 12) % 12 == (other.base_midi_number() + 12) % 12
     }
 
-    /// Returns the letter that is the given interval size away from this note's letter
-    fn get_letter_at_interval(&self, steps: i8) -> Letter {
-        // Apply the letter steps
-        let letter_value = (self.letter() as i8 + steps) % 7;
-        match letter_value {
-            0 => Letter::C,
-            1 => Letter::D,
-            2 => Letter::E,
-            3 => Letter::F,
-            4 => Letter::G,
-            5 => Letter::A,
-            6 => Letter::B,
-            _ => unreachable!(),
-        }
-    }
-
-    /// Creates a note with the specified letter that is the given number of semitones away
-    fn note_with_interval_to(&self, target_letter: Letter, semitones: i8) -> Self {
-        // Get the base MIDI values as if both notes were natural
-        let self_natural_base = self.letter().base_midi_number();
-        let target_natural_base = target_letter.base_midi_number();
-
-        // Account for the current note's accidental
-        let actual_self_value = self_natural_base + self.accidental().semitone_offset();
-
-        // Calculate what the target value should be based on the requested interval
-        let target_value = (actual_self_value + semitones) % 12;
-
-        // Calculate how many semitones need to be added/subtracted with an accidental
-        // to get from the natural target letter to the desired pitch
-        let natural_target_mod12 = target_natural_base % 12;
-        let adjustment = (target_value - natural_target_mod12 + 12) % 12;
-
-        // Determine the correct accidental
-        let accidental = match adjustment {
-            0 => Accidental::Natural,
-            1 => Accidental::Sharp,
-            2 => Accidental::DoubleSharp,
-            11 => Accidental::Flat,
-            10 => Accidental::DoubleFlat,
-            _ => panic!(
-                "Cannot represent adjustment of {} semitones with simple accidentals",
-                adjustment
-            ),
-        };
-
-        NoteName::new(target_letter, accidental)
-    }
-
     pub fn transpose_by_interval(&self, interval: Interval) -> NoteName {
         *self + interval
     }

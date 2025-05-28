@@ -180,7 +180,7 @@ fn test_chord_functions() {
 
     tests.iter().for_each(|(chord,  expected_function)| {
         assert_eq!(
-            c_major.harmonic_function(&chord),
+            c_major.harmonic_function(chord),
             Some(*expected_function),
             "Test failed for chord: {:?}, expected function: {:?}",
             chord.root,

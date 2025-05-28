@@ -23,7 +23,7 @@ impl Chord {
         // The interval set that contains a fifth and some third will be the root.
         let candidate: Option<NoteName> = notes.first().cloned();
         let score: i32 = i32::MIN;
-        let outcome = notes.iter().fold((candidate, score), |(mut candidate, mut score), note| {
+        notes.iter().fold((candidate, score), |(mut candidate, mut score), note| {
             let note_intervals = notes.iter()
                 .filter(|&&n| n != *note)
                 .map(|&n| note.interval_to(n))
@@ -37,18 +37,22 @@ impl Chord {
                     acc
                 }
             });
-            if note_score > score {
-                candidate = Some(*note);
-                score = note_score;
-            } else if note_score == score {
-                // If scores are equal, prefer the lower note
-                if let Some(c) = candidate {
-                    if note.base_midi_number() < c.base_midi_number() {
+            match note_score.cmp(&score) {
+                // equal score, prefer lower note
+                std::cmp::Ordering::Equal => {
+                    if let Some(c) = candidate {
+                        if note.base_midi_number() < c.base_midi_number() {
+                            candidate = Some(*note);
+                        }
+                    } else {
                         candidate = Some(*note);
                     }
-                } else {
+                },
+                std::cmp::Ordering::Greater => {
                     candidate = Some(*note);
-                }
+                    score = note_score;
+                },
+                _ => {}
             }
             (candidate, score)
         });
