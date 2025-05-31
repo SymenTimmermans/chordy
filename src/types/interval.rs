@@ -367,3 +367,17 @@ impl FromStr for Interval {
         Ok(Interval::new(adjusted_fifths, octaves))
     }
 }
+
+impl PartialOrd for Interval {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+
+impl Ord for Interval {
+    /// Compare intervals based on their semitone distance.
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.semitones().cmp(&other.semitones())
+    }
+}
