@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use super::{scale::ScaleDegree, Interval, NoteName};
-use crate::note;
+use crate::{note, traits::{HasIntervals, HasRoot, Invertible, Transposable}};
 
 /// A chord represented by a root note and intervals from that root
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -71,16 +71,6 @@ impl Chord {
         Self::new(root, notes.iter().map(|&n| root.interval_to(n)).collect())
     }
 
-    /// Returns the notes in the chord with proper theoretical spelling
-    pub fn notes(&self) -> Vec<NoteName> {
-        self.intervals
-            .iter()
-            .map(|interval| self.root + *interval)
-            .collect()
-    }
-
-    // Common chord constructors
-
     pub fn major(root: NoteName) -> Self {
         Self::new(
             root,
@@ -137,6 +127,55 @@ impl Chord {
         )
     }
 
+    pub fn major_7th(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MAJOR_SEVENTH,
+            ],
+        )
+    }
+    
+    pub fn minor_7th(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MINOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MINOR_SEVENTH,
+            ],
+        )
+    }
+
+    pub fn minor_major_7th(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MINOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MAJOR_SEVENTH,
+            ],
+        )
+    }
+
+    pub fn minor_7th_flat_5(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MINOR_THIRD,
+                Interval::DIMINISHED_FIFTH,
+                Interval::MINOR_SEVENTH,
+            ],
+        )
+    }
+
+
     // More chord constructors can be added as needed...
 
     /// Return a Harte representation (string) of the chord
@@ -158,6 +197,47 @@ impl Chord {
 impl Display for Chord {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} {:?}", self.root, self.intervals)
+    }
+}
+
+impl HasRoot for Chord {
+    fn root(&self) -> NoteName {
+        self.root
+    }
+
+    fn root_mut(&mut self) -> &mut NoteName {
+        &mut self.root
+    }
+}
+
+impl HasIntervals for Chord {
+    fn intervals(&self) -> &[Interval] {
+        &self.intervals
+    }
+
+    fn intervals_mut(&mut self) -> &mut Vec<Interval> {
+        &mut self.intervals
+    }
+}
+
+impl Invertible for Chord {
+    fn inverted(&self, inversion: u8) -> Self {
+        let mut intervals = self.intervals.clone();
+        // Rotate intervals based on inversion
+        intervals.rotate_left(inversion as usize % self.intervals.len());
+        // Adjust octaves for proper inversion
+        if inversion > 0 {
+            if let Some(last) = intervals.last_mut() {
+                *last = *last - Interval::OCTAVE;
+            }
+        }
+        Chord::new(self.root, intervals)
+    }
+}
+
+impl Transposable for Chord {
+    fn transposed(&self, interval: Interval) -> Self {
+        Chord::new(self.root + interval, self.intervals.clone())
     }
 }
 

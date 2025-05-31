@@ -48,6 +48,7 @@ pub use crate::symbols::{
 pub mod traits {
     pub use std::fmt::Display;
     pub use std::str::FromStr;
+    pub use crate::traits::*;
 }
 
 // Macros

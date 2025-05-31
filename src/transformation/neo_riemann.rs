@@ -1,4 +1,5 @@
 use crate::{Chord, Interval, NoteName};
+use crate::traits::ChordLike;
 
 // Transform to parallel major or minor chord
 pub fn transform_p(chord: &Chord) -> Chord {
@@ -25,24 +26,16 @@ fn reflect_across_axis(chord: &Chord, axis_note1: NoteName, axis_note2: NoteName
     // For each note not on the axis, reflect it across this line
 
     let notes: Vec<NoteName> = chord
-        .notes()
-        .iter()
-        .map(|&note| {
+        .notes_iter()
+        .map(|note| {
             if note == axis_note1 || note == axis_note2 {
-                println!("Note {:?} is on the axis, not reflecting", note);
                 note // Notes on the axis stay fixed
             } else {
                 // Calculate reflection of note across the axis
-                let new_note = reflect_point_across_line(note, axis_note1, axis_note2);
-                println!(
-                    "Reflecting note {:?} across axis {:?} - {:?} ==> {:?}",
-                    note, axis_note1, axis_note2, new_note
-                );
-                new_note
+                reflect_point_across_line(note, axis_note1, axis_note2)
             }
         })
         .collect();
-    println!("Reflected notes: {:?}", notes);
 
     Chord::from_notes(&notes)
 }
@@ -61,10 +54,6 @@ fn reflect_point_across_line(
 
     // Calculate the interval between the axis notes
     let axis_interval = axis2_fifths - axis1_fifths;
-    println!(
-        "Reflecting note {:?} across axis {:?} - {:?} with interval {}",
-        note, axis2_fifths, axis1_fifths, axis_interval
-    );
 
     match axis_interval.abs() as i8 {
         1 => {
@@ -72,10 +61,6 @@ fn reflect_point_across_line(
             // The axis is the perfect fifth edge of the triangle
             let midpoint = (axis1_fifths + axis2_fifths) / 2f32;
             let reflection = 2f32 * midpoint - note_fifths;
-            println!(
-                "Perfect fifth reflection: midpoint = {}, reflection = {}",
-                midpoint, reflection
-            );
             NoteName::from_fifths(reflection as i8)
         }
         4 => {

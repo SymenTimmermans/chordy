@@ -1,6 +1,7 @@
 use crate::error::TypeError;
+use crate::traits::{ChordLike, HasIntervals, HasRoot};
 
-use super::{chord::HarmonicFunction, Accidental, Chord, NoteName};
+use super::{chord::HarmonicFunction, Accidental, Chord, Interval, NoteName};
 
 pub mod definition;
 pub use definition::ScaleDefinition;
@@ -186,11 +187,8 @@ impl Scale {
     ///
     /// ```
     pub fn harmonic_function(&self, chord: &Chord) -> Option<HarmonicFunction> {
-        let notes = chord.notes();
-
-        let scale_degrees: Vec<ScaleDegree> = notes
-            .iter()
-            .filter_map(|note| self.degree_of(note))
+        let scale_degrees: Vec<ScaleDegree> = chord.notes_iter()
+            .filter_map(|note| self.degree_of(&note))
             .collect();
 
         HarmonicFunction::detect_by_scale_degrees(&scale_degrees)
@@ -236,9 +234,9 @@ impl Scale {
     }
     ///
     /// Determine if a given note belongs to the scale
-    pub fn contains(&self, _note: &NoteName) -> bool {
-        // Implementation
-        todo!()
+    pub fn contains(&self, note: &NoteName) -> bool {
+        let interval: Interval = self.tonic - *note;
+        self.definition.intervals.contains(&interval)
     }
 
     /// Find the closest scale tone to a given note
@@ -254,10 +252,17 @@ impl Scale {
     }
     */
 
-    /// Returns all possible chords that can be built within this scale
-    pub fn possible_chords(&self) -> Vec<Chord> {
-        // Implementation
-        todo!()
+}
+
+impl HasRoot for Scale {
+    fn root(&self) -> NoteName {
+        self.tonic
+    }
+}
+
+impl HasIntervals for Scale {
+    fn intervals(&self) -> &[Interval] {
+        self.definition.intervals
     }
 }
 

@@ -168,6 +168,13 @@ impl Interval {
         *self == Self::AUGMENTED_THIRD || 
         *self == Self::DIMINISHED_THIRD
     }
+
+    pub fn is_seventh(&self) -> bool {
+        *self == Self::DIMINISHED_SEVENTH ||
+        *self == Self::MINOR_SEVENTH ||
+        *self == Self::MAJOR_SEVENTH ||
+        *self == Self::AUGMENTED_SEVENTH
+    }
 }
 
 // Intervals form a group

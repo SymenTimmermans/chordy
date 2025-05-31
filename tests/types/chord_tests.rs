@@ -1,4 +1,5 @@
-use chordy::{note, Chord, Interval};
+use chordy::{note, scales, Chord, Interval, Scale};
+use chordy::prelude::traits::ChordLike;
 
 #[test]
 fn test_chord_notes() {
@@ -45,4 +46,73 @@ fn test_chord_notes() {
         ],
     );
     assert_eq!(custom.notes(), vec![note!("D"), note!("F"), note!("A")]);
+}
+
+#[test]
+fn test_triads_from_scale_c_major() {
+    // start with a scale
+    let scale = Scale::new(note!("C"), scales::IONIAN);
+
+    // get the triads that are in this scale
+    let triads: Vec<Chord> = scale.triads().collect();
+
+    // triads contains C major
+    assert!(triads.contains(&Chord::major(note!("C"))));
+    assert!(triads.contains(&Chord::minor(note!("D"))));
+    assert!(triads.contains(&Chord::minor(note!("E"))));
+    assert!(triads.contains(&Chord::major(note!("F"))));
+    assert!(triads.contains(&Chord::major(note!("G"))));
+    assert!(triads.contains(&Chord::minor(note!("A"))));
+    assert!(triads.contains(&Chord::diminished(note!("B"))));
+}
+
+#[test]
+fn test_triads_from_scale_d_flat_major() {
+    // start with a scale
+    let scale = Scale::new(note!("Db"), scales::IONIAN);
+
+    // get the triads that are in this scale
+    let triads: Vec<Chord> = scale.triads().collect();
+
+    assert!(triads.contains(&Chord::major(note!("Db"))));
+    assert!(triads.contains(&Chord::minor(note!("Eb"))));
+    assert!(triads.contains(&Chord::minor(note!("F"))));
+    assert!(triads.contains(&Chord::major(note!("Gb"))));
+    assert!(triads.contains(&Chord::major(note!("Ab"))));
+    assert!(triads.contains(&Chord::minor(note!("Bb"))));
+    assert!(triads.contains(&Chord::diminished(note!("C"))));
+}
+
+#[test]
+fn test_triads_from_scale_f_sharp_harmonic_minor() {
+    // start with a scale
+    let scale = Scale::new(note!("F#"), scales::HARMONIC_MINOR);
+
+    // get the triads that are in this scale
+    let triads: Vec<Chord> = scale.triads().collect();
+
+    assert!(triads.contains(&Chord::minor(note!("F#"))));
+    assert!(triads.contains(&Chord::diminished(note!("G#"))));
+    assert!(triads.contains(&Chord::augmented(note!("A"))));
+    assert!(triads.contains(&Chord::minor(note!("B"))));
+    assert!(triads.contains(&Chord::major(note!("C#"))));
+    assert!(triads.contains(&Chord::major(note!("D"))));
+    assert!(triads.contains(&Chord::diminished(note!("E#"))));
+}
+
+#[test]
+fn test_sevenths_from_scale_c_major() {
+    // start with a scale
+    let scale = Scale::new(note!("C"), scales::IONIAN);
+
+    // get the triads that are in this scale
+    let sevenths: Vec<Chord> = scale.sevenths().collect();
+
+    assert!(sevenths.contains(&Chord::major_7th(note!("C"))));
+    assert!(sevenths.contains(&Chord::minor_7th(note!("D"))));
+    assert!(sevenths.contains(&Chord::minor_7th(note!("E"))));
+    assert!(sevenths.contains(&Chord::major_7th(note!("F"))));
+    assert!(sevenths.contains(&Chord::dominant_7th(note!("G"))));
+    assert!(sevenths.contains(&Chord::minor_7th(note!("A"))));
+    assert!(sevenths.contains(&Chord::minor_7th_flat_5(note!("B"))));
 }
