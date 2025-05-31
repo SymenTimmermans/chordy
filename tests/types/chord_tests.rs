@@ -1,5 +1,4 @@
-use chordy::{note, scales, Chord, Interval, Scale};
-use chordy::prelude::traits::ChordLike;
+use chordy::prelude::*;
 
 #[test]
 fn test_chord_notes() {

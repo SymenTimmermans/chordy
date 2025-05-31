@@ -6,6 +6,7 @@ use crate::error::ParseError;
 /// with numeric backing representing semitone shifts.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(i8)]
+#[allow(missing_docs)]
 pub enum Accidental {
     DoubleFlat = -2,
     Flat = -1,
@@ -15,6 +16,7 @@ pub enum Accidental {
 }
 
 impl Accidental {
+    /// Returns an array with all possible accidentals
     pub fn all() -> [Accidental; 5] {
         [
             Accidental::DoubleFlat,
@@ -30,6 +32,7 @@ impl Accidental {
         *self as i8
     }
 
+    /// Pitch naming penalty for this accidental.
     pub fn penalty(self) -> i32 {
         match self {
             Accidental::Natural => 0,
@@ -38,10 +41,12 @@ impl Accidental {
         }
     }
 
+    /// Returns true if the accidental is a sharp variant (sharp or double sharp)
     pub fn is_sharp(self) -> bool {
         matches!(self, Accidental::Sharp | Accidental::DoubleSharp)
     }
 
+    /// Returns true if the accidental is a flat variant (flat or double flat)
     pub fn is_flat(self) -> bool {
         matches!(self, Accidental::Flat | Accidental::DoubleFlat)
     }

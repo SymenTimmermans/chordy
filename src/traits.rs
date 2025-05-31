@@ -1,7 +1,9 @@
+//! Traits for musical structures
 use crate::{Chord, Interval, NoteName};
 
 /// A trait for musical structures that have a root note
 pub trait HasRoot {
+    /// Returns the root note of the structure
     fn root(&self) -> NoteName;
 
     /// Optional: Provides mutable access to root
@@ -12,11 +14,17 @@ pub trait HasRoot {
 
 /// A trait for musical structures that contain intervals
 pub trait HasIntervals {
+    /// Returns a slice of intervals contained in the structure
     fn intervals(&self) -> &[Interval];
 
     /// Optional: Provides mutable access to intervals
     fn intervals_mut(&mut self) -> &mut Vec<Interval> {
         unimplemented!("Mutable interval access not implemented for this type")
+    }
+
+    /// Checks if the structure contains a specific interval
+    fn contains_interval(&self, interval: Interval) -> bool {
+        self.intervals().contains(&interval)
     }
 }
 
@@ -50,21 +58,25 @@ pub trait Transposable {
 
 /// A combined trait for chord-like structures
 pub trait ChordLike: HasRoot + HasIntervals {
+    /// Returns an iterator of NoteName within this structure based on the root note and intervals.
     fn notes_iter(&self) -> impl Iterator<Item = NoteName> + '_ {
         self.intervals()
             .iter()
             .map(move |&interval| self.root() + interval)
     }
 
+    /// Returns a vector of NoteName within this structure based on the root note and intervals.
     fn notes(&self) -> Vec<NoteName> {
         self.notes_iter().collect()
     }
 
-    /// Checks if the chord contains a specific interval
-    fn contains_interval(&self, interval: Interval) -> bool {
-        self.intervals().contains(&interval)
-    }
-
+    /// Returns an iterator over all possible triads that can be built from this type's
+    /// root and intervals.
+    ///
+    /// Each triad will have:
+    /// - A root from one scale degree
+    /// - A third from another scale degree
+    /// - A fifth from another scale degree
     fn triads(&self) -> impl Iterator<Item = Chord> + '_ {
         let intervals = self.intervals();
         let tonic = self.root();
@@ -141,8 +153,17 @@ pub trait ChordLike: HasRoot + HasIntervals {
     }
 }
 
-/// Blanket implementation for anything that has root and intervals
-impl<T> ChordLike for T where T: HasRoot + HasIntervals {}
+// Blanket implementations for ergonomics
+impl<T: HasRoot + HasIntervals> ChordLike for T {}
+
+/// Auto-implement Transposable for all ChordLike types
+impl<T: ChordLike + Clone> Transposable for T {
+    fn transposed(&self, interval: Interval) -> Self {
+        let mut new = self.clone();
+        *new.root_mut() = new.root() + interval;
+        new
+    }
+}
 
 /// A trait to formalize the torsor relationship
 pub trait Torsor<Group> {

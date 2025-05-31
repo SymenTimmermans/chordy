@@ -22,11 +22,16 @@ use std::ops::{Add, Sub};
 ///  
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Interval {
+    /// The number of fifths (7 semitones) this interval spans.
+    ///
+    /// It is normalized to the range -12 to 12, any octave displacement is stored in `octaves`.
     pub fifths: i8,
+    /// The number of octaves (12 semitones) this interval spans.
     pub octaves: i8,
 }
 
 #[rustfmt::skip]
+#[allow(missing_docs)]
 impl Interval {
     pub const PERFECT_UNISON: Self = Self { fifths: 0, octaves: 0};
 
@@ -90,27 +95,33 @@ impl Interval {
     pub const AUGMENTED_FOURTEENTH: Self = Self { fifths: 12, octaves: 1};
     
 
+    /// Create a new interval with specified fifths and octaves.
     pub fn new(fifths: i8, octaves: i8) -> Self {
         Self { fifths, octaves }
     }
 
+    /// Create a new interval with specified fifths, defaulting octaves to 0.
     pub fn with_fifths(fifths: i8) -> Self {
         Self { fifths, octaves: 0 }
     }
     
+    /// These intervals are used to represent the "distance" between two pitches.
     pub fn fifths(&self) -> i8 {
         self.fifths
     }
     
+    /// The number of octaves this interval spans.
     pub fn octaves(&self) -> i8 {
         self.octaves
     }
 
+    /// The number of semitones this interval spans.
     pub fn semitones(&self) -> i8 {
         // Convert fifths to semitones, making sure it's positive.
         (((self.fifths * 7 % 12) + 12) % 12) + self.octaves * 12
     }
 
+    /// Returns a new interval that represents the class of this interval, setting octaves to 0.
     pub fn interval_class(&self) -> Self {
         Self { fifths: self.fifths, octaves: 0 }
     }
@@ -156,12 +167,14 @@ impl Interval {
         matches!(base_number, 1 | 4 | 5)
     }
 
+    /// Returns true if the interval is a fifth of some kind.
     pub fn is_fifth(&self) -> bool {
         *self == Self::PERFECT_FIFTH || 
         *self == Self::AUGMENTED_FIFTH || 
         *self == Self::DIMINISHED_FIFTH
     }
 
+    /// Returns true if the interval is a third of some kind.
     pub fn is_third(&self) -> bool {
         *self == Self::MAJOR_THIRD || 
         *self == Self::MINOR_THIRD || 
@@ -169,6 +182,7 @@ impl Interval {
         *self == Self::DIMINISHED_THIRD
     }
 
+    /// Returns true if the interval is a seventh of some kind.
     pub fn is_seventh(&self) -> bool {
         *self == Self::DIMINISHED_SEVENTH ||
         *self == Self::MINOR_SEVENTH ||

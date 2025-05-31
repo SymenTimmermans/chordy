@@ -1,12 +1,17 @@
 use std::fmt::Display;
 
 use super::{scale::ScaleDegree, Interval, NoteName};
-use crate::{note, traits::{HasIntervals, HasRoot, Invertible, Transposable}};
+use crate::{note, traits::{HasIntervals, HasRoot, Invertible}};
 
 /// A chord represented by a root note and intervals from that root
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Chord {
+    /// The root note of the chord
     pub root: NoteName,
+    /// The intervals from the root note that define the chord.
+    ///
+    /// Intervals are typically in ascending order, starting from the root, which is included as a 
+    /// PERFECT_UNISON.
     pub intervals: Vec<Interval>,
 }
 
@@ -71,6 +76,7 @@ impl Chord {
         Self::new(root, notes.iter().map(|&n| root.interval_to(n)).collect())
     }
 
+    /// Create a major chord with the given root note
     pub fn major(root: NoteName) -> Self {
         Self::new(
             root,
@@ -82,6 +88,7 @@ impl Chord {
         )
     }
 
+    /// Create a minor chord with the given root note
     pub fn minor(root: NoteName) -> Self {
         Self::new(
             root,
@@ -93,6 +100,7 @@ impl Chord {
         )
     }
 
+    /// Create a diminished chord with the given root note
     pub fn diminished(root: NoteName) -> Self {
         Self::new(
             root,
@@ -104,6 +112,7 @@ impl Chord {
         )
     }
 
+    /// Create an augmented chord with the given root note
     pub fn augmented(root: NoteName) -> Self {
         Self::new(
             root,
@@ -115,6 +124,7 @@ impl Chord {
         )
     }
 
+    /// Create a dominant 7th chord with the given root note
     pub fn dominant_7th(root: NoteName) -> Self {
         Self::new(
             root,
@@ -127,6 +137,7 @@ impl Chord {
         )
     }
 
+    /// Create a major 7th chord with the given root note
     pub fn major_7th(root: NoteName) -> Self {
         Self::new(
             root,
@@ -139,6 +150,7 @@ impl Chord {
         )
     }
     
+    /// Create a minor 7th chord with the given root note
     pub fn minor_7th(root: NoteName) -> Self {
         Self::new(
             root,
@@ -151,6 +163,7 @@ impl Chord {
         )
     }
 
+    /// Create a minor-major 7th chord with the given root note
     pub fn minor_major_7th(root: NoteName) -> Self {
         Self::new(
             root,
@@ -163,6 +176,7 @@ impl Chord {
         )
     }
 
+    /// Create a half-diminished 7th chord (minor 7th flat 5) with the given root note
     pub fn minor_7th_flat_5(root: NoteName) -> Self {
         Self::new(
             root,
@@ -235,13 +249,9 @@ impl Invertible for Chord {
     }
 }
 
-impl Transposable for Chord {
-    fn transposed(&self, interval: Interval) -> Self {
-        Chord::new(self.root + interval, self.intervals.clone())
-    }
-}
-
+/// Harmonic functions represent the roles chords play in a key
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(missing_docs)]
 pub enum HarmonicFunction {
     Tonic,
     Subdominant,
@@ -281,6 +291,7 @@ impl HarmonicFunction {
         }
     }
 
+    /// Detects the harmonic function of a chord based on its scale degrees
     pub fn detect_by_scale_degrees(scale_degrees: &[ScaleDegree]) -> Option<Self> {
         let all = Self::all();
         let simple_degrees = scale_degrees.iter().map(|sd| sd.step).collect::<Vec<u8>>();

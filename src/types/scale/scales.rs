@@ -2,6 +2,7 @@
 
 use crate::{ScaleDefinition, Interval, ScaleBitmask};
 
+/// Ionian: P1,M2,M3,P4,P5,M6,M7
 pub const IONIAN: ScaleDefinition = ScaleDefinition {
     name: "Ionian",
     intervals: &[Interval::PERFECT_UNISON, Interval::MAJOR_SECOND, Interval::MAJOR_THIRD, Interval::PERFECT_FOURTH, Interval::PERFECT_FIFTH, Interval::MAJOR_SIXTH, Interval::MAJOR_SEVENTH],
@@ -10,6 +11,7 @@ pub const IONIAN: ScaleDefinition = ScaleDefinition {
     degree_offset: None,
 };
 
+/// Dorian (mode 2 of Ionian): P1,M2,m3,P4,P5,M6,m7
 pub const DORIAN: ScaleDefinition = ScaleDefinition {
     name: "Dorian",
     intervals: &[Interval::PERFECT_UNISON, Interval::MAJOR_SECOND, Interval::MINOR_THIRD, Interval::PERFECT_FOURTH, Interval::PERFECT_FIFTH, Interval::MAJOR_SIXTH, Interval::MINOR_SEVENTH],
@@ -18,6 +20,7 @@ pub const DORIAN: ScaleDefinition = ScaleDefinition {
     degree_offset: Some(1),
 };
 
+/// Phrygian (mode 3 of Ionian): P1,m2,m3,P4,P5,m6,m7
 pub const PHRYGIAN: ScaleDefinition = ScaleDefinition {
     name: "Phrygian",
     intervals: &[Interval::PERFECT_UNISON, Interval::MINOR_SECOND, Interval::MINOR_THIRD, Interval::PERFECT_FOURTH, Interval::PERFECT_FIFTH, Interval::MINOR_SIXTH, Interval::MINOR_SEVENTH],
@@ -26,6 +29,7 @@ pub const PHRYGIAN: ScaleDefinition = ScaleDefinition {
     degree_offset: Some(2),
 };
 
+/// Lydian (mode 4 of Ionian): P1,M2,M3,A4,P5,M6,M7
 pub const LYDIAN: ScaleDefinition = ScaleDefinition {
     name: "Lydian",
     intervals: &[Interval::PERFECT_UNISON, Interval::MAJOR_SECOND, Interval::MAJOR_THIRD, Interval::AUGMENTED_FOURTH, Interval::PERFECT_FIFTH, Interval::MAJOR_SIXTH, Interval::MAJOR_SEVENTH],
@@ -34,6 +38,7 @@ pub const LYDIAN: ScaleDefinition = ScaleDefinition {
     degree_offset: Some(3),
 };
 
+/// Mixolydian (mode 5 of Ionian): P1,M2,M3,P4,P5,M6,m7
 pub const MIXOLYDIAN: ScaleDefinition = ScaleDefinition {
     name: "Mixolydian",
     intervals: &[Interval::PERFECT_UNISON, Interval::MAJOR_SECOND, Interval::MAJOR_THIRD, Interval::PERFECT_FOURTH, Interval::PERFECT_FIFTH, Interval::MAJOR_SIXTH, Interval::MINOR_SEVENTH],
@@ -42,6 +47,7 @@ pub const MIXOLYDIAN: ScaleDefinition = ScaleDefinition {
     degree_offset: Some(4),
 };
 
+/// Aeolian (mode 6 of Ionian): P1,M2,m3,P4,P5,m6,m7
 pub const AEOLIAN: ScaleDefinition = ScaleDefinition {
     name: "Aeolian",
     intervals: &[Interval::PERFECT_UNISON, Interval::MAJOR_SECOND, Interval::MINOR_THIRD, Interval::PERFECT_FOURTH, Interval::PERFECT_FIFTH, Interval::MINOR_SIXTH, Interval::MINOR_SEVENTH],
@@ -50,6 +56,7 @@ pub const AEOLIAN: ScaleDefinition = ScaleDefinition {
     degree_offset: Some(5),
 };
 
+/// Harmonic Minor: P1,M2,m3,P4,P5,m6,M7
 pub const HARMONIC_MINOR: ScaleDefinition = ScaleDefinition {
     name: "Harmonic Minor",
     intervals: &[Interval::PERFECT_UNISON, Interval::MAJOR_SECOND, Interval::MINOR_THIRD, Interval::PERFECT_FOURTH, Interval::PERFECT_FIFTH, Interval::MINOR_SIXTH, Interval::MAJOR_SEVENTH],
@@ -58,6 +65,7 @@ pub const HARMONIC_MINOR: ScaleDefinition = ScaleDefinition {
     degree_offset: None,
 };
 
+/// Melodic Minor: P1,M2,m3,P4,P5,M6,M7
 pub const MELODIC_MINOR: ScaleDefinition = ScaleDefinition {
     name: "Melodic Minor",
     intervals: &[Interval::PERFECT_UNISON, Interval::MAJOR_SECOND, Interval::MINOR_THIRD, Interval::PERFECT_FOURTH, Interval::PERFECT_FIFTH, Interval::MAJOR_SIXTH, Interval::MAJOR_SEVENTH],
@@ -66,6 +74,7 @@ pub const MELODIC_MINOR: ScaleDefinition = ScaleDefinition {
     degree_offset: None,
 };
 
+/// Locrian (mode 7 of Ionian): P1,m2,m3,P4,d5,m6,m7
 pub const LOCRIAN: ScaleDefinition = ScaleDefinition {
     name: "Locrian",
     intervals: &[Interval::PERFECT_UNISON, Interval::MINOR_SECOND, Interval::MINOR_THIRD, Interval::PERFECT_FOURTH, Interval::DIMINISHED_FIFTH, Interval::MINOR_SIXTH, Interval::MINOR_SEVENTH],
@@ -74,6 +83,7 @@ pub const LOCRIAN: ScaleDefinition = ScaleDefinition {
     degree_offset: Some(6),
 };
 
+/// Whole Tone: P1,M2,M3,A4,A5,A6
 pub const WHOLE_TONE: ScaleDefinition = ScaleDefinition {
     name: "Whole Tone",
     intervals: &[Interval::PERFECT_UNISON, Interval::MAJOR_SECOND, Interval::MAJOR_THIRD, Interval::AUGMENTED_FOURTH, Interval::AUGMENTED_FIFTH, Interval::AUGMENTED_SIXTH],
@@ -82,6 +92,7 @@ pub const WHOLE_TONE: ScaleDefinition = ScaleDefinition {
     degree_offset: None,
 };
 
+/// Hungarian Minor: P1,M2,m3,A4,P5,m6,M7
 pub const HUNGARIAN_MINOR: ScaleDefinition = ScaleDefinition {
     name: "Hungarian Minor",
     intervals: &[Interval::PERFECT_UNISON, Interval::MAJOR_SECOND, Interval::MINOR_THIRD, Interval::AUGMENTED_FOURTH, Interval::PERFECT_FIFTH, Interval::MINOR_SIXTH, Interval::MAJOR_SEVENTH],
@@ -90,6 +101,7 @@ pub const HUNGARIAN_MINOR: ScaleDefinition = ScaleDefinition {
     degree_offset: None,
 };
 
+/// Altered: P1,m2,m3,d4,d5,m6,m7
 pub const ALTERED: ScaleDefinition = ScaleDefinition {
     name: "Altered",
     intervals: &[Interval::PERFECT_UNISON, Interval::MINOR_SECOND, Interval::MINOR_THIRD, Interval::DIMINISHED_FOURTH, Interval::DIMINISHED_FIFTH, Interval::MINOR_SIXTH, Interval::MINOR_SEVENTH],
@@ -98,6 +110,7 @@ pub const ALTERED: ScaleDefinition = ScaleDefinition {
     degree_offset: None,
 };
 
+/// Registry of all scales.
 pub const REGISTRY: &[ScaleDefinition] = &[
     IONIAN,
     DORIAN,

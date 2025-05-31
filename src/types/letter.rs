@@ -6,6 +6,7 @@ use crate::error::ParseError;
 /// representing their position in the chromatic scale.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(i8)]
+#[allow(missing_docs)]
 pub enum Letter {
     C,
     D,
@@ -74,6 +75,7 @@ impl Letter {
         }
     }
 
+    /// Creates a `Letter` from a character, returning an error if the character is invalid
     pub const fn from_char(c: char) -> Result<Self, &'static str> {
         match c {
             'C' | 'c' => Ok(Letter::C),
@@ -87,6 +89,7 @@ impl Letter {
         }
     }
 
+    /// Returns an array of all musical letters in order
     pub fn all() -> [Letter; 7] {
         [
             Letter::C,

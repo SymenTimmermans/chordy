@@ -26,6 +26,7 @@ use crate::traits::Torsor;
 pub struct NoteName(i8);
 
 impl NoteName {
+    /// Creates a new `NoteName` from a letter and accidental.
     pub fn new(letter: Letter, accidental: Accidental) -> Self {
         use crate::types::Accidental::*;
         use crate::types::Letter::*;
@@ -69,14 +70,17 @@ impl NoteName {
         }
     }
 
+    /// Creates a new `NoteName` from a number of fifths.
     pub fn from_fifths(fifths: i8) -> Self {
         Self(fifths)
     }
 
+    /// Returns the number of fifths represented by this note name.
     pub fn fifths(&self) -> i8 {
         self.0
     }
 
+    /// Returns the letter of this note name.
     pub fn letter(&self) -> Letter {
         match (self.0 + 15) % 7 {
             0 => Letter::F,
@@ -90,6 +94,7 @@ impl NoteName {
         }
     }
 
+    /// Returns the accidental of this note name.
     pub fn accidental(&self) -> Accidental {
         match self.0 {
             -15..-8 => Accidental::DoubleFlat,
@@ -128,6 +133,7 @@ impl NoteName {
         (self.base_midi_number() + 12) % 12 == (other.base_midi_number() + 12) % 12
     }
 
+    /// Transpose this note by a certain interval
     pub fn transpose_by_interval(&self, interval: Interval) -> NoteName {
         *self + interval
     }
@@ -208,7 +214,7 @@ impl FromStr for NoteName {
     /// # Examples
     /// ```
     /// use chordy::{NoteName, Letter, Accidental};
-    /// use chordy::prelude::traits::FromStr;
+    /// use chordy::prelude::FromStr;
     ///
     /// let c_sharp = NoteName::from_str("C♯").unwrap();
     /// assert_eq!(c_sharp.letter(), Letter::C);

@@ -1,10 +1,26 @@
+#![warn(missing_docs)]
 #![doc = include_str!("../README.md")]
 //! Music theory library for Rust
 //!
-//! For most use cases, import the prelude:
-//! ```
+//! ## Getting Started
+//! 
+//! ```rust
 //! use chordy::prelude::*;
+//!
+//! // Create musical elements
+//! let chord = Chord::major(note!("C"));
+//! let scale = Scale::new(note!("C"), scales::IONIAN);
+//!
+//! // Use trait methods (all available via prelude)
+//! let notes = chord.notes(); // From ChordLike
+//! let triads = scale.triads(); // From ChordLike 
+//! let transposed = chord.transposed(Interval::MAJOR_THIRD); // From Transposable
 //! ```
+//!
+//! ## Core Concepts
+//! - All musical types implement relevant traits (chords are `Transposable`, scales are `ChordLike`)
+//! - Traits are automatically in scope when using `prelude::*`
+//! - Macros provide compile-time safety for note creation
 //!
 //! # Macros
 //!
@@ -33,7 +49,7 @@
 
 pub mod error;
 pub mod symbols;
-mod traits;
+pub mod traits;
 pub mod transformation;
 pub mod transposition;
 pub mod types;
@@ -42,6 +58,16 @@ pub mod types;
 pub mod prelude;
 pub use types::*;
 
+/// Makes it easy to create a `NoteName` at compile time.
+///
+/// # Examples
+///
+/// ```rust
+/// let note = chordy::note!("C#");
+/// let c_sharp = chordy::NoteName::new(chordy::Letter::C, chordy::Accidental::Sharp);
+///
+/// assert_eq!(note, c_sharp);
+/// ```
 #[macro_export]
 macro_rules! note {
     ($s:literal) => {{
@@ -59,6 +85,22 @@ macro_rules! note {
     }};
 }
 
+/// Makes it easy to create a `Pitch` at compile time.
+///
+/// # Examples
+///
+/// ```rust
+/// use chordy::{Pitch, Accidental, Letter};
+///
+/// let pitch = chordy::pitch!("C#4");
+/// let c_sharp_4 = Pitch::new(
+///     Letter::C,
+///     Accidental::Sharp,
+///     4
+/// );
+/// assert_eq!(pitch, c_sharp_4);
+///
+/// ```
 #[macro_export]
 macro_rules! pitch {
     ($s:literal) => {{

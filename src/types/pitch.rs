@@ -10,11 +10,14 @@ use super::{Accidental, Letter, NoteName};
 /// A specific pitch with both note name and octave
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Pitch {
+    /// The note name (letter + accidental)
     pub name: NoteName,
+    /// The octave number, where C-2 is octave -2
     pub octave: i8,
 }
 
 impl Pitch {
+    /// Creates a new `Pitch` from a letter, accidental, and octave.
     pub fn new(letter: Letter, accidental: Accidental, octave: i8) -> Self {
         Pitch {
             name: NoteName::new(letter, accidental),
@@ -64,6 +67,9 @@ impl Pitch {
         self.midi_number() == other.midi_number()
     }
 
+    /// Transpose this pitch by a number of semitones
+    ///
+    /// Uses the `ChromaticTransposer` algorithm, which handles enharmonic spelling.
     pub fn transpose(&self, semitone_offset: i8) -> Pitch {
         ChromaticTransposer::transpose(*self, semitone_offset)
     }
@@ -73,6 +79,7 @@ impl Pitch {
         T::transpose(*self, interval)
     }
 
+    /// Returns true if the note spelling is suspicious.
     pub fn is_suspicious_spelling(&self) -> bool {
         matches!(
             (self.name.letter(), self.name.accidental()),

@@ -1,55 +1,36 @@
-//! The `chordy` prelude
+//! The `chordy` prelude - one import gives all core functionality
 //!
-//! Provides convenient access to commonly used types and traits:
-//!
-//! ```
+//! ```rust
 //! use chordy::prelude::*;
+//!
+//! // All these work without additional imports:
+//! let mut chord = Chord::major(note!("C"));
+//! chord.transpose(Interval::MAJOR_THIRD);
+//!
+//! let scale = Scale::new(note!("C"), scales::IONIAN);
+//! scale.triads().for_each(|triad| println!("{}", triad));
 //! ```
 
-// Core music theory types
+// Core Types
 pub use crate::types::{
-    Accidental,
-
-    // Chord types
-    Chord,
-
-    Key,
-    Letter,
-    NoteName,
-    // Basic note types
-    Pitch,
-    // Scale/key types
-    Scale,
-    ScaleDefinition,
-    ScaleDegree,
+    Accidental, Chord, HarmonicFunction, Interval, Key, 
+    Letter, NoteName, Pitch, Scale, ScaleDefinition, ScaleDegree
 };
 
-// Error handling
-pub use crate::error::ParseError;
-pub use crate::error::TypeError;
+// All Musical Traits
+pub use crate::traits::*;
 
-// Musical symbols (ASCII or UTF-8 based on feature flag)
-pub use crate::symbols::{
-    A,
-    B, // Note letters for consistency
-    C,
-    D,
-    DOUBLE_FLAT,
-    DOUBLE_SHARP,
-    E,
-    F,
-    FLAT,
-    G,
-    NATURAL,
-    SHARP,
-};
+// Error Types
+pub use crate::error::{ParseError, TypeError};
 
-// Essential traits
-pub mod traits {
-    pub use std::fmt::Display;
-    pub use std::str::FromStr;
-    pub use crate::traits::*;
-}
+// Constants and Symbols
+pub use crate::symbols::*;
+pub use crate::scales;
+
+// Essential Std Traits
+pub use std::fmt::{Debug, Display};
+pub use std::str::FromStr;
 
 // Macros
-pub use crate::pitch;
+pub use crate::{note, pitch};
+

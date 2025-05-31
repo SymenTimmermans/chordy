@@ -1,3 +1,5 @@
+//! Error types for the `chordy` crate
+
 /// Error type for parsing failures
 ///
 /// Included in the crate prelude
@@ -20,6 +22,8 @@ pub enum ParseError {
 
     /// Error when an invalid pitch is provided
     InvalidPitch(String),
+
+    /// Error when an invalid interval is provided
     InvalidInterval(String),
 }
 

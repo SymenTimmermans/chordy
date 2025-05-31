@@ -1,12 +1,14 @@
+//! Neo-Riemann transformations
 use crate::{Chord, Interval, NoteName};
 use crate::traits::ChordLike;
 
-// Transform to parallel major or minor chord
+/// Transform to parallel major or minor chord
 pub fn transform_p(chord: &Chord) -> Chord {
     // The axis is the root and the fifth
     reflect_across_axis(chord, chord.root, chord.root + Interval::PERFECT_FIFTH)
 }
 
+/// Perform an R transformation and return the transformed chord.
 pub fn transform_r(chord: &Chord) -> Chord {
     if chord.is_major() {
         // if the chord is major, the axis is the root and the major third

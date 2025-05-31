@@ -105,14 +105,23 @@ fn main() {
                 .to_uppercase()
                 .replace(|c: char| !c.is_alphanumeric(), "_");
 
+            let doc_name = format!(
+                "{}{}: {}",
+                name,
+                if parent.is_empty() { "".to_string() } else { format!(" (mode {} of {})", offset.parse::<i8>().unwrap() + 1, parent) },
+                parts[1]
+            );
+
             generated.push_str(&format!(
-                "pub const {}: ScaleDefinition = ScaleDefinition {{
+                "/// {}
+pub const {}: ScaleDefinition = ScaleDefinition {{
     name: \"{}\",
     intervals: &[{}],
     bitmask: ScaleBitmask(0b{:012b}),
     mode_of: {},
     degree_offset: {},
 }};\n\n",
+                doc_name,
                 const_name,
                 name,
                 intervals_formatted,
@@ -132,7 +141,8 @@ fn main() {
             registry_entries.push(const_name);
         });
 
-    generated.push_str("pub const REGISTRY: &[ScaleDefinition] = &[\n");
+    generated.push_str("/// Registry of all scales.
+pub const REGISTRY: &[ScaleDefinition] = &[\n");
     for name in &registry_entries {
         generated.push_str(&format!("    {},\n", name));
     }

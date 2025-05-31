@@ -82,7 +82,7 @@ assert_eq!(e_sharp.name.accidental(), Accidental::Sharp);
 ### Scales and Chords
 
 ```rust
-use chordy::{NoteName, Letter, Accidental, Scale, scales};
+use chordy::{NoteName, Letter, Accidental, Scale, scales, traits::ChordLike};
 
 // Create a C major scale
 let c = NoteName::new(Letter::C, Accidental::Natural);
@@ -106,9 +106,9 @@ ongoing work on scales, chords, and more advanced music theory concepts.
 
 - [x] Notes, pitches, and enharmonic relationships
 - [x] Basic interval representation 
-- [ ] Scales and modes
-- [ ] Chords and harmony
-    - [ ] Deriving basic triads from scales
+- [x] Scales and modes
+- [x] Chords and harmony
+    - [x] Deriving basic triads from scales
     - [ ] Deriving extended chords from scales
     - [ ] Deriving chords from multiple scales
     - [ ] Piano chord voicings based on hand ergonomics

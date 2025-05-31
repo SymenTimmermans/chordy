@@ -1,6 +1,5 @@
 use crate::error::TypeError;
 use crate::traits::{ChordLike, HasIntervals, HasRoot};
-
 use super::{chord::HarmonicFunction, Accidental, Chord, Interval, NoteName};
 
 pub mod definition;
@@ -24,7 +23,7 @@ pub struct Scale {
 
 /// A scale is a sequence of notes that defines a musical key.
 /// ```
-/// use chordy::{NoteName, Letter, Accidental, Scale, scales};
+/// use chordy::prelude::*;
 ///
 /// // Create a C major scale
 /// let c = NoteName::new(Letter::C, Accidental::Natural);
@@ -44,22 +43,9 @@ pub struct Scale {
 /// ]);
 /// ```
 impl Scale {
-    // Core constructor
+    /// Creates a new scale with the given tonic and definition
     pub fn new(tonic: NoteName, definition: ScaleDefinition) -> Self {
         Scale { tonic, definition }
-    }
-
-    pub fn notes(&self) -> Vec<NoteName> {
-        // Generate notes based on scale type intervals
-        let mut result = Vec::with_capacity(self.definition.intervals.len());
-
-        // Add remaining notes with proper spelling based on key signature
-        for &interval in self.definition.intervals {
-            let note = self.tonic + interval;
-            result.push(note);
-        }
-
-        result
     }
 
     /// Returns the scale degree for a given note, accounting for alterations
@@ -174,7 +160,7 @@ impl Scale {
     /// For this, we use a method devised by Ian Quinn (Yale University), which distinguishes three
     /// harmonic functions, and categorises chords based on the internal scale degrees.
     ///
-    /// See: https://openmusictheory.github.io/harmonicFunctions.html
+    /// See: <https://openmusictheory.github.io/harmonicFunctions.html>
     ///
     /// # Examples
     ///
@@ -266,9 +252,13 @@ impl HasIntervals for Scale {
     }
 }
 
+/// A scale degree represents a specific step in a scale, optionally with an alteration
+/// (accidental).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ScaleDegree {
+    /// The step in the scale (1-7)
     pub step: u8,
+    /// The alteration of the scale degree, if any
     pub alteration: Option<Accidental>,
 }
 
@@ -280,7 +270,7 @@ impl ScaleDegree {
         ScaleDegree { step, alteration }
     }
 
-    // Add runtime validation if needed
+    /// Validate the scale degree
     pub fn validate(&self) -> Result<(), TypeError> {
         if self.step < 1 || self.step > 7 {
             return Err(TypeError::InvalidScaleDegree(self.step));
@@ -288,24 +278,36 @@ impl ScaleDegree {
         Ok(())
     }
 
-    // Constants for common scale degrees
+    /// The tonic (1st scale degree)
     pub const TONIC: Self = Self::new(1, None);
+    /// The supertonic (2nd scale degree)
     pub const SUPERTONIC: Self = Self::new(2, None);
+    /// The mediant (3rd scale degree)
     pub const MEDIANT: Self = Self::new(3, None);
+    /// The subdominant (4th scale degree)
     pub const SUBDOMINANT: Self = Self::new(4, None);
+    /// The dominant (5th scale degree)
     pub const DOMINANT: Self = Self::new(5, None);
+    /// The submediant (6th scale degree)
     pub const SUBMEDIANT: Self = Self::new(6, None);
+    /// The leading tone (7th scale degree in major scales)
     pub const LEADING_TONE: Self = Self::new(7, None);
-    // unaltered 7th scale degree in minor scales
+    /// The subtonic, unaltered 7th scale degree in minor scales
     pub const SUBTONIC: Self = Self::new(7, None);
 
     // Altered scale degrees
+    #[allow(missing_docs)]
     pub const FLAT_SECOND: Self = Self::new(2, Some(Accidental::Flat));
+    #[allow(missing_docs)]
     pub const FLAT_THIRD: Self = Self::new(3, Some(Accidental::Flat));
+    #[allow(missing_docs)]
     pub const SHARP_FOURTH: Self = Self::new(4, Some(Accidental::Sharp));
+    #[allow(missing_docs)]
     pub const FLAT_SIXTH: Self = Self::new(6, Some(Accidental::Flat));
+    #[allow(missing_docs)]
     pub const FLAT_SEVENTH: Self = Self::new(7, Some(Accidental::Flat));
 
     // Special scale degrees with traditional names
+    /// The Neapolitan flat second scale degree (♭II)
     pub const NEAPOLITAN: Self = Self::new(2, Some(Accidental::Flat)); // ♭II
 }

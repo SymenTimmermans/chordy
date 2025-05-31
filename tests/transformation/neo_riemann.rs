@@ -1,6 +1,4 @@
-use chordy::note;
-use chordy::Chord;
-use chordy::prelude::traits::ChordLike;
+use chordy::prelude::*;
 
 #[test]
 fn test_p_transformations() {
