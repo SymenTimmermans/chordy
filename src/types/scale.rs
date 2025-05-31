@@ -271,6 +271,59 @@ impl Scale {
     }
     */
 
+    /// Join two scales together, returning a new scale that combines their intervals
+    ///
+    /// The new scale will have the tonic of the first scale, and it will have the notes of both
+    /// scales, by taking into account the interval difference between the tonics.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use chordy::prelude::*;
+    ///
+    /// let c_major = Scale::from_definition(note!("C"), scales::IONIAN);
+    /// let d_lydian = Scale::from_definition(note!("D"), scales::LYDIAN);
+    /// let joined = c_major.join(&d_lydian);
+    ///
+    /// // The joined scale will have the tonic of C and intervals (notes) from both scales
+    /// assert_eq!(joined.root(), note!("C"));
+    /// 
+    /// let notes = joined.notes();
+    /// // F# from D Lydian should be included
+    /// assert!(notes.contains(&note!("F#")));
+    /// // B from C Major should be included
+    /// assert!(notes.contains(&note!("B")));
+    /// // C sharp from D Lydian should be included
+    /// assert!(notes.contains(&note!("C#")));
+    ///
+    /// ```
+    pub fn join(&self, other: &Scale) -> Scale {
+        let tonic_difference = other.tonic - self.tonic;
+
+        let mut intervals: Vec<Interval> = self.intervals.clone();
+
+        // add each of the other intervals, adjusted by the tonic difference
+        intervals.extend(
+            other
+                .intervals
+                .iter()
+                .map(|&i| i + tonic_difference),
+        );
+
+        intervals.sort();
+        intervals.dedup();
+
+        let bitmask = ScaleBitmask::from_intervals(&intervals);
+
+        Scale {
+            tonic: self.tonic,
+            name: format!("{} + {} @ {}", self.name, other.name, tonic_difference),
+            intervals,
+            degree_offset: None,
+            mode_of: None,
+            bitmask,
+        }
+    }
 }
 
 impl HasRoot for Scale {
