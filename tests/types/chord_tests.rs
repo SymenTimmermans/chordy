@@ -50,7 +50,7 @@ fn test_chord_notes() {
 #[test]
 fn test_triads_from_scale_c_major() {
     // start with a scale
-    let scale = Scale::new(note!("C"), scales::IONIAN);
+    let scale = Scale::from_definition(note!("C"), scales::IONIAN);
 
     // get the triads that are in this scale
     let triads: Vec<Chord> = scale.triads().collect();
@@ -68,7 +68,7 @@ fn test_triads_from_scale_c_major() {
 #[test]
 fn test_triads_from_scale_d_flat_major() {
     // start with a scale
-    let scale = Scale::new(note!("Db"), scales::IONIAN);
+    let scale = Scale::from_definition(note!("Db"), scales::IONIAN);
 
     // get the triads that are in this scale
     let triads: Vec<Chord> = scale.triads().collect();
@@ -85,7 +85,7 @@ fn test_triads_from_scale_d_flat_major() {
 #[test]
 fn test_triads_from_scale_f_sharp_harmonic_minor() {
     // start with a scale
-    let scale = Scale::new(note!("F#"), scales::HARMONIC_MINOR);
+    let scale = Scale::from_definition(note!("F#"), scales::HARMONIC_MINOR);
 
     // get the triads that are in this scale
     let triads: Vec<Chord> = scale.triads().collect();
@@ -102,7 +102,7 @@ fn test_triads_from_scale_f_sharp_harmonic_minor() {
 #[test]
 fn test_sevenths_from_scale_c_major() {
     // start with a scale
-    let scale = Scale::new(note!("C"), scales::IONIAN);
+    let scale = Scale::from_definition(note!("C"), scales::IONIAN);
 
     // get the triads that are in this scale
     let sevenths: Vec<Chord> = scale.sevenths().collect();

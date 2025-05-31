@@ -86,7 +86,7 @@ use chordy::{NoteName, Letter, Accidental, Scale, scales, traits::ChordLike};
 
 // Create a C major scale
 let c = NoteName::new(Letter::C, Accidental::Natural);
-let c_major = Scale::new(c, scales::IONIAN);
+let c_major = Scale::from_definition(c, scales::IONIAN);
 
 // Get the notes in the scale
 let notes = c_major.notes();

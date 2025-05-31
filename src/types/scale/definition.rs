@@ -2,6 +2,27 @@
 use crate::{Interval, ScaleBitmask};
 
 /// ScaleDefinition represents a musical scale with its name, intervals, and optional properties.
+///
+/// It is mainly used to define scales in a structured way, allowing for easy reference and
+/// manipulation.
+/// The ScaleDefinition struct implements equality checks against `Scale`, so you can easily
+/// check if a given scale is matches a known scale:
+///
+/// ```rust
+/// use chordy::prelude::*;
+///
+/// let c_major = Scale::from_definition(note!("C"), scales::IONIAN);
+/// let custom_major = Scale::custom(
+///     note!("C"),
+///     "Custom Major Name",
+///     scales::IONIAN.intervals.to_vec(),
+///     None,
+///     None
+/// );
+///
+/// assert_eq!(c_major, scales::IONIAN); // true - same intervals
+/// assert_eq!(custom_major, scales::IONIAN); // true - same intervals
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ScaleDefinition {
     /// A human-readable name for the scale, e.g., "Major", "Minor", "Dorian".

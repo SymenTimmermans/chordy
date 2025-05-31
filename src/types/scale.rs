@@ -11,14 +11,21 @@ pub use bitmask::ScaleBitmask;
 #[allow(dead_code)]
 pub mod scales;
 
-/// A scale with a tonic and mode
+/// A musical scale with a tonic and intervals
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Scale {
     /// The tonic (starting note) of the scale
     pub tonic: NoteName,
-
-    /// The scale definition
-    pub definition: ScaleDefinition,
+    /// Human-readable name of the scale
+    pub name: String,
+    /// Intervals that define the scale
+    pub intervals: Vec<Interval>,
+    /// For modes, the degree offset in parent scale
+    pub degree_offset: Option<u8>,
+    /// Optional name of parent scale for modes
+    pub mode_of: Option<String>,
+    /// Bitmask representing pitch classes
+    pub bitmask: ScaleBitmask,
 }
 
 /// A scale is a sequence of notes that defines a musical key.
@@ -27,7 +34,7 @@ pub struct Scale {
 ///
 /// // Create a C major scale
 /// let c = NoteName::new(Letter::C, Accidental::Natural);
-/// let c_major = Scale::new(c, scales::IONIAN);
+/// let c_major = Scale::from_definition(c, scales::IONIAN);
 ///
 /// // Get the notes in the scale
 /// let notes = c_major.notes();
@@ -43,9 +50,35 @@ pub struct Scale {
 /// ]);
 /// ```
 impl Scale {
-    /// Creates a new scale with the given tonic and definition
-    pub fn new(tonic: NoteName, definition: ScaleDefinition) -> Self {
-        Scale { tonic, definition }
+    /// Creates a new scale from a ScaleDefinition (for preset scales)
+    pub fn from_definition(tonic: NoteName, definition: ScaleDefinition) -> Self {
+        Scale {
+            tonic,
+            name: definition.name.to_string(),
+            intervals: definition.intervals.to_vec(),
+            degree_offset: definition.degree_offset,
+            mode_of: definition.mode_of.map(|s| s.to_string()),
+            bitmask: definition.bitmask,
+        }
+    }
+
+    /// Creates a custom scale with the given properties
+    pub fn custom(
+        tonic: NoteName,
+        name: impl Into<String>,
+        intervals: impl Into<Vec<Interval>>,
+        degree_offset: Option<u8>,
+        mode_of: Option<String>,
+    ) -> Self {
+        let intervals = intervals.into();
+        Scale {
+            tonic,
+            name: name.into(),
+            bitmask: ScaleBitmask::from_intervals(&intervals),
+            intervals,
+            degree_offset,
+            mode_of,
+        }
     }
 
     /// Returns the scale degree for a given note, accounting for alterations
@@ -59,7 +92,7 @@ impl Scale {
     /// ```
     /// use chordy::{Scale, scales, note, Accidental, ScaleDegree, HarmonicFunction};
     ///
-    /// let c_major = Scale::new(note!("C"), scales::IONIAN);
+    /// let c_major = Scale::from_definition(note!("C"), scales::IONIAN);
     /// // Exact matches return natural accidentals
     /// assert_eq!(c_major.degree_of(&note!("C")), Some(ScaleDegree::TONIC));
     /// assert_eq!(c_major.degree_of(&note!("G")), Some(ScaleDegree::DOMINANT));
@@ -69,7 +102,7 @@ impl Scale {
     /// assert_eq!(c_major.degree_of(&note!("F#")), Some(ScaleDegree::new(4, Some(Accidental::Sharp))));
     ///
     /// // Works with enharmonic equivalents
-    /// let a_minor = Scale::new(note!("A"), scales::AEOLIAN);
+    /// let a_minor = Scale::from_definition(note!("A"), scales::AEOLIAN);
     /// assert_eq!(a_minor.degree_of(&note!("G#")), Some(ScaleDegree::new(7, Some(Accidental::Sharp)))); // Leading tone
     /// assert_eq!(a_minor.degree_of(&note!("Ab")), Some(ScaleDegree::new(1, Some(Accidental::Flat))));
     /// ```
@@ -167,7 +200,7 @@ impl Scale {
     /// ```
     /// use chordy::{Chord, Scale, scales, HarmonicFunction, note};
     ///
-    /// let c_major_scale = Scale::new(note!("C"), scales::IONIAN);
+    /// let c_major_scale = Scale::from_definition(note!("C"), scales::IONIAN);
     /// let g_chord = Chord::major(note!("G"));
     /// assert_eq!(c_major_scale.harmonic_function(&g_chord), Some(HarmonicFunction::Dominant));
     ///
@@ -187,19 +220,19 @@ impl Scale {
     }
     /// Returns the relative major/minor of this scale
     pub fn relative(&self) -> Option<Scale> {
-        if self.definition == scales::IONIAN {
+        if *self == scales::IONIAN {
             // to get the new tonic, transpose the tonic to the 6th interval
-            let new_tonic = self.tonic + self.definition.intervals[5];
+            let new_tonic = self.tonic + self.intervals[5];
 
             // If the scale is Ionian, return the relative minor (Aeolian)
-            let relative_minor = Scale::new(new_tonic, scales::AEOLIAN);
+            let relative_minor = Scale::from_definition(new_tonic, scales::AEOLIAN);
             Some(relative_minor)
-        } else if self.definition == scales::AEOLIAN {
+        } else if self.name == "Aeolian" {
             // to get the new tonic, transpose the tonic to the 3rd interval
-            let new_tonic = self.tonic + self.definition.intervals[5];
+            let new_tonic = self.tonic + self.intervals[5];
 
             // If the scale is Aeolian, return the relative major (Ionian)
-            let relative_major = Scale::new(new_tonic, scales::IONIAN);
+            let relative_major = Scale::from_definition(new_tonic, scales::IONIAN);
             Some(relative_major)
         } else {
             None
@@ -208,11 +241,11 @@ impl Scale {
 
     /// Returns the parallel major/minor of this scale
     pub fn parallel(&self) -> Option<Scale> {
-        if self.definition == scales::IONIAN {
-            let parallel_minor = Scale::new(self.tonic, scales::AEOLIAN);
+        if self == scales::IONIAN {
+            let parallel_minor = Scale::from_definition(self.tonic, scales::AEOLIAN);
             Some(parallel_minor)
-        } else if self.definition == scales::AEOLIAN {
-            let parallel_major = Scale::new(self.tonic, scales::IONIAN);
+        } else if self == scales::AEOLIAN {
+            let parallel_major = Scale::from_definition(self.tonic, scales::IONIAN);
             Some(parallel_major)
         } else {
             None
@@ -222,7 +255,7 @@ impl Scale {
     /// Determine if a given note belongs to the scale
     pub fn contains(&self, note: &NoteName) -> bool {
         let interval: Interval = self.tonic - *note;
-        self.definition.intervals.contains(&interval)
+        self.intervals.contains(&interval)
     }
 
     /// Find the closest scale tone to a given note
@@ -248,7 +281,41 @@ impl HasRoot for Scale {
 
 impl HasIntervals for Scale {
     fn intervals(&self) -> &[Interval] {
-        self.definition.intervals
+        &self.intervals
+    }
+}
+
+use std::ops::Deref;
+
+impl Deref for Scale {
+    type Target = [Interval];
+
+    fn deref(&self) -> &Self::Target {
+        &self.intervals
+    }
+}
+
+impl PartialEq<ScaleDefinition> for Scale {
+    fn eq(&self, other: &ScaleDefinition) -> bool {
+        self.intervals == other.intervals
+    }
+}
+
+impl PartialEq<ScaleDefinition> for &Scale {
+    fn eq(&self, other: &ScaleDefinition) -> bool {
+        self.intervals == other.intervals
+    }
+}
+
+impl PartialEq<Scale> for ScaleDefinition {
+    fn eq(&self, other: &Scale) -> bool {
+        self.intervals == other.intervals()
+    }
+}
+
+impl PartialEq<&Scale> for ScaleDefinition {
+    fn eq(&self, other: &&Scale) -> bool {
+        self.intervals == other.intervals()
     }
 }
 

@@ -4,7 +4,7 @@ macro_rules! scale_test {
     ($name:ident, $root:expr, $scale_type:expr, $expected:expr) => {
         #[test]
         fn $name() {
-            let scale = Scale::new($root, $scale_type);
+            let scale = Scale::from_definition($root, $scale_type);
             let notes = scale.notes();
             assert_eq!(notes, $expected);
         }
@@ -94,7 +94,7 @@ scale_test!(
 #[test]
 fn test_scale_degree_functions() {
     // --- C Major Scale ---
-    let c_major = Scale::new(note!("C"), scales::IONIAN);
+    let c_major = Scale::from_definition(note!("C"), scales::IONIAN);
     // Test basic degrees of c major
     assert_eq!(c_major.degree_of(&note!("C")), Some(ScaleDegree::TONIC));
     assert_eq!(
@@ -179,7 +179,7 @@ fn test_scale_degree_functions() {
     );
 
     // --- E flat minor scale ---
-    let eb_minor = Scale::new(note!("Eb"), scales::AEOLIAN);
+    let eb_minor = Scale::from_definition(note!("Eb"), scales::AEOLIAN);
     // test basic degrees of eb minor
     assert_eq!(eb_minor.degree_of(&note!("Eb")), Some(ScaleDegree::TONIC));
     assert_eq!(
@@ -275,7 +275,7 @@ fn test_scale_degree_functions() {
 fn test_chord_functions() {
     use chordy::types::HarmonicFunction::*;
 
-    let c_major = Scale::new(note!("C"), scales::IONIAN);
+    let c_major = Scale::from_definition(note!("C"), scales::IONIAN);
 
     let tests: Vec<(Chord, HarmonicFunction)> = vec![
         // Diatonic chords
@@ -304,19 +304,19 @@ fn test_chord_functions() {
 
 #[test]
 fn test_scale_transformations() {
-    let c_major = Scale::new(note!("C"), scales::IONIAN);
+    let c_major = Scale::from_definition(note!("C"), scales::IONIAN);
 
     // Relative minor
     let a_minor = c_major
         .relative()
         .expect("Could not transform to relative scale");
     assert_eq!(a_minor.tonic, note!("A"));
-    assert_eq!(a_minor.definition, scales::AEOLIAN);
+    assert_eq!(a_minor, scales::AEOLIAN);
 
     // Parallel minor
     let c_minor = c_major
         .parallel()
         .expect("Could not transform to parallel scale");
     assert_eq!(c_minor.tonic, note!("C"));
-    assert_eq!(c_minor.definition, scales::AEOLIAN);
+    assert_eq!(c_minor, scales::AEOLIAN);
 }

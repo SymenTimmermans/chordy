@@ -9,7 +9,7 @@
 //!
 //! // Create musical elements
 //! let chord = Chord::major(note!("C"));
-//! let scale = Scale::new(note!("C"), scales::IONIAN);
+//! let scale = Scale::from_definition(note!("C"), scales::IONIAN);
 //!
 //! // Use trait methods (all available via prelude)
 //! let notes = chord.notes(); // From ChordLike

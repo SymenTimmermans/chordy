@@ -7,7 +7,7 @@
 //! let mut chord = Chord::major(note!("C"));
 //! chord.transpose(Interval::MAJOR_THIRD);
 //!
-//! let scale = Scale::new(note!("C"), scales::IONIAN);
+//! let scale = Scale::from_definition(note!("C"), scales::IONIAN);
 //! scale.triads().for_each(|triad| println!("{}", triad));
 //! ```
 
