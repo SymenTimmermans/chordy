@@ -1,7 +1,11 @@
 use std::fmt::Display;
 
+use quality::ChordQuality;
+
 use super::{scale::ScaleDegree, Interval, NoteName};
 use crate::{note, traits::{HasIntervals, HasRoot, Invertible}};
+
+mod quality;
 
 /// A chord represented by a root note and intervals from that root
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -205,6 +209,44 @@ impl Chord {
     /// Returns true if the intervals contain the major third
     pub fn is_major(&self) -> bool {
         self.intervals.contains(&Interval::MAJOR_THIRD)
+    }
+
+    /// Returns the chord qualitty if it can be determined.
+    pub fn quality(&self) -> Option<ChordQuality> {
+        None
+    }
+
+    /// Return abbreviated name of the chord.
+    ///
+    /// Tries to figure out by intervals what the chord name is and then creates suffixes for any
+    /// remaining intervals.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use chordy::{Chord, note};
+    ///
+    /// let a_minor = Chord::from_notes_and_root(
+    ///     [note!("A"), note!("C"), note!("E")].as_ref(),
+    ///     note!("A")
+    /// );
+    ///
+    /// assert_eq!(a_minor.abbreviated_name(), "Am");
+    /// ```
+    pub fn abbreviated_name(&self) -> String {
+        let quality = match self.quality() {
+            Some(ChordQuality::Major) => "",
+            Some(ChordQuality::Minor) => "m",
+            Some(ChordQuality::Diminished) => "dim",
+            Some(ChordQuality::Augmented) => "aug",
+            None => "",
+        };
+
+        format!(
+            "{}{}",
+            self.root,
+            quality
+        )
     }
 }
 
