@@ -211,9 +211,31 @@ impl Chord {
         self.intervals.contains(&Interval::MAJOR_THIRD)
     }
 
-    /// Returns the chord qualitty if it can be determined.
+    /// Returns the chord quality if it can be determined.
     pub fn quality(&self) -> Option<ChordQuality> {
-        None
+        ChordQuality::detect(self)
+    }
+
+    /// Returns the extended type of the chord, such as "7", "9", "11", etc.
+    pub fn extended_type(&self) -> String {
+        if self.intervals.len() <= 3 {
+            return String::new(); // No extensions for triads
+        }
+
+        if self.intervals.len() == 4 {
+            if self.intervals.contains(&Interval::MINOR_SEVENTH) {
+                return "7".to_string();
+            } else if self.intervals.contains(&Interval::MAJOR_SEVENTH) {
+                return "maj7".to_string();
+            } else {
+                return String::new(); // No recognized extension
+            }
+        }
+
+        if self.intervals.contains(&Interval::MINOR_SEVENTH) {
+            
+        }
+        String::new()
     }
 
     /// Return abbreviated name of the chord.
@@ -242,17 +264,20 @@ impl Chord {
             None => "",
         };
 
+
+
         format!(
-            "{}{}",
+            "{}{}{}",
             self.root,
-            quality
+            quality,
+            self.extended_type()
         )
     }
 }
 
 impl Display for Chord {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {:?}", self.root, self.intervals)
+        write!(f, "{}", self.abbreviated_name())
     }
 }
 
