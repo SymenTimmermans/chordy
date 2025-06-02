@@ -5,6 +5,7 @@ use crate::{traits::HasIntervals, Interval};
 /// interval in the chord.
 ///
 ///
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ChordQuality {
     /// Major: Major third and perfect fifth
     Major,
@@ -61,7 +62,11 @@ impl ChordQuality {
             (Some(false), Some(0)) => Some(ChordQuality::Minor),
             (Some(false), Some(-1)) => Some(ChordQuality::Diminished),
             (Some(true), Some(1)) => Some(ChordQuality::Augmented),
-            _ => None, // Any other combination is ambiguous
+            // Classify diads as major/minor
+            (Some(false), None) => Some(ChordQuality::Minor),
+            (Some(true), None) => Some(ChordQuality::Major),
+            // Any other combination is ambiguous
+            _ => None, 
         }
     }
 }

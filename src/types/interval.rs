@@ -85,6 +85,7 @@ impl Interval {
     pub const PERFECT_TWELFTH: Self = Self { fifths: 1, octaves: 1};
     pub const AUGMENTED_TWELFTH: Self = Self { fifths: 8, octaves: 1};
 
+    pub const DIMINISHED_THIRTEENTH: Self = Self { fifths: -11, octaves: 1};
     pub const MINOR_THIRTEENTH: Self = Self { fifths: -4, octaves: 1};
     pub const MAJOR_THIRTEENTH: Self = Self { fifths: 3, octaves: 1};
     pub const AUGMENTED_THIRTEENTH: Self = Self { fifths: 10, octaves: 1};
@@ -228,24 +229,69 @@ impl std::ops::Neg for Interval {
 /// Quite the challenge.
 impl fmt::Display for Interval {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // Direct lookup of common intervals first
-        match (self.fifths, self.octaves) {
-            (0, 0) => write!(f, "P1"),
-            (-5, 0) => write!(f, "m2"),
-            (2, 0) => write!(f, "M2"),
-            (-3, 0) => write!(f, "m3"),
-            (4, 0) => write!(f, "M3"),
-            (-1, 0) => write!(f, "P4"),
-            (6, 0) => write!(f, "A4"),
-            (-6, 0) => write!(f, "d5"),
-            (1, 0) => write!(f, "P5"),
-            (-4, 0) => write!(f, "m6"),
-            (3, 0) => write!(f, "M6"),
-            (-2, 0) => write!(f, "m7"),
-            (5, 0) => write!(f, "M7"),
-            (0, 1) => write!(f, "P8"),
-            (2, 1) => write!(f, "M9"),
-            // ... add more as needed
+        match *self {
+            // Unison
+            Self::PERFECT_UNISON => write!(f, "P1"),
+            // Seconds
+            Self::DIMINISHED_SECOND => write!(f, "d2"),
+            Self::MINOR_SECOND => write!(f, "m2"),
+            Self::MAJOR_SECOND => write!(f, "M2"),
+            Self::AUGMENTED_SECOND => write!(f, "A2"),
+            // Thirds
+            Self::DIMINISHED_THIRD => write!(f, "d3"),
+            Self::MINOR_THIRD => write!(f, "m3"),
+            Self::MAJOR_THIRD => write!(f, "M3"),
+            Self::AUGMENTED_THIRD => write!(f, "A3"),
+            // Fourths
+            Self::DIMINISHED_FOURTH => write!(f, "d4"),
+            Self::PERFECT_FOURTH => write!(f, "P4"),
+            Self::AUGMENTED_FOURTH => write!(f, "A4"),
+            // Fifths
+            Self::DIMINISHED_FIFTH => write!(f, "d5"),
+            Self::PERFECT_FIFTH => write!(f, "P5"),
+            Self::AUGMENTED_FIFTH => write!(f, "A5"),
+            // Sixths
+            Self::DIMINISHED_SIXTH => write!(f, "d6"),
+            Self::MINOR_SIXTH => write!(f, "m6"),
+            Self::MAJOR_SIXTH => write!(f, "M6"),
+            Self::AUGMENTED_SIXTH => write!(f, "A6"),
+            // Sevenths
+            Self::DIMINISHED_SEVENTH => write!(f, "d7"),
+            Self::MINOR_SEVENTH => write!(f, "m7"),
+            Self::MAJOR_SEVENTH => write!(f, "M7"),
+            Self::AUGMENTED_SEVENTH => write!(f, "A7"),
+            // Octaves
+            Self::DIMINISHED_OCTAVE => write!(f, "d8"),
+            Self::OCTAVE => write!(f, "P8"),
+            Self::AUGMENTED_OCTAVE => write!(f, "A8"),
+            // Ninths
+            Self::DIMINISHED_NINTH => write!(f, "d9"),
+            Self::MINOR_NINTH => write!(f, "m9"),
+            Self::MAJOR_NINTH => write!(f, "M9"),
+            Self::AUGMENTED_NINTH => write!(f, "A9"),
+            // Tenths
+            Self::DIMINISHED_TENTH => write!(f, "d10"),
+            Self::MINOR_TENTH => write!(f, "m10"),
+            Self::MAJOR_TENTH => write!(f, "M10"),
+            Self::AUGMENTED_TENTH => write!(f, "A10"),
+            // Elevenths
+            Self::DIMINISHED_ELEVENTH => write!(f, "d11"),
+            Self::PERFECT_ELEVENTH => write!(f, "P11"),
+            Self::AUGMENTED_ELEVENTH => write!(f, "A11"),
+            // Twelfths
+            Self::DIMINISHED_TWELFTH => write!(f, "d12"),
+            Self::PERFECT_TWELFTH => write!(f, "P12"),
+            Self::AUGMENTED_TWELFTH => write!(f, "A12"),
+            // Thirteenths
+            Self::DIMINISHED_THIRTEENTH => write!(f, "d13"),
+            Self::MINOR_THIRTEENTH => write!(f, "m13"),
+            Self::MAJOR_THIRTEENTH => write!(f, "M13"),
+            Self::AUGMENTED_THIRTEENTH => write!(f, "A13"),
+            // Fourteenths
+            Self::DIMINISHED_FOURTEENTH => write!(f, "d14"),
+            Self::MINOR_FOURTEENTH => write!(f, "m14"),
+            Self::MAJOR_FOURTEENTH => write!(f, "M14"),
+            Self::AUGMENTED_FOURTEENTH => write!(f, "A14"),
             _ => {
                 // Fall back to algorithmic approach for uncommon intervals
                 let generic_num = self.generic_interval_number();

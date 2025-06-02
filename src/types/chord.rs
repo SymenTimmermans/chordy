@@ -1,13 +1,12 @@
 use std::{fmt::Display, str::FromStr};
 
-use quality::ChordQuality;
-
 use super::{scale::ScaleDegree, Interval, NoteName};
 use crate::{
     error::ParseError, note, traits::{HasIntervals, HasRoot, Invertible}
 };
 
 mod quality;
+pub use quality::ChordQuality;
 
 /// A chord represented by a root note and intervals from that root
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -213,16 +212,33 @@ impl Chord {
     }
 
     /// Returns the chord quality if it can be determined.
+    ///
+    /// It mainly considers the third and fifth intervals to determine the quality.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use chordy::{Chord, note, ChordQuality};
+    ///
+    /// let d_major = Chord::from_notes_and_root(
+    ///     &[note!("D"), note!("F#"), note!("A")],
+    ///     note!("D")
+    /// );
+    /// assert_eq!(d_major.quality(), Some(ChordQuality::Major));
+    ///
+    /// let b_minor_diad = Chord::from_notes_and_root(
+    ///    &[note!("B"), note!("D")],
+    ///    note!("B")
+    /// );
+    /// assert_eq!(b_minor_diad.quality(), Some(ChordQuality::Minor));
+    ///
+    /// ```
     pub fn quality(&self) -> Option<ChordQuality> {
         ChordQuality::detect(self)
     }
 
     /// Returns the extended type of the chord, such as "7", "9", "11", etc.
     pub fn extended_type(&self) -> String {
-        if self.intervals.len() <= 3 {
-            return String::new(); // No extensions for triads
-        }
-
         if self.intervals.contains(&Interval::MINOR_SEVENTH) {
             return "7".to_string();
         } else if self.intervals.contains(&Interval::MAJOR_SEVENTH) {

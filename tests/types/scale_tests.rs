@@ -1,4 +1,5 @@
 use chordy::prelude::*;
+use crate::test_util::*;
 
 macro_rules! scale_test {
     ($name:ident, $root:expr, $scale_type:expr, $expected:expr) => {
@@ -11,18 +12,13 @@ macro_rules! scale_test {
     };
 }
 
-macro_rules! note_vec {
-    ($($note:expr),*) => {
-        vec![$(note!($note)),*]
-    };
-}
 
 // Major scale tests
 scale_test!(
     test_major_scale_c,
     note!("C"),
     scales::IONIAN,
-    note_vec!("C", "D", "E", "F", "G", "A", "B")
+    note_vec!["C", "D", "E", "F", "G", "A", "B"]
 );
 
 scale_test!(

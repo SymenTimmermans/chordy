@@ -9,7 +9,7 @@ mod note_name;
 pub use note_name::NoteName;
 
 mod chord;
-pub use chord::{Chord, HarmonicFunction};
+pub use chord::{Chord, ChordQuality, HarmonicFunction};
 
 mod accidental;
 pub use accidental::Accidental;
