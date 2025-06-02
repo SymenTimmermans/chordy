@@ -1,9 +1,11 @@
-use std::fmt::Display;
+use std::{fmt::Display, str::FromStr};
 
 use quality::ChordQuality;
 
 use super::{scale::ScaleDegree, Interval, NoteName};
-use crate::{note, traits::{HasIntervals, HasRoot, Invertible}};
+use crate::{
+    error::ParseError, note, traits::{HasIntervals, HasRoot, Invertible}
+};
 
 mod quality;
 
@@ -14,7 +16,7 @@ pub struct Chord {
     pub root: NoteName,
     /// The intervals from the root note that define the chord.
     ///
-    /// Intervals are typically in ascending order, starting from the root, which is included as a 
+    /// Intervals are typically in ascending order, starting from the root, which is included as a
     /// PERFECT_UNISON.
     pub intervals: Vec<Interval>,
 }
@@ -153,7 +155,7 @@ impl Chord {
             ],
         )
     }
-    
+
     /// Create a minor 7th chord with the given root note
     pub fn minor_7th(root: NoteName) -> Self {
         Self::new(
@@ -193,7 +195,6 @@ impl Chord {
         )
     }
 
-
     // More chord constructors can be added as needed...
 
     /// Return a Harte representation (string) of the chord
@@ -222,19 +223,19 @@ impl Chord {
             return String::new(); // No extensions for triads
         }
 
-        if self.intervals.len() == 4 {
-            if self.intervals.contains(&Interval::MINOR_SEVENTH) {
-                return "7".to_string();
-            } else if self.intervals.contains(&Interval::MAJOR_SEVENTH) {
+        if self.intervals.contains(&Interval::MINOR_SEVENTH) {
+            return "7".to_string();
+        } else if self.intervals.contains(&Interval::MAJOR_SEVENTH) {
+            if self.is_major() {
                 return "maj7".to_string();
             } else {
-                return String::new(); // No recognized extension
+                return "(maj7)".to_string(); // Minor-major 7th
             }
+        } else {
+            return String::new(); // No recognized extension
         }
 
-        if self.intervals.contains(&Interval::MINOR_SEVENTH) {
-            
-        }
+        if self.intervals.contains(&Interval::MINOR_SEVENTH) {}
         String::new()
     }
 
@@ -264,14 +265,7 @@ impl Chord {
             None => "",
         };
 
-
-
-        format!(
-            "{}{}{}",
-            self.root,
-            quality,
-            self.extended_type()
-        )
+        format!("{}{}{}", self.root, quality, self.extended_type())
     }
 }
 
@@ -313,6 +307,40 @@ impl Invertible for Chord {
             }
         }
         Chord::new(self.root, intervals)
+    }
+}
+
+/// Implement FromStr for Chord to allow parsing from a string representation.
+///
+impl FromStr for Chord {
+    type Err = ParseError;
+
+    /// Parses a string into a Chord, currently returning an error as a placeholder.
+    ///
+    /// Supports only list of notes right now, where the notes are separated by comma.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use chordy::prelude::*;
+    ///
+    /// let chord: Chord = "C,E,G".parse().unwrap();
+    /// let c_major = Chord::major(note!("C"));
+    ///
+    /// assert_eq!(chord, c_major);
+    /// ```
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // split the string by commas and parse each note
+        let notes: Vec<NoteName> = s
+            .split(',')
+            .map(|note_str| note_str.trim().parse::<NoteName>())
+            .collect::<Result<Vec<NoteName>, ParseError>>()?;
+
+        if notes.is_empty() {
+            return Err(ParseError::InvalidChordFormat(s.to_string()));
+        }
+
+        Ok(Chord::from_notes(&notes))
     }
 }
 

@@ -25,6 +25,9 @@ pub enum ParseError {
 
     /// Error when an invalid interval is provided
     InvalidInterval(String),
+
+    /// Error when a chord format is invalid
+    InvalidChordFormat(String),
 }
 
 impl std::fmt::Display for ParseError {
@@ -37,6 +40,7 @@ impl std::fmt::Display for ParseError {
             ParseError::UnrecognizedFormat(s) => write!(f, "Unrecognized format: '{}'", s),
             ParseError::InvalidPitch(s) => write!(f, "Invalid pitch: '{}'", s),
             ParseError::InvalidInterval(s) => write!(f, "Invalid interval: '{}'", s),
+            ParseError::InvalidChordFormat(s) => write!(f, "Invalid chord format: '{}'", s),
         }
     }
 }
