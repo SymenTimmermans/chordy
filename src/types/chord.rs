@@ -239,20 +239,41 @@ impl Chord {
 
     /// Returns the extended type of the chord, such as "7", "9", "11", etc.
     pub fn extended_type(&self) -> String {
-        if self.intervals.contains(&Interval::MINOR_SEVENTH) {
+        let has_minor_7th = self.intervals.contains(&Interval::MINOR_SEVENTH);
+        let has_major_7th = self.intervals.contains(&Interval::MAJOR_SEVENTH);
+        let has_9th = self.intervals.contains(&Interval::MAJOR_NINTH) || 
+                     self.intervals.contains(&Interval::MINOR_NINTH) ||
+                     self.intervals.contains(&Interval::MINOR_SECOND) ||
+                    self.intervals.contains(&Interval::MAJOR_SECOND);
+
+        // Handle 9th chords first since they're more specific
+        if has_9th {
+            if has_minor_7th {
+                return "9".to_string(); // Dominant 9th (e.g. C9)
+            } else if has_major_7th {
+                if self.is_major() {
+                    return "maj9".to_string(); // Major 9th (e.g. Cmaj9)
+                } else {
+                    return "(maj9)".to_string(); // Minor-major 9th (e.g. Cm(maj9))
+                }
+            } else {
+                // Just a 9th without 7th (add9 chord)
+                return "add9".to_string();
+            }
+        }
+
+        // Handle 7th chords if no 9th present
+        if has_minor_7th {
             return "7".to_string();
-        } else if self.intervals.contains(&Interval::MAJOR_SEVENTH) {
+        } else if has_major_7th {
             if self.is_major() {
                 return "maj7".to_string();
             } else {
                 return "(maj7)".to_string(); // Minor-major 7th
             }
-        } else {
-            return String::new(); // No recognized extension
         }
 
-        if self.intervals.contains(&Interval::MINOR_SEVENTH) {}
-        String::new()
+        String::new() // No recognized extension
     }
 
     /// Return abbreviated name of the chord.
