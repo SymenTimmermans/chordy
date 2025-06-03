@@ -66,6 +66,34 @@ naming_test!(test_g_add9, "G,B,D,A", "Gadd9");
 naming_test!(test_a_minor_add9, "A,C,E,B", "Amadd9");
 
 
+// --- ELEVENTH CHORDS ---
+// Basic dominant eleventh
+naming_test!(test_g11, "G,B,D,F,A,C", "G11");
+naming_test!(test_a_minor_11, "A,C,E,G,B,D", "Am11");
+naming_test!(test_c_major_11, "C,E,G,B,D,F", "Cmaj11");
+naming_test!(test_c_minor_major_11, "C,Eb,G,B,D,F", "Cm(maj11)");
+// omitted fifth
+naming_test!(test_g11_omit_5, "G,B,F,A,C", "G11");
+naming_test!(test_a_minor_11_omit_5, "A,C,G,B,D", "Am11");
+naming_test!(test_f_sharp_major_11_omit_5, "F#,A#,E#,G#,B", "F♯maj11");
+naming_test!(test_c_major_11_omit_5, "C,E,B,D,F", "Cmaj11");
+// omitting the seventh and 9th should lead to add11 chords
+naming_test!(test_g_add11, "G,B,D,C", "Gadd11");
+naming_test!(test_a_minor_add11, "A,C,E,D", "Amadd11");
+naming_test!(test_c_major_add11, "C,E,G,B,F", "Cmaj7(add11)");
+
+
+// --- THIRTEENTH CHORDS ---
+// Basic dominant thirteenth
+naming_test!(test_g13, "G,B,D,F,A,C,E", "G13");
+naming_test!(test_a_minor_13, "A,C,E,G,B,D,F#", "Am13");
+naming_test!(test_c_major_13, "C,E,G,B,D,F,A", "Cmaj13");
+naming_test!(test_c_minor_major_13, "C,Eb,G,B,D,F,A", "Cm(maj13)");
+// no11 chords
+naming_test!(test_g13_no11, "G,B,D,F,A,E", "G13(no11)");
+naming_test!(test_a_minor_13_no11, "A,C,E,G,B,F", "Am13(no11)");
+naming_test!(test_c_major_13_no11, "C,E,G,B,D,A", "Cmaj13(no11)");
+
 
 
 

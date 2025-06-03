@@ -244,9 +244,87 @@ impl Chord {
         let has_9th = self.intervals.contains(&Interval::MAJOR_NINTH) || 
                      self.intervals.contains(&Interval::MINOR_NINTH) ||
                      self.intervals.contains(&Interval::MINOR_SECOND) ||
-                    self.intervals.contains(&Interval::MAJOR_SECOND);
+                     self.intervals.contains(&Interval::MAJOR_SECOND);
+        let has_11th = self.intervals.contains(&Interval::PERFECT_ELEVENTH) ||
+                      self.intervals.contains(&Interval::PERFECT_FOURTH);
+        let has_13th = self.intervals.contains(&Interval::MAJOR_THIRTEENTH) ||
+                      self.intervals.contains(&Interval::MINOR_THIRTEENTH) ||
+                      self.intervals.contains(&Interval::MAJOR_SIXTH) ||
+                      self.intervals.contains(&Interval::MINOR_SIXTH);
 
-        // Handle 9th chords first since they're more specific
+        // Handle 13th chords first since they're most specific
+        if has_13th {
+            if has_11th && has_9th {
+                if has_minor_7th {
+                    return "13".to_string(); // Dominant 13th (e.g. C13)
+                } else if has_major_7th {
+                    if self.is_major() {
+                        return "maj13".to_string(); // Major 13th (e.g. Cmaj13)
+                    } else {
+                        return "(maj13)".to_string(); // Minor-major 13th
+                    }
+                } else {
+                    return "add13".to_string(); // Just a 13th without 7th, 9th or 11th
+                }
+            } else if has_major_7th {
+                if self.is_major() {
+                    if has_9th {
+                        return "maj13(no11)".to_string();
+                    } else if has_11th {
+                        return "maj13(no9)".to_string();
+                    } else {
+                        return "maj7(add13)".to_string();
+                    }
+                } else {
+                    if has_9th {
+                        return "(maj13)(no11)".to_string();
+                    } else if has_11th {
+                        return "(maj13)(no9)".to_string();
+                    } else {
+                        return "(maj7)(add13)".to_string();
+                    }
+                }
+            } else if has_minor_7th {
+                if has_9th {
+                    return "13(no11)".to_string();
+                } else if has_11th {
+                    return "13(no9)".to_string();
+                } else {
+                    return "7(add13)".to_string();
+                }
+            } else {
+                return "add13".to_string();
+            }
+        }
+
+        // Handle 11th chords next
+        if has_11th {
+            if has_9th {
+                if has_major_7th {
+                    if self.is_major() {
+                        return "maj11".to_string(); // Major 11th (e.g. Cmaj11)
+                    } else {
+                        return "(maj11)".to_string(); // Minor-major 11th
+                    }
+                } else if has_minor_7th {
+                    return "11".to_string(); // Dominant 11th (e.g. C11)
+                } else {
+                    return "add11".to_string(); // Just an 11th without 7th or 9th
+                }
+            } else if has_major_7th {
+                if self.is_major() {
+                    return "maj7(add11)".to_string();
+                } else {
+                    return "(maj7)(add11)".to_string();
+                }
+            } else if has_minor_7th {
+                return "7(add11)".to_string();
+            } else {
+                return "add11".to_string();
+            }
+        }
+
+        // Handle 9th chords next
         if has_9th {
             if has_minor_7th {
                 return "9".to_string(); // Dominant 9th (e.g. C9)
@@ -257,12 +335,11 @@ impl Chord {
                     return "(maj9)".to_string(); // Minor-major 9th (e.g. Cm(maj9))
                 }
             } else {
-                // Just a 9th without 7th (add9 chord)
-                return "add9".to_string();
+                return "add9".to_string(); // Just a 9th without 7th
             }
         }
 
-        // Handle 7th chords if no 9th present
+        // Handle 7th chords if no higher extensions present
         if has_minor_7th {
             return "7".to_string();
         } else if has_major_7th {
