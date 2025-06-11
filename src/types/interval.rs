@@ -67,7 +67,7 @@ impl Interval {
     pub const OCTAVE: Self = Self { fifths: 0, octaves: 1};
     pub const AUGMENTED_OCTAVE: Self = Self { fifths: 7, octaves: 1};
 
-    pub const DIMINISHED_NINTH: Self = Self { fifths: -11, octaves: 1};
+    pub const DIMINISHED_NINTH: Self = Self { fifths: -12, octaves: 1};
     pub const MINOR_NINTH: Self = Self { fifths: -5, octaves: 1};
     pub const MAJOR_NINTH: Self = Self { fifths: 2, octaves: 1};
     pub const AUGMENTED_NINTH: Self = Self { fifths: 9, octaves: 1};

@@ -275,14 +275,12 @@ impl Chord {
                     } else {
                         return "maj7(add13)".to_string();
                     }
+                } else if has_9th {
+                    return "(maj13)(no11)".to_string();
+                } else if has_11th {
+                    return "(maj13)(no9)".to_string();
                 } else {
-                    if has_9th {
-                        return "(maj13)(no11)".to_string();
-                    } else if has_11th {
-                        return "(maj13)(no9)".to_string();
-                    } else {
-                        return "(maj7)(add13)".to_string();
-                    }
+                    return "(maj7)(add13)".to_string();
                 }
             } else if has_minor_7th {
                 if has_9th {
