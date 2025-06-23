@@ -457,7 +457,7 @@ impl FromStr for Chord {
 }
 
 /// Harmonic functions represent the roles chords play in a key
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[allow(missing_docs)]
 pub enum HarmonicFunction {
     Tonic,
