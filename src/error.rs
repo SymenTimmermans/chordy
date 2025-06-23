@@ -28,6 +28,9 @@ pub enum ParseError {
 
     /// Error when a chord format is invalid
     InvalidChordFormat(String),
+
+    /// Error when an invalid roman numeral is provided
+    InvalidRomanNumeral(String),
 }
 
 impl std::fmt::Display for ParseError {
@@ -41,6 +44,7 @@ impl std::fmt::Display for ParseError {
             ParseError::InvalidPitch(s) => write!(f, "Invalid pitch: '{}'", s),
             ParseError::InvalidInterval(s) => write!(f, "Invalid interval: '{}'", s),
             ParseError::InvalidChordFormat(s) => write!(f, "Invalid chord format: '{}'", s),
+            ParseError::InvalidRomanNumeral(s) => write!(f, "Invalid roman numeral: '{}'", s),
         }
     }
 }

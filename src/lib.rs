@@ -120,6 +120,46 @@ macro_rules! pitch {
     }};
 }
 
+/// Makes it easy to create a `RomanNumeral` at compile time.
+///
+/// # Examples
+///
+/// ```rust
+/// use chordy::{RomanNumeral, RomanDegree, Accidental};
+/// 
+/// let roman_one = chordy::roman!("I");
+/// let roman_flat_three = chordy::roman!("♭III");
+/// let roman_sharp_four = chordy::roman!("♯IV");
+///
+/// assert_eq!(roman_one, RomanNumeral::new(RomanDegree::I, Accidental::Natural));
+/// assert_eq!(roman_flat_three, RomanNumeral::new(RomanDegree::III, Accidental::Flat));
+/// assert_eq!(roman_sharp_four, RomanNumeral::new(RomanDegree::IV, Accidental::Sharp));
+/// ```
+#[macro_export]
+macro_rules! roman {
+    ($s:literal) => {{
+        // Only do compile-time validation in non-test contexts
+        #[cfg(not(test))]
+        const _VALIDATE: () = {
+            if !$crate::is_valid_roman($s) {
+                panic!(concat!(
+                    "Invalid roman numeral string '", $s, "'. ",
+                    "Must be a valid roman numeral (I, ii, iii, IV, V, vi, vii°)"
+                ));
+            }
+        };
+        $s.parse::<$crate::RomanNumeral>().unwrap()
+    }};
+}
+
+/// Helper function for roman numeral validation
+#[doc(hidden)]
+pub const fn is_valid_roman(s: &str) -> bool {
+    // For now, just allow any non-empty string and let the parser handle validation
+    // This is because const functions have limited pattern matching capabilities
+    !s.is_empty()
+}
+
 /// Helper function for note/pitch validation
 #[doc(hidden)]
 pub const fn is_valid_note(s: &str, check_octave: bool) -> bool {
