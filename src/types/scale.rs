@@ -65,6 +65,66 @@ impl Scale {
         }
     }
 
+    /// Creates a major scale with the given tonic
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::prelude::*;
+    ///
+    /// let c_major = Scale::major(note!("C"));
+    /// let notes = c_major.notes();
+    /// // [C, D, E, F, G, A, B]
+    /// ```
+    pub fn major(tonic: NoteName) -> Self {
+        Self::from_definition(tonic, scales::IONIAN)
+    }
+
+    /// Creates a minor scale (natural minor/Aeolian) with the given tonic
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::prelude::*;
+    ///
+    /// let a_minor = Scale::minor(note!("A"));
+    /// let notes = a_minor.notes();
+    /// // [A, B, C, D, E, F, G]
+    /// ```
+    pub fn minor(tonic: NoteName) -> Self {
+        Self::from_definition(tonic, scales::AEOLIAN)
+    }
+
+    /// Creates a harmonic minor scale with the given tonic
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::prelude::*;
+    ///
+    /// let a_harmonic_minor = Scale::harmonic_minor(note!("A"));
+    /// let notes = a_harmonic_minor.notes();
+    /// // [A, B, C, D, E, F, G#]
+    /// ```
+    pub fn harmonic_minor(tonic: NoteName) -> Self {
+        Self::from_definition(tonic, scales::HARMONIC_MINOR)
+    }
+
+    /// Creates a melodic minor scale with the given tonic
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::prelude::*;
+    ///
+    /// let a_melodic_minor = Scale::melodic_minor(note!("A"));
+    /// let notes = a_melodic_minor.notes();
+    /// // [A, B, C, D, E, F#, G#]
+    /// ```
+    pub fn melodic_minor(tonic: NoteName) -> Self {
+        Self::from_definition(tonic, scales::MELODIC_MINOR)
+    }
+
     /// Creates a custom scale with the given properties
     pub fn custom(
         tonic: NoteName,
@@ -216,10 +276,75 @@ impl Scale {
         HarmonicFunction::detect_by_scale_degrees(&scale_degrees)
     }
 
-    /// Creates a chord from the given scale degree (1-7)
-    pub fn chord_at_degree(&self, _degree: u8) -> Chord {
-        // Implementation
-        todo!()
+    /// Creates a triad from the given scale degree (1-7)
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Scale, Chord, note};
+    ///
+    /// let c_major = Scale::major(note!("C"));
+    /// let tonic_chord = c_major.chord_at_degree(1);
+    /// assert_eq!(tonic_chord, Chord::major(note!("C")));
+    /// ```
+    pub fn chord_at_degree(&self, degree: u8) -> Chord {
+        if degree < 1 || degree > 7 {
+            panic!("Scale degree must be in range 1-7, got {}", degree);
+        }
+        
+        let notes = self.notes();
+        let root = notes[(degree - 1) as usize];
+        
+        // Build triad using scale notes
+        let third_degree = ((degree - 1 + 2) % 7) as usize;
+        let fifth_degree = ((degree - 1 + 4) % 7) as usize;
+        
+        let third = notes[third_degree];
+        let fifth = notes[fifth_degree];
+        
+        let third_interval = root.interval_to(third);
+        let fifth_interval = root.interval_to(fifth);
+        
+        Chord::new(root, vec![
+            Interval::PERFECT_UNISON,
+            third_interval,
+            fifth_interval,
+        ])
+    }
+
+    /// Gets the tonic chord (I)
+    pub fn tonic_chord(&self) -> Chord {
+        self.chord_at_degree(1)
+    }
+
+    /// Gets the supertonic chord (ii)
+    pub fn supertonic_chord(&self) -> Chord {
+        self.chord_at_degree(2)
+    }
+
+    /// Gets the mediant chord (iii)
+    pub fn mediant_chord(&self) -> Chord {
+        self.chord_at_degree(3)
+    }
+
+    /// Gets the subdominant chord (IV)
+    pub fn subdominant_chord(&self) -> Chord {
+        self.chord_at_degree(4)
+    }
+
+    /// Gets the dominant chord (V)
+    pub fn dominant_chord(&self) -> Chord {
+        self.chord_at_degree(5)
+    }
+
+    /// Gets the submediant chord (vi)
+    pub fn submediant_chord(&self) -> Chord {
+        self.chord_at_degree(6)
+    }
+
+    /// Gets the leading tone chord (vii°)
+    pub fn leading_tone_chord(&self) -> Chord {
+        self.chord_at_degree(7)
     }
     /// Returns the relative major/minor of this scale
     pub fn relative(&self) -> Option<Scale> {

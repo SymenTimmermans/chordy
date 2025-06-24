@@ -87,9 +87,60 @@ pub struct RomanNumeral {
 
 impl RomanNumeral {
     /// Create a new roman numeral
-    pub fn new(degree: RomanDegree, accidental: Accidental) -> Self {
+    pub const fn new(degree: RomanDegree, accidental: Accidental) -> Self {
         RomanNumeral { degree, accidental }
     }
+
+    // Convenience constructors for natural degrees
+    /// I - Tonic
+    #[allow(non_snake_case)]
+    pub const fn I() -> Self { Self::new(RomanDegree::I, Accidental::Natural) }
+    /// II - Supertonic  
+    #[allow(non_snake_case)]
+    pub const fn II() -> Self { Self::new(RomanDegree::II, Accidental::Natural) }
+    /// III - Mediant
+    #[allow(non_snake_case)]
+    pub const fn III() -> Self { Self::new(RomanDegree::III, Accidental::Natural) }
+    /// IV - Subdominant
+    #[allow(non_snake_case)]
+    pub const fn IV() -> Self { Self::new(RomanDegree::IV, Accidental::Natural) }
+    /// V - Dominant
+    #[allow(non_snake_case)]
+    pub const fn V() -> Self { Self::new(RomanDegree::V, Accidental::Natural) }
+    /// VI - Submediant
+    #[allow(non_snake_case)]
+    pub const fn VI() -> Self { Self::new(RomanDegree::VI, Accidental::Natural) }
+    /// VII - Leading tone
+    #[allow(non_snake_case)]
+    pub const fn VII() -> Self { Self::new(RomanDegree::VII, Accidental::Natural) }
+
+    // Convenience constructors for flat degrees
+    /// ♭II - Flat supertonic
+    #[allow(non_snake_case)]
+    pub const fn flat_II() -> Self { Self::new(RomanDegree::II, Accidental::Flat) }
+    /// ♭III - Flat mediant
+    #[allow(non_snake_case)]
+    pub const fn flat_III() -> Self { Self::new(RomanDegree::III, Accidental::Flat) }
+    /// ♭VI - Flat submediant
+    #[allow(non_snake_case)]
+    pub const fn flat_VI() -> Self { Self::new(RomanDegree::VI, Accidental::Flat) }
+    /// ♭VII - Flat subtonic
+    #[allow(non_snake_case)]
+    pub const fn flat_VII() -> Self { Self::new(RomanDegree::VII, Accidental::Flat) }
+
+    // Convenience constructors for sharp degrees
+    /// ♯I - Sharp tonic
+    #[allow(non_snake_case)]
+    pub const fn sharp_I() -> Self { Self::new(RomanDegree::I, Accidental::Sharp) }
+    /// ♯IV - Sharp subdominant
+    #[allow(non_snake_case)]
+    pub const fn sharp_IV() -> Self { Self::new(RomanDegree::IV, Accidental::Sharp) }
+    /// ♯V - Sharp dominant
+    #[allow(non_snake_case)]
+    pub const fn sharp_V() -> Self { Self::new(RomanDegree::V, Accidental::Sharp) }
+    /// ♯VII - Sharp leading tone
+    #[allow(non_snake_case)]
+    pub const fn sharp_VII() -> Self { Self::new(RomanDegree::VII, Accidental::Sharp) }
     
     /// Get the degree
     pub fn degree(self) -> RomanDegree {
@@ -132,7 +183,7 @@ impl Display for RomanNumeral {
         // Default display without quality context - use uppercase
         let base = self.degree.base_string();
         
-        write!(f, "{}{}", self.accidental, base)
+        write!(f, "{}{}", self.accidental.component_str(), base)
     }
 }
 
@@ -358,5 +409,17 @@ impl From<Interval> for RomanNumeral {
     fn from(interval: Interval) -> Self {
         let scale_degree = super::scale::ScaleDegree::from(interval);
         RomanNumeral::from(scale_degree)
+    }
+}
+
+impl From<u8> for RomanNumeral {
+    /// Create a natural roman numeral from a degree number (1-7)
+    /// 
+    /// # Panics
+    /// Panics if the number is not in the range 1-7
+    fn from(degree_num: u8) -> Self {
+        let degree = RomanDegree::from_number(degree_num)
+            .expect("Degree number must be in range 1-7");
+        RomanNumeral::new(degree, Accidental::Natural)
     }
 }

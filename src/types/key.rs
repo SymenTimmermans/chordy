@@ -1,6 +1,6 @@
 use crate::traits::HasRoot;
 
-use super::{NoteName, scale::ScaleDegree};
+use super::{NoteName, scale::ScaleDegree, Chord, RomanNumeral, HarmonicFunction, Scale};
 
 /// The mode of a key (Major, Minor, etc.)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -51,6 +51,63 @@ impl Key {
         
         // Convert the interval to a scale degree
         ScaleDegree::from(interval)
+    }
+
+    /// Analyze a chord in this key, returning its roman numeral representation
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Key, Chord, RomanNumeral, note};
+    ///
+    /// let c_major_key = Key::Major(note!("C"));
+    /// let g_chord = Chord::major(note!("G"));
+    /// let roman = c_major_key.analyze_chord(&g_chord);
+    /// assert_eq!(roman, RomanNumeral::V());
+    /// ```
+    pub fn analyze_chord(&self, chord: &Chord) -> RomanNumeral {
+        let root_degree = self.degree_of(chord.root);
+        RomanNumeral::from(root_degree)
+    }
+
+    /// Get the harmonic function of a chord in this key
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Key, Chord, HarmonicFunction, note};
+    ///
+    /// let c_major_key = Key::Major(note!("C"));
+    /// let g_chord = Chord::major(note!("G"));
+    /// let function = c_major_key.harmonic_function(&g_chord);
+    /// assert_eq!(function, Some(HarmonicFunction::Dominant));
+    /// ```
+    pub fn harmonic_function(&self, chord: &Chord) -> Option<HarmonicFunction> {
+        // Get the scale for this key
+        let scale = match self {
+            Key::Major(tonic) => Scale::major(*tonic),
+            Key::Minor(tonic) => Scale::minor(*tonic),
+        };
+        
+        scale.harmonic_function(chord)
+    }
+
+    /// Get the scale associated with this key
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Key, Scale, note};
+    ///
+    /// let c_major_key = Key::Major(note!("C"));
+    /// let scale = c_major_key.scale();
+    /// assert_eq!(scale, Scale::major(note!("C")));
+    /// ```
+    pub fn scale(&self) -> Scale {
+        match self {
+            Key::Major(tonic) => Scale::major(*tonic),
+            Key::Minor(tonic) => Scale::minor(*tonic),
+        }
     }
 }
 

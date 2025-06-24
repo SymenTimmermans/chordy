@@ -44,21 +44,51 @@ impl ScaleDegree {
     /// The subtonic, unaltered 7th scale degree in minor scales
     pub const SUBTONIC: Self = Self::new(7, None);
 
-    // Altered scale degrees
-    #[allow(missing_docs)]
-    pub const FLAT_SECOND: Self = Self::new(2, Some(Accidental::Flat));
-    #[allow(missing_docs)]
-    pub const FLAT_THIRD: Self = Self::new(3, Some(Accidental::Flat));
-    #[allow(missing_docs)]
+    // Altered scale degrees - sharps
+    /// Sharp tonic (♯1)
+    pub const SHARP_TONIC: Self = Self::new(1, Some(Accidental::Sharp));
+    /// Sharp supertonic (♯2)  
+    pub const SHARP_SUPERTONIC: Self = Self::new(2, Some(Accidental::Sharp));
+    /// Sharp mediant (♯3)
+    pub const SHARP_MEDIANT: Self = Self::new(3, Some(Accidental::Sharp));
+    /// Sharp subdominant (♯4)
     pub const SHARP_FOURTH: Self = Self::new(4, Some(Accidental::Sharp));
-    #[allow(missing_docs)]
+    /// Sharp subdominant alias
+    pub const SHARP_SUBDOMINANT: Self = Self::SHARP_FOURTH;
+    /// Sharp dominant (♯5)
+    pub const SHARP_DOMINANT: Self = Self::new(5, Some(Accidental::Sharp));
+    /// Sharp submediant (♯6)
+    pub const SHARP_SUBMEDIANT: Self = Self::new(6, Some(Accidental::Sharp));
+    /// Sharp leading tone (♯7)
+    pub const SHARP_LEADING_TONE: Self = Self::new(7, Some(Accidental::Sharp));
+
+    // Altered scale degrees - flats
+    /// Flat tonic (♭1)
+    pub const FLAT_TONIC: Self = Self::new(1, Some(Accidental::Flat));
+    /// Flat supertonic (♭2)
+    pub const FLAT_SECOND: Self = Self::new(2, Some(Accidental::Flat));
+    /// Flat supertonic alias
+    pub const FLAT_SUPERTONIC: Self = Self::FLAT_SECOND;
+    /// Flat mediant (♭3)
+    pub const FLAT_THIRD: Self = Self::new(3, Some(Accidental::Flat));
+    /// Flat mediant alias
+    pub const FLAT_MEDIANT: Self = Self::FLAT_THIRD;
+    /// Flat subdominant (♭4)
+    pub const FLAT_SUBDOMINANT: Self = Self::new(4, Some(Accidental::Flat));
+    /// Flat dominant (♭5)
+    pub const FLAT_DOMINANT: Self = Self::new(5, Some(Accidental::Flat));
+    /// Flat submediant (♭6)
     pub const FLAT_SIXTH: Self = Self::new(6, Some(Accidental::Flat));
-    #[allow(missing_docs)]
+    /// Flat submediant alias
+    pub const FLAT_SUBMEDIANT: Self = Self::FLAT_SIXTH;
+    /// Flat subtonic (♭7)
     pub const FLAT_SEVENTH: Self = Self::new(7, Some(Accidental::Flat));
+    /// Flat subtonic alias
+    pub const FLAT_SUBTONIC: Self = Self::FLAT_SEVENTH;
 
     // Special scale degrees with traditional names
     /// The Neapolitan flat second scale degree (♭II)
-    pub const NEAPOLITAN: Self = Self::new(2, Some(Accidental::Flat)); // ♭II
+    pub const NEAPOLITAN: Self = Self::FLAT_SECOND;
 }
 
 impl From<Interval> for ScaleDegree {
@@ -153,5 +183,18 @@ impl From<Interval> for ScaleDegree {
                 Self::new(reduced_degree as u8, None)
             }
         }
+    }
+}
+
+impl From<u8> for ScaleDegree {
+    /// Create a natural scale degree from a step number (1-7)
+    /// 
+    /// # Panics
+    /// Panics if the number is not in the range 1-7
+    fn from(step: u8) -> Self {
+        if step < 1 || step > 7 {
+            panic!("Scale degree step must be in range 1-7, got {}", step);
+        }
+        ScaleDegree::new(step, None)
     }
 }
