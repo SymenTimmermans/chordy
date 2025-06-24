@@ -343,8 +343,8 @@ impl Display for RomanChord {
     }
 }
 
-impl From<super::ScaleDegree> for RomanNumeral {
-    fn from(scale_degree: super::ScaleDegree) -> Self {
+impl From<super::scale::ScaleDegree> for RomanNumeral {
+    fn from(scale_degree: super::scale::ScaleDegree) -> Self {
         let degree = RomanDegree::from_number(scale_degree.step)
             .expect("ScaleDegree should always have a valid step (1-7)");
         
@@ -356,7 +356,7 @@ impl From<super::ScaleDegree> for RomanNumeral {
 
 impl From<Interval> for RomanNumeral {
     fn from(interval: Interval) -> Self {
-        let scale_degree = super::ScaleDegree::from(interval);
+        let scale_degree = super::scale::ScaleDegree::from(interval);
         RomanNumeral::from(scale_degree)
     }
 }

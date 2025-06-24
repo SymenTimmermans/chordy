@@ -1,6 +1,6 @@
 use crate::traits::HasRoot;
 
-use super::{NoteName, ScaleDegree};
+use super::{NoteName, scale::ScaleDegree};
 
 /// The mode of a key (Major, Minor, etc.)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
