@@ -50,6 +50,32 @@ impl Accidental {
     pub fn is_flat(self) -> bool {
         matches!(self, Accidental::Flat | Accidental::DoubleFlat)
     }
+
+    /// Returns the string representation of the accidental for use as a component in another
+    /// string. This means that only non-natural accidentals get written out, as natural is
+    /// the default state.
+    pub fn component_str(&self) -> &'static str {
+        use crate::symbols::*;
+        match self {
+            Accidental::Flat => FLAT,
+            Accidental::Sharp => SHARP,
+            Accidental::Natural => "",
+            Accidental::DoubleFlat => DOUBLE_FLAT,
+            Accidental::DoubleSharp => DOUBLE_SHARP,
+        }
+    }
+
+    /// Returns the accidental as an alteration, meaning that if it's natural, it returns None,
+    /// otherwise it returns Some(Accidental).
+    pub fn as_alteration(&self) -> Option<Self> {
+        match self {
+            Accidental::Flat => Some(Accidental::Flat),
+            Accidental::Sharp => Some(Accidental::Sharp),
+            Accidental::Natural => None,
+            Accidental::DoubleFlat => Some(Accidental::DoubleFlat),
+            Accidental::DoubleSharp => Some(Accidental::DoubleSharp),
+        }
+    }
 }
 
 impl fmt::Display for Accidental {

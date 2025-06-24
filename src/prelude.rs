@@ -13,8 +13,8 @@
 
 // Core Types
 pub use crate::types::{
-    Accidental, Chord, HarmonicFunction, Interval, Key, 
-    Letter, NoteName, Pitch, Scale, ScaleDefinition, ScaleDegree
+    Accidental, Chord, ChordQuality, HarmonicFunction, Interval, Key, 
+    Letter, NoteName, Pitch, RomanChord, RomanDegree, RomanNumeral, Scale, ScaleDefinition, ScaleDegree
 };
 
 // All Musical Traits
@@ -32,5 +32,5 @@ pub use std::fmt::{Debug, Display};
 pub use std::str::FromStr;
 
 // Macros
-pub use crate::{note, pitch};
+pub use crate::{note, pitch, roman};
 

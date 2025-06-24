@@ -33,7 +33,9 @@ pub struct Interval {
 #[rustfmt::skip]
 #[allow(missing_docs)]
 impl Interval {
+    pub const DIMINISHED_UNISON: Self = Self { fifths: -7, octaves: 0};
     pub const PERFECT_UNISON: Self = Self { fifths: 0, octaves: 0};
+    pub const AUGMENTED_UNISON: Self = Self { fifths: 7, octaves: 0};
 
     pub const DIMINISHED_SECOND: Self = Self { fifths: -12, octaves: 0};
     pub const MINOR_SECOND: Self = Self { fifths: -5, octaves: 0};
@@ -63,7 +65,7 @@ impl Interval {
     pub const MAJOR_SEVENTH: Self = Self { fifths: 5, octaves: 0};
     pub const AUGMENTED_SEVENTH: Self = Self { fifths: 12, octaves: 0};
 
-    pub const DIMINISHED_OCTAVE: Self = Self { fifths: -7, octaves: 0};
+    pub const DIMINISHED_OCTAVE: Self = Self { fifths: -7, octaves: 1};
     pub const OCTAVE: Self = Self { fifths: 0, octaves: 1};
     pub const AUGMENTED_OCTAVE: Self = Self { fifths: 7, octaves: 1};
 
@@ -231,7 +233,9 @@ impl fmt::Display for Interval {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             // Unison
+            Self::DIMINISHED_UNISON => write!(f, "d1"),
             Self::PERFECT_UNISON => write!(f, "P1"),
+            Self::AUGMENTED_UNISON => write!(f, "A1"),
             // Seconds
             Self::DIMINISHED_SECOND => write!(f, "d2"),
             Self::MINOR_SECOND => write!(f, "m2"),

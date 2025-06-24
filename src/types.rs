@@ -22,3 +22,6 @@ pub use key::Key;
 
 mod interval;
 pub use interval::*;
+
+mod roman_numeral;
+pub use roman_numeral::{RomanDegree, RomanNumeral, RomanChord};

@@ -379,6 +379,152 @@ impl Chord {
 
         format!("{}{}{}", self.root, quality, self.extended_type())
     }
+
+    /// Convert this chord to a roman numeral chord in the given key
+    pub fn to_roman(&self, key: &super::Key) -> Option<super::RomanChord> {
+        use super::RomanNumeral;
+        
+        // Calculate the interval from the key root to this chord's root
+        let interval_from_key = key.root().interval_to(self.root);
+        
+        let roman_numeral: RomanNumeral = interval_from_key.into();
+        println!("Converting chord {} to roman numeral: {} via interval: {}", self, roman_numeral, interval_from_key);
+        Some(super::RomanChord::new(roman_numeral, self.intervals.clone()))
+    }
+
+    /// Analyze this chord in the given key, returning both roman numeral and harmonic function
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, Key, note};
+    ///
+    /// let g_chord = Chord::major(note!("G"));
+    /// let c_major_key = Key::Major(note!("C"));
+    /// let (roman, function) = g_chord.analyze_in_key(&c_major_key);
+    /// // roman would be V, function would be Some(Dominant)
+    /// ```
+    pub fn analyze_in_key(&self, key: &super::Key) -> (super::RomanNumeral, Option<super::HarmonicFunction>) {
+        let roman = key.analyze_chord(self);
+        let function = key.harmonic_function(self);
+        (roman, function)
+    }
+
+    /// Get the roman numeral for this chord in the given key
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, Key, RomanNumeral, note};
+    ///
+    /// let g_chord = Chord::major(note!("G"));
+    /// let c_major_key = Key::Major(note!("C"));
+    /// let roman = g_chord.roman_in_key(&c_major_key);
+    /// assert_eq!(roman, RomanNumeral::V());
+    /// ```
+    pub fn roman_in_key(&self, key: &super::Key) -> super::RomanNumeral {
+        key.analyze_chord(self)
+    }
+
+    /// Get the harmonic function of this chord in the given key
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, Key, HarmonicFunction, note};
+    ///
+    /// let g_chord = Chord::major(note!("G"));
+    /// let c_major_key = Key::Major(note!("C"));
+    /// let function = g_chord.function_in_key(&c_major_key);
+    /// assert_eq!(function, Some(HarmonicFunction::Dominant));
+    /// ```
+    pub fn function_in_key(&self, key: &super::Key) -> Option<super::HarmonicFunction> {
+        key.harmonic_function(self)
+    }
+
+    // Fluent interface methods for method chaining
+    
+    /// Add an interval to this chord (fluent interface)
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, Interval, note};
+    ///
+    /// let chord = Chord::major(note!("C"))
+    ///     .with_interval(Interval::MINOR_SEVENTH);
+    /// // Creates a C7 chord
+    /// ```
+    pub fn with_interval(mut self, interval: Interval) -> Self {
+        if !self.intervals.contains(&interval) {
+            self.intervals.push(interval);
+            self.intervals.sort();
+        }
+        self
+    }
+
+    /// Remove an interval from this chord (fluent interface)
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, Interval, note};
+    ///
+    /// let chord = Chord::major(note!("C"))
+    ///     .without_interval(Interval::PERFECT_FIFTH);
+    /// // Creates a C chord without the fifth (C power chord)
+    /// ```
+    pub fn without_interval(mut self, interval: Interval) -> Self {
+        self.intervals.retain(|&i| i != interval);
+        self
+    }
+
+    /// Transpose this chord (fluent interface)
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, Interval, note};
+    ///
+    /// let chord = Chord::major(note!("C"))
+    ///     .transposed_by(Interval::MAJOR_THIRD);
+    /// // Creates an E major chord
+    /// ```
+    pub fn transposed_by(mut self, interval: Interval) -> Self {
+        use crate::traits::Transposable;
+        self.transpose(interval);
+        self
+    }
+
+    /// Convert to a different chord type while keeping the root (fluent interface)
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let minor_chord = Chord::major(note!("C"))
+    ///     .as_minor();
+    /// // Converts C major to C minor
+    /// ```
+    pub fn as_minor(self) -> Self {
+        Chord::minor(self.root)
+    }
+
+    /// Convert to major chord while keeping the root (fluent interface)
+    pub fn as_major(self) -> Self {
+        Chord::major(self.root)
+    }
+
+    /// Convert to diminished chord while keeping the root (fluent interface)
+    pub fn as_diminished(self) -> Self {
+        Chord::diminished(self.root)
+    }
+
+    /// Convert to augmented chord while keeping the root (fluent interface)
+    pub fn as_augmented(self) -> Self {
+        Chord::augmented(self.root)
+    }
 }
 
 impl Display for Chord {

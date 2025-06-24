@@ -1,4 +1,3 @@
-use crate::error::TypeError;
 use crate::traits::{ChordLike, HasIntervals, HasRoot};
 use super::{chord::HarmonicFunction, Accidental, Chord, Interval, NoteName};
 
@@ -7,6 +6,10 @@ pub use definition::ScaleDefinition;
 
 pub mod bitmask;
 pub use bitmask::ScaleBitmask;
+
+/// Scale degree representation and conversion
+pub mod degree;
+pub use degree::ScaleDegree;
 
 #[allow(dead_code)]
 pub mod scales;
@@ -60,6 +63,66 @@ impl Scale {
             mode_of: definition.mode_of.map(|s| s.to_string()),
             bitmask: definition.bitmask,
         }
+    }
+
+    /// Creates a major scale with the given tonic
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::prelude::*;
+    ///
+    /// let c_major = Scale::major(note!("C"));
+    /// let notes = c_major.notes();
+    /// // [C, D, E, F, G, A, B]
+    /// ```
+    pub fn major(tonic: NoteName) -> Self {
+        Self::from_definition(tonic, scales::IONIAN)
+    }
+
+    /// Creates a minor scale (natural minor/Aeolian) with the given tonic
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::prelude::*;
+    ///
+    /// let a_minor = Scale::minor(note!("A"));
+    /// let notes = a_minor.notes();
+    /// // [A, B, C, D, E, F, G]
+    /// ```
+    pub fn minor(tonic: NoteName) -> Self {
+        Self::from_definition(tonic, scales::AEOLIAN)
+    }
+
+    /// Creates a harmonic minor scale with the given tonic
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::prelude::*;
+    ///
+    /// let a_harmonic_minor = Scale::harmonic_minor(note!("A"));
+    /// let notes = a_harmonic_minor.notes();
+    /// // [A, B, C, D, E, F, G#]
+    /// ```
+    pub fn harmonic_minor(tonic: NoteName) -> Self {
+        Self::from_definition(tonic, scales::HARMONIC_MINOR)
+    }
+
+    /// Creates a melodic minor scale with the given tonic
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::prelude::*;
+    ///
+    /// let a_melodic_minor = Scale::melodic_minor(note!("A"));
+    /// let notes = a_melodic_minor.notes();
+    /// // [A, B, C, D, E, F#, G#]
+    /// ```
+    pub fn melodic_minor(tonic: NoteName) -> Self {
+        Self::from_definition(tonic, scales::MELODIC_MINOR)
     }
 
     /// Creates a custom scale with the given properties
@@ -213,10 +276,75 @@ impl Scale {
         HarmonicFunction::detect_by_scale_degrees(&scale_degrees)
     }
 
-    /// Creates a chord from the given scale degree (1-7)
-    pub fn chord_at_degree(&self, _degree: u8) -> Chord {
-        // Implementation
-        todo!()
+    /// Creates a triad from the given scale degree (1-7)
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Scale, Chord, note};
+    ///
+    /// let c_major = Scale::major(note!("C"));
+    /// let tonic_chord = c_major.chord_at_degree(1);
+    /// assert_eq!(tonic_chord, Chord::major(note!("C")));
+    /// ```
+    pub fn chord_at_degree(&self, degree: u8) -> Chord {
+        if degree < 1 || degree > 7 {
+            panic!("Scale degree must be in range 1-7, got {}", degree);
+        }
+        
+        let notes = self.notes();
+        let root = notes[(degree - 1) as usize];
+        
+        // Build triad using scale notes
+        let third_degree = ((degree - 1 + 2) % 7) as usize;
+        let fifth_degree = ((degree - 1 + 4) % 7) as usize;
+        
+        let third = notes[third_degree];
+        let fifth = notes[fifth_degree];
+        
+        let third_interval = root.interval_to(third);
+        let fifth_interval = root.interval_to(fifth);
+        
+        Chord::new(root, vec![
+            Interval::PERFECT_UNISON,
+            third_interval,
+            fifth_interval,
+        ])
+    }
+
+    /// Gets the tonic chord (I)
+    pub fn tonic_chord(&self) -> Chord {
+        self.chord_at_degree(1)
+    }
+
+    /// Gets the supertonic chord (ii)
+    pub fn supertonic_chord(&self) -> Chord {
+        self.chord_at_degree(2)
+    }
+
+    /// Gets the mediant chord (iii)
+    pub fn mediant_chord(&self) -> Chord {
+        self.chord_at_degree(3)
+    }
+
+    /// Gets the subdominant chord (IV)
+    pub fn subdominant_chord(&self) -> Chord {
+        self.chord_at_degree(4)
+    }
+
+    /// Gets the dominant chord (V)
+    pub fn dominant_chord(&self) -> Chord {
+        self.chord_at_degree(5)
+    }
+
+    /// Gets the submediant chord (vi)
+    pub fn submediant_chord(&self) -> Chord {
+        self.chord_at_degree(6)
+    }
+
+    /// Gets the leading tone chord (vii°)
+    pub fn leading_tone_chord(&self) -> Chord {
+        self.chord_at_degree(7)
     }
     /// Returns the relative major/minor of this scale
     pub fn relative(&self) -> Option<Scale> {
@@ -372,62 +500,3 @@ impl PartialEq<&Scale> for ScaleDefinition {
     }
 }
 
-/// A scale degree represents a specific step in a scale, optionally with an alteration
-/// (accidental).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct ScaleDegree {
-    /// The step in the scale (1-7)
-    pub step: u8,
-    /// The alteration of the scale degree, if any
-    pub alteration: Option<Accidental>,
-}
-
-impl ScaleDegree {
-    /// Create a new scale degree with the given step and optional alteration
-    pub const fn new(step: u8, alteration: Option<Accidental>) -> Self {
-        // Note: const fn can't use assert! before Rust 1.57
-        // Use runtime validation in a separate function if needed
-        ScaleDegree { step, alteration }
-    }
-
-    /// Validate the scale degree
-    pub fn validate(&self) -> Result<(), TypeError> {
-        if self.step < 1 || self.step > 7 {
-            return Err(TypeError::InvalidScaleDegree(self.step));
-        }
-        Ok(())
-    }
-
-    /// The tonic (1st scale degree)
-    pub const TONIC: Self = Self::new(1, None);
-    /// The supertonic (2nd scale degree)
-    pub const SUPERTONIC: Self = Self::new(2, None);
-    /// The mediant (3rd scale degree)
-    pub const MEDIANT: Self = Self::new(3, None);
-    /// The subdominant (4th scale degree)
-    pub const SUBDOMINANT: Self = Self::new(4, None);
-    /// The dominant (5th scale degree)
-    pub const DOMINANT: Self = Self::new(5, None);
-    /// The submediant (6th scale degree)
-    pub const SUBMEDIANT: Self = Self::new(6, None);
-    /// The leading tone (7th scale degree in major scales)
-    pub const LEADING_TONE: Self = Self::new(7, None);
-    /// The subtonic, unaltered 7th scale degree in minor scales
-    pub const SUBTONIC: Self = Self::new(7, None);
-
-    // Altered scale degrees
-    #[allow(missing_docs)]
-    pub const FLAT_SECOND: Self = Self::new(2, Some(Accidental::Flat));
-    #[allow(missing_docs)]
-    pub const FLAT_THIRD: Self = Self::new(3, Some(Accidental::Flat));
-    #[allow(missing_docs)]
-    pub const SHARP_FOURTH: Self = Self::new(4, Some(Accidental::Sharp));
-    #[allow(missing_docs)]
-    pub const FLAT_SIXTH: Self = Self::new(6, Some(Accidental::Flat));
-    #[allow(missing_docs)]
-    pub const FLAT_SEVENTH: Self = Self::new(7, Some(Accidental::Flat));
-
-    // Special scale degrees with traditional names
-    /// The Neapolitan flat second scale degree (♭II)
-    pub const NEAPOLITAN: Self = Self::new(2, Some(Accidental::Flat)); // ♭II
-}
