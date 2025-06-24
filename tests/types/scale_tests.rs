@@ -1,5 +1,4 @@
 use chordy::prelude::*;
-use crate::test_util::*;
 
 macro_rules! scale_test {
     ($name:ident, $root:expr, $scale_type:expr, $expected:expr) => {

@@ -194,7 +194,10 @@ impl FromStr for RomanNumeral {
 }
 
 /// A chord represented by a roman numeral root and intervals
-#[derive(Debug, Clone, PartialEq, Eq)]
+///
+/// This struct represents a chord in the context of a key, defined by its roman numeral root and
+/// the intervals that make up the chord.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RomanChord {
     /// The roman numeral root of the chord
     pub root: RomanNumeral,
@@ -344,5 +347,23 @@ impl Display for RomanChord {
         }
         
         write!(f, "{}", result)
+    }
+}
+
+impl From<super::ScaleDegree> for RomanNumeral {
+    fn from(scale_degree: super::ScaleDegree) -> Self {
+        let degree = RomanDegree::from_number(scale_degree.step)
+            .expect("ScaleDegree should always have a valid step (1-7)");
+        
+        let accidental = scale_degree.alteration.unwrap_or(Accidental::Natural);
+        
+        RomanNumeral::new(degree, accidental)
+    }
+}
+
+impl From<Interval> for RomanNumeral {
+    fn from(interval: Interval) -> Self {
+        let scale_degree = super::ScaleDegree::from(interval);
+        RomanNumeral::from(scale_degree)
     }
 }

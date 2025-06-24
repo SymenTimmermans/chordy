@@ -38,11 +38,16 @@ fn test_roman_numeral_creation() {
     assert_ne!(one, two);
     assert_ne!(four, five);
     assert_ne!(RomanNumeral::new(RomanDegree::III, Accidental::Natural), flat_three);
+    assert_ne!(flat_six, flat_seven);
     
     // Test degree access
     assert_eq!(one.degree(), RomanDegree::I);
     assert_eq!(flat_three.degree(), RomanDegree::III);
     assert_eq!(flat_three.accidental(), Accidental::Flat);
+    assert_eq!(flat_six.degree(), RomanDegree::VI);
+    assert_eq!(flat_six.accidental(), Accidental::Flat);
+    assert_eq!(flat_seven.degree(), RomanDegree::VII);
+    assert_eq!(flat_seven.accidental(), Accidental::Flat);
 }
 
 #[test]
@@ -143,6 +148,12 @@ fn test_roman_chord_helper_methods() {
         Interval::PERFECT_UNISON,
         Interval::MINOR_THIRD,
         Interval::PERFECT_FIFTH,
+    ]);
+
+    assert_eq!(diminished_vii.intervals(), &vec![
+        Interval::PERFECT_UNISON,
+        Interval::MINOR_THIRD,
+        Interval::DIMINISHED_FIFTH,
     ]);
 }
 
@@ -294,4 +305,93 @@ fn test_roman_macro() {
     assert_eq!(roman_sharp_four, RomanNumeral::new(RomanDegree::IV, Accidental::Sharp));
 }
 
+#[test]
+fn test_from_interval_for_scale_degree() {
+    // Test From<Interval> for ScaleDegree
+    let unison = ScaleDegree::from(Interval::PERFECT_UNISON);
+    assert_eq!(unison.step, 1);
+    assert_eq!(unison.alteration, None);
 
+    let major_second = ScaleDegree::from(Interval::MAJOR_SECOND);
+    assert_eq!(major_second.step, 2);
+    assert_eq!(major_second.alteration, None);
+
+    let minor_third = ScaleDegree::from(Interval::MINOR_THIRD);
+    assert_eq!(minor_third.step, 3);
+    assert_eq!(minor_third.alteration, Some(Accidental::Flat));
+
+    let perfect_fourth = ScaleDegree::from(Interval::PERFECT_FOURTH);
+    assert_eq!(perfect_fourth.step, 4);
+    assert_eq!(perfect_fourth.alteration, None);
+
+    let augmented_fourth = ScaleDegree::from(Interval::AUGMENTED_FOURTH);
+    assert_eq!(augmented_fourth.step, 4);
+    assert_eq!(augmented_fourth.alteration, Some(Accidental::Sharp));
+
+    // Test compound intervals reduce to simple
+    let major_ninth = ScaleDegree::from(Interval::MAJOR_NINTH);
+    assert_eq!(major_ninth.step, 2);
+    assert_eq!(major_ninth.alteration, None);
+}
+
+#[test]
+fn test_from_scale_degree_for_roman_numeral() {
+    // Test From<ScaleDegree> for RomanNumeral
+    let scale_degree_1 = ScaleDegree::new(1, None);
+    let roman_1 = RomanNumeral::from(scale_degree_1);
+    assert_eq!(roman_1.degree(), RomanDegree::I);
+    assert_eq!(roman_1.accidental(), Accidental::Natural);
+
+    let scale_degree_flat_3 = ScaleDegree::new(3, Some(Accidental::Flat));
+    let roman_flat_3 = RomanNumeral::from(scale_degree_flat_3);
+    assert_eq!(roman_flat_3.degree(), RomanDegree::III);
+    assert_eq!(roman_flat_3.accidental(), Accidental::Flat);
+
+    let scale_degree_sharp_5 = ScaleDegree::new(5, Some(Accidental::Sharp));
+    let roman_sharp_5 = RomanNumeral::from(scale_degree_sharp_5);
+    assert_eq!(roman_sharp_5.degree(), RomanDegree::V);
+    assert_eq!(roman_sharp_5.accidental(), Accidental::Sharp);
+}
+
+#[test]
+fn test_from_interval_for_roman_numeral() {
+    // Test From<Interval> for RomanNumeral (chained conversion)
+    let roman_from_unison = RomanNumeral::from(Interval::PERFECT_UNISON);
+    assert_eq!(roman_from_unison.degree(), RomanDegree::I);
+    assert_eq!(roman_from_unison.accidental(), Accidental::Natural);
+
+    let roman_from_major_third = RomanNumeral::from(Interval::MAJOR_THIRD);
+    assert_eq!(roman_from_major_third.degree(), RomanDegree::III);
+    assert_eq!(roman_from_major_third.accidental(), Accidental::Natural);
+
+    let roman_from_minor_sixth = RomanNumeral::from(Interval::MINOR_SIXTH);
+    assert_eq!(roman_from_minor_sixth.degree(), RomanDegree::VI);
+    assert_eq!(roman_from_minor_sixth.accidental(), Accidental::Flat);
+
+    let roman_from_aug_fourth = RomanNumeral::from(Interval::AUGMENTED_FOURTH);
+    assert_eq!(roman_from_aug_fourth.degree(), RomanDegree::IV);
+    assert_eq!(roman_from_aug_fourth.accidental(), Accidental::Sharp);
+}
+
+macro_rules! roman_naming_test {
+    ($name:ident, $chord_str:expr, $key:expr, $expected:expr) => {
+        #[test]
+        fn $name() {
+            let chord: Chord = $chord_str.parse().unwrap();
+            let roman = chord.to_roman(&$key).unwrap();
+            assert_eq!(
+                roman.to_string(),
+                $expected,
+                "Roman numeral of chord with notes {} in key {} should be named `{}`", 
+                $chord_str,
+                $key,
+                $expected
+            );
+        }
+    };
+}
+
+roman_naming_test!(test_c_major_roman, "C,E,G", Key::Major(note!("C")), "I");
+roman_naming_test!(test_d_minor_roman, "D,F,A", Key::Major(note!("C")), "ii");
+roman_naming_test!(test_e_flat_minor_roman, "Eb,Gb,Bb", Key::Major(note!("C")), "♭iii");
+roman_naming_test!(test_c_sharp_diminished_roman, "C#,E,G", Key::Major(note!("C")), "#I°");

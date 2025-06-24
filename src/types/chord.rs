@@ -384,59 +384,11 @@ impl Chord {
     pub fn to_roman(&self, key: &super::Key) -> Option<super::RomanChord> {
         use super::RomanNumeral;
         
-        // Get the root note of the key
-        let key_root = match key {
-            super::Key::Major(note) | super::Key::Minor(note) => *note,
-        };
-        
         // Calculate the interval from the key root to this chord's root
-        let interval_from_key = key_root.interval_to(self.root);
+        let interval_from_key = key.root().interval_to(self.root);
         
-        // Convert interval to degree and accidental
-        let (degree, accidental) = interval_to_degree_and_accidental(interval_from_key, key)?;
-        
-        let roman_numeral = RomanNumeral::new(degree, accidental);
+        let roman_numeral: RomanNumeral = interval_from_key.into();
         Some(super::RomanChord::new(roman_numeral, self.intervals.clone()))
-    }
-}
-
-/// Helper function to convert an interval to roman degree and accidental
-fn interval_to_degree_and_accidental(interval: Interval, key: &super::Key) -> Option<(super::RomanDegree, super::Accidental)> {
-    use super::{RomanDegree, Accidental, Interval, Key};
-    
-    // Map intervals to degrees and accidentals relative to major scale
-    let (base_degree, base_accidental) = match interval {
-        Interval::PERFECT_UNISON => (RomanDegree::I, Accidental::Natural),
-        Interval::MINOR_SECOND => (RomanDegree::II, Accidental::Flat),
-        Interval::MAJOR_SECOND => (RomanDegree::II, Accidental::Natural),
-        Interval::AUGMENTED_SECOND => (RomanDegree::II, Accidental::Sharp),
-        Interval::MINOR_THIRD => (RomanDegree::III, Accidental::Flat),
-        Interval::MAJOR_THIRD => (RomanDegree::III, Accidental::Natural),
-        Interval::AUGMENTED_THIRD => (RomanDegree::III, Accidental::Sharp),
-        Interval::DIMINISHED_FOURTH => (RomanDegree::IV, Accidental::Flat),
-        Interval::PERFECT_FOURTH => (RomanDegree::IV, Accidental::Natural),
-        Interval::AUGMENTED_FOURTH => (RomanDegree::IV, Accidental::Sharp),
-        Interval::DIMINISHED_FIFTH => (RomanDegree::V, Accidental::Flat),
-        Interval::PERFECT_FIFTH => (RomanDegree::V, Accidental::Natural),
-        Interval::AUGMENTED_FIFTH => (RomanDegree::V, Accidental::Sharp),
-        Interval::MINOR_SIXTH => (RomanDegree::VI, Accidental::Flat),
-        Interval::MAJOR_SIXTH => (RomanDegree::VI, Accidental::Natural),
-        Interval::AUGMENTED_SIXTH => (RomanDegree::VI, Accidental::Sharp),
-        Interval::MINOR_SEVENTH => (RomanDegree::VII, Accidental::Flat),
-        Interval::MAJOR_SEVENTH => (RomanDegree::VII, Accidental::Natural),
-        Interval::AUGMENTED_SEVENTH => (RomanDegree::VII, Accidental::Sharp),
-        _ => return None,
-    };
-    
-    // In minor keys, adjust the accidentals relative to the major scale
-    // Minor keys naturally have ♭III, ♭VI, ♭VII compared to major
-    match key {
-        Key::Major(_) => Some((base_degree, base_accidental)),
-        Key::Minor(_) => {
-            // For minor keys, we already computed relative to major scale
-            // So the accidentals are already correct
-            Some((base_degree, base_accidental))
-        }
     }
 }
 

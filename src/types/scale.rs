@@ -431,3 +431,96 @@ impl ScaleDegree {
     /// The Neapolitan flat second scale degree (♭II)
     pub const NEAPOLITAN: Self = Self::new(2, Some(Accidental::Flat)); // ♭II
 }
+
+impl From<Interval> for ScaleDegree {
+    fn from(interval: Interval) -> Self {
+        match interval {
+            // Unisons
+            Interval::PERFECT_UNISON => Self::TONIC,
+
+            // Seconds  
+            Interval::DIMINISHED_SECOND => Self::new(2, Some(Accidental::DoubleFlat)),
+            Interval::MINOR_SECOND => Self::new(2, Some(Accidental::Flat)),
+            Interval::MAJOR_SECOND => Self::new(2, None),
+            Interval::AUGMENTED_SECOND => Self::new(2, Some(Accidental::Sharp)),
+
+            // Thirds
+            Interval::DIMINISHED_THIRD => Self::new(3, Some(Accidental::DoubleFlat)),
+            Interval::MINOR_THIRD => Self::new(3, Some(Accidental::Flat)),
+            Interval::MAJOR_THIRD => Self::new(3, None),
+            Interval::AUGMENTED_THIRD => Self::new(3, Some(Accidental::Sharp)),
+
+            // Fourths
+            Interval::DIMINISHED_FOURTH => Self::new(4, Some(Accidental::Flat)),
+            Interval::PERFECT_FOURTH => Self::new(4, None),
+            Interval::AUGMENTED_FOURTH => Self::new(4, Some(Accidental::Sharp)),
+
+            // Fifths
+            Interval::DIMINISHED_FIFTH => Self::new(5, Some(Accidental::Flat)),
+            Interval::PERFECT_FIFTH => Self::new(5, None),
+            Interval::AUGMENTED_FIFTH => Self::new(5, Some(Accidental::Sharp)),
+
+            // Sixths
+            Interval::DIMINISHED_SIXTH => Self::new(6, Some(Accidental::DoubleFlat)),
+            Interval::MINOR_SIXTH => Self::new(6, Some(Accidental::Flat)),
+            Interval::MAJOR_SIXTH => Self::new(6, None),
+            Interval::AUGMENTED_SIXTH => Self::new(6, Some(Accidental::Sharp)),
+
+            // Sevenths
+            Interval::DIMINISHED_SEVENTH => Self::new(7, Some(Accidental::DoubleFlat)),
+            Interval::MINOR_SEVENTH => Self::new(7, Some(Accidental::Flat)),
+            Interval::MAJOR_SEVENTH => Self::new(7, None),
+            Interval::AUGMENTED_SEVENTH => Self::new(7, Some(Accidental::Sharp)),
+
+            // Octaves (wrap back to 1)
+            Interval::DIMINISHED_OCTAVE => Self::new(1, Some(Accidental::Flat)),
+            Interval::OCTAVE => Self::TONIC,
+            Interval::AUGMENTED_OCTAVE => Self::new(1, Some(Accidental::Sharp)),
+
+            // Compound intervals (reduce to simple intervals)
+            // Ninths -> Seconds
+            Interval::DIMINISHED_NINTH => Self::new(2, Some(Accidental::DoubleFlat)),
+            Interval::MINOR_NINTH => Self::new(2, Some(Accidental::Flat)),
+            Interval::MAJOR_NINTH => Self::new(2, None),
+            Interval::AUGMENTED_NINTH => Self::new(2, Some(Accidental::Sharp)),
+
+            // Tenths -> Thirds  
+            Interval::DIMINISHED_TENTH => Self::new(3, Some(Accidental::DoubleFlat)),
+            Interval::MINOR_TENTH => Self::new(3, Some(Accidental::Flat)),
+            Interval::MAJOR_TENTH => Self::new(3, None),
+            Interval::AUGMENTED_TENTH => Self::new(3, Some(Accidental::Sharp)),
+
+            // Elevenths -> Fourths
+            Interval::DIMINISHED_ELEVENTH => Self::new(4, Some(Accidental::Flat)),
+            Interval::PERFECT_ELEVENTH => Self::new(4, None),
+            Interval::AUGMENTED_ELEVENTH => Self::new(4, Some(Accidental::Sharp)),
+
+            // Twelfths -> Fifths
+            Interval::DIMINISHED_TWELFTH => Self::new(5, Some(Accidental::Flat)),
+            Interval::PERFECT_TWELFTH => Self::new(5, None),
+            Interval::AUGMENTED_TWELFTH => Self::new(5, Some(Accidental::Sharp)),
+
+            // Thirteenths -> Sixths
+            Interval::DIMINISHED_THIRTEENTH => Self::new(6, Some(Accidental::DoubleFlat)),
+            Interval::MINOR_THIRTEENTH => Self::new(6, Some(Accidental::Flat)),
+            Interval::MAJOR_THIRTEENTH => Self::new(6, None),
+            Interval::AUGMENTED_THIRTEENTH => Self::new(6, Some(Accidental::Sharp)),
+
+            // Fourteenths -> Sevenths
+            Interval::DIMINISHED_FOURTEENTH => Self::new(7, Some(Accidental::DoubleFlat)),
+            Interval::MINOR_FOURTEENTH => Self::new(7, Some(Accidental::Flat)),
+            Interval::MAJOR_FOURTEENTH => Self::new(7, None),
+            Interval::AUGMENTED_FOURTEENTH => Self::new(7, Some(Accidental::Sharp)),
+
+            // For any other intervals, calculate the scale degree from the fifths position
+            _ => {
+                // Calculate generic interval from fifths using the same formula as the private method
+                let base_generic = ((interval.fifths * 4) % 7 + 7) % 7;
+                let octave_generics = interval.octaves * 7;
+                let generic_num = base_generic + octave_generics + 1;  // +1 because intervals start at 1
+                let reduced_degree = ((generic_num - 1) % 7) + 1;
+                Self::new(reduced_degree as u8, None)
+            }
+        }
+    }
+}

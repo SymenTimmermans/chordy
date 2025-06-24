@@ -1,3 +1,5 @@
+use crate::traits::HasRoot;
+
 use super::NoteName;
 
 /// The mode of a key (Major, Minor, etc.)
@@ -22,3 +24,29 @@ impl Key {
         }
     }
 }
+
+impl std::fmt::Display for Key {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Key::Major(note) => write!(f, "{} Major", note),
+            Key::Minor(note) => write!(f, "{} Minor", note),
+        }
+    }
+}
+
+impl HasRoot for Key {
+    fn root(&self) -> NoteName {
+        match self {
+            Key::Major(note) => *note,
+            Key::Minor(note) => *note,
+        }
+    }
+
+    fn root_mut(&mut self) -> &mut NoteName {
+        match self {
+            Key::Major(note) => note,
+            Key::Minor(note) => note,
+        }
+    }
+}
+
