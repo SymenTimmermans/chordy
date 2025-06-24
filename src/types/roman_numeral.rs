@@ -372,25 +372,29 @@ impl RomanChord {
         );
         temp_chord.quality()
     }
+    
+    /// Convert this roman chord to a ChordName using the new naming system
+    pub fn to_chord_name(&self) -> super::chord::ChordName {
+        use super::chord::{ChordRoot, ChordAnalyzer};
+        let chord_root = ChordRoot::Roman(self.root);
+        ChordAnalyzer::analyze_with_root(chord_root, &self.intervals)
+    }
 }
 
 impl Display for RomanChord {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // Show the roman numeral with quality-based case and any extensions
-        let quality = self.quality().unwrap_or(ChordQuality::Major);
-        let mut result = self.root.display_for_quality(quality);
+        // Use the new chord naming system for consistent and complete notation
+        use super::chord::{ChordRenderer, NamingConvention};
         
-        // Check for common extensions
-        let has_minor_7th = self.intervals.contains(&Interval::MINOR_SEVENTH);
-        let has_major_7th = self.intervals.contains(&Interval::MAJOR_SEVENTH);
+        let chord_name = self.to_chord_name();
         
-        if has_minor_7th {
-            result.push('7');
-        } else if has_major_7th {
-            result.push_str("maj7");
-        }
+        // Use Roman numeral specific renderer
+        let renderer = ChordRenderer::new(
+            super::chord::ChordFormat::Unicode, 
+            NamingConvention::Jazz
+        );
         
-        write!(f, "{}", result)
+        write!(f, "{}", renderer.render(&chord_name))
     }
 }
 

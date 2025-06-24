@@ -8,6 +8,9 @@ use crate::{
 mod quality;
 pub use quality::ChordQuality;
 
+pub mod naming;
+pub use naming::*;
+
 /// A chord represented by a root note and intervals from that root
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Chord {
@@ -353,8 +356,9 @@ impl Chord {
 
     /// Return abbreviated name of the chord.
     ///
-    /// Tries to figure out by intervals what the chord name is and then creates suffixes for any
-    /// remaining intervals.
+    /// Uses the new chord naming system for consistent and accurate chord symbol generation.
+    /// This method replaces the old nested if/else logic with a clean analyzer-based approach.
+    /// Uses legacy compatibility rendering to maintain backward compatibility.
     ///
     /// # Examples
     ///
@@ -369,15 +373,9 @@ impl Chord {
     /// assert_eq!(a_minor.abbreviated_name(), "Am");
     /// ```
     pub fn abbreviated_name(&self) -> String {
-        let quality = match self.quality() {
-            Some(ChordQuality::Major) => "",
-            Some(ChordQuality::Minor) => "m",
-            Some(ChordQuality::Diminished) => "dim",
-            Some(ChordQuality::Augmented) => "aug",
-            None => "",
-        };
-
-        format!("{}{}{}", self.root, quality, self.extended_type())
+        // Use the new ChordAnalyzer with legacy renderer for backward compatibility
+        let chord_name = self.to_chord_name();
+        ChordRenderer::legacy().render(&chord_name)
     }
 
     /// Convert this chord to a roman numeral chord in the given key
@@ -440,6 +438,21 @@ impl Chord {
     /// ```
     pub fn function_in_key(&self, key: &super::Key) -> Option<super::HarmonicFunction> {
         key.harmonic_function(self)
+    }
+
+    /// Convert this chord to a ChordName using the new naming system
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let g7 = Chord::dominant_7th(note!("G"));
+    /// let chord_name = g7.to_chord_name();
+    /// assert_eq!(format!("{}", chord_name), "G7");
+    /// ```
+    pub fn to_chord_name(&self) -> ChordName {
+        ChordAnalyzer::analyze(self.root, &self.intervals)
     }
 
     // Fluent interface methods for method chaining
