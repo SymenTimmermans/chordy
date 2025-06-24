@@ -131,15 +131,8 @@ impl Display for RomanNumeral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // Default display without quality context - use uppercase
         let base = self.degree.base_string();
-        let accidental_str = match self.accidental {
-            Accidental::Natural => "",
-            Accidental::Sharp => "♯",
-            Accidental::Flat => "♭",
-            Accidental::DoubleSharp => "𝄪",
-            Accidental::DoubleFlat => "𝄫",
-        };
         
-        write!(f, "{}{}", accidental_str, base)
+        write!(f, "{}{}", self.accidental, base)
     }
 }
 

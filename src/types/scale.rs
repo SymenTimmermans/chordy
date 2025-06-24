@@ -436,7 +436,9 @@ impl From<Interval> for ScaleDegree {
     fn from(interval: Interval) -> Self {
         match interval {
             // Unisons
+            Interval::DIMINISHED_UNISON => Self::new(1, Some(Accidental::Flat)),
             Interval::PERFECT_UNISON => Self::TONIC,
+            Interval::AUGMENTED_UNISON => Self::new(1, Some(Accidental::Sharp)),
 
             // Seconds  
             Interval::DIMINISHED_SECOND => Self::new(2, Some(Accidental::DoubleFlat)),

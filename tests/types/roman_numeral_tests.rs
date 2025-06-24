@@ -391,7 +391,19 @@ macro_rules! roman_naming_test {
     };
 }
 
+// Triads
 roman_naming_test!(test_c_major_roman, "C,E,G", Key::Major(note!("C")), "I");
 roman_naming_test!(test_d_minor_roman, "D,F,A", Key::Major(note!("C")), "ii");
 roman_naming_test!(test_e_flat_minor_roman, "Eb,Gb,Bb", Key::Major(note!("C")), "♭iii");
-roman_naming_test!(test_c_sharp_diminished_roman, "C#,E,G", Key::Major(note!("C")), "#I°");
+roman_naming_test!(test_c_sharp_diminished_roman, "C#,E,G", Key::Major(note!("C")), "♯i°");
+roman_naming_test!(test_f_major_augmented_roman, "F,A,C#", Key::Major(note!("C")), "IV+");
+
+// Seventh chords
+roman_naming_test!(test_g7_roman, "G,B,D,F", Key::Major(note!("C")), "V7");
+roman_naming_test!(test_a_minor7_roman, "A,C,E,G", Key::Major(note!("C")), "vi7");
+roman_naming_test!(test_b_diminished7_roman, "B,D,F,A", Key::Major(note!("C")), "vii°7");
+roman_naming_test!(test_d_minor7_roman, "D,F,A,C", Key::Major(note!("C")), "ii7");
+roman_naming_test!(test_e_flat_major7_roman, "Eb,G,Bb,D", Key::Major(note!("C")), "♭IIImaj7");
+roman_naming_test!(test_f_sharp_minor7_roman, "F#,A,C#,E", Key::Major(note!("Ab")), "♯vi7");
+roman_naming_test!(test_c_major7_roman, "C,E,G,B", Key::Major(note!("C")), "Imaj7");
+

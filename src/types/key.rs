@@ -1,6 +1,6 @@
 use crate::traits::HasRoot;
 
-use super::NoteName;
+use super::{NoteName, ScaleDegree};
 
 /// The mode of a key (Major, Minor, etc.)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -22,6 +22,35 @@ impl Key {
         match self {
             Key::Major(note) | Key::Minor(note) => note.fifths(),
         }
+    }
+
+    /// Returns the scale degree of a given note within this key
+    ///
+    /// Calculates the scale degree by finding the interval from the key's root
+    /// to the given note, then converting that interval to a ScaleDegree.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use chordy::{Key, note, ScaleDegree, Accidental};
+    ///
+    /// let c_major = Key::Major(note!("C"));
+    /// 
+    /// // Natural scale degrees in C major
+    /// assert_eq!(c_major.degree_of(note!("C")), ScaleDegree::new(1, None));
+    /// assert_eq!(c_major.degree_of(note!("D")), ScaleDegree::new(2, None));
+    /// assert_eq!(c_major.degree_of(note!("E")), ScaleDegree::new(3, None));
+    /// 
+    /// // Altered notes
+    /// assert_eq!(c_major.degree_of(note!("C#")), ScaleDegree::new(1, Some(Accidental::Sharp)));
+    /// assert_eq!(c_major.degree_of(note!("F#")), ScaleDegree::new(4, Some(Accidental::Sharp)));
+    /// ```
+    pub fn degree_of(&self, note: NoteName) -> ScaleDegree {
+        // Calculate the interval from the key root to the given note
+        let interval = self.root().interval_to(note);
+        
+        // Convert the interval to a scale degree
+        ScaleDegree::from(interval)
     }
 }
 

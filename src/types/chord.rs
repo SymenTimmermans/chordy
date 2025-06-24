@@ -388,6 +388,7 @@ impl Chord {
         let interval_from_key = key.root().interval_to(self.root);
         
         let roman_numeral: RomanNumeral = interval_from_key.into();
+        println!("Converting chord {} to roman numeral: {} via interval: {}", self, roman_numeral, interval_from_key);
         Some(super::RomanChord::new(roman_numeral, self.intervals.clone()))
     }
 }
