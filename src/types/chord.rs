@@ -84,6 +84,89 @@ impl Chord {
         Self::new(root, notes.iter().map(|&n| root.interval_to(n)).collect())
     }
 
+    /// Create a chord from an ordered list of notes and a specified root
+    /// 
+    /// This method assumes the notes are in ascending order and calculates 
+    /// compound intervals when necessary. For example, in "G,B,D,F,Ab", 
+    /// the Ab will be treated as a minor 9th rather than a minor 2nd.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// // This creates a G7♭9 chord
+    /// let notes = [note!("G"), note!("B"), note!("D"), note!("F"), note!("Ab")];
+    /// let chord = Chord::from_notes_ordered(&notes, note!("G"));
+    /// assert_eq!(chord.abbreviated_name(), "G7♭9");
+    /// ```
+    pub fn from_notes_ordered(notes: &[NoteName], root: NoteName) -> Chord {
+        if notes.is_empty() {
+            return Self::new(root, vec![]);
+        }
+
+        let mut intervals = Vec::new();
+        let mut last_semitone_position = 0; // Position of the root
+        
+        for &note in notes {
+            if note == root {
+                // Root note, add perfect unison
+                intervals.push(Interval::PERFECT_UNISON);
+                continue;
+            }
+
+            // Calculate the basic interval from root to this note
+            let base_interval = root.interval_to(note);
+            
+            // Calculate how many semitones this represents (using positive modulo)
+            let base_semitones = (base_interval.fifths as i32 * 7 + base_interval.octaves as i32 * 12).rem_euclid(12);
+            let mut final_semitones = base_semitones;
+            let mut octaves_to_add = 0;
+            
+            // If this note would be at the same position or lower than the last note,
+            // move it up octaves until it's higher
+            while final_semitones <= last_semitone_position {
+                final_semitones += 12;
+                octaves_to_add += 1;
+            }
+            
+            // Create the final interval
+            let final_interval = Interval {
+                fifths: base_interval.fifths,
+                octaves: base_interval.octaves + octaves_to_add,
+            };
+            
+            intervals.push(final_interval);
+            last_semitone_position = final_semitones;
+        }
+
+        Self::new(root, intervals)
+    }
+
+    /// Create a chord from an ordered list of notes, using the first note as root
+    /// 
+    /// This is a convenience method that uses the first note as the root and 
+    /// applies ordered parsing to the rest.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// // This creates a G7♭9 chord
+    /// let notes = [note!("G"), note!("B"), note!("D"), note!("F"), note!("Ab")];
+    /// let chord = Chord::from_notes_ordered_root_first(&notes);
+    /// assert_eq!(chord.abbreviated_name(), "G7♭9");
+    /// ```
+    pub fn from_notes_ordered_root_first(notes: &[NoteName]) -> Chord {
+        if notes.is_empty() {
+            return Self::new(note!("C"), vec![]);
+        }
+        
+        let root = notes[0];
+        Self::from_notes_ordered(notes, root)
+    }
+
     /// Create a major chord with the given root note
     pub fn major(root: NoteName) -> Self {
         Self::new(
@@ -611,7 +694,8 @@ impl FromStr for Chord {
             return Err(ParseError::InvalidChordFormat(s.to_string()));
         }
 
-        Ok(Chord::from_notes(&notes))
+        // Use ordered parsing with the first note as root for test compatibility
+        Ok(Chord::from_notes_ordered_root_first(&notes))
     }
 }
 
