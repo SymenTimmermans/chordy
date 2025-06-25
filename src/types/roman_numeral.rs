@@ -167,37 +167,32 @@ impl FromStr for RomanNumeral {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let chars: Vec<char> = s.chars().collect();
-        if chars.is_empty() {
+        if s.is_empty() {
             return Err(ParseError::InvalidRomanNumeral(s.to_string()));
         }
         
-        // Parse accidental prefix
+        // Parse accidental prefix using centralized Accidental::FromStr
+        // Try different prefix lengths to find the longest match
         let mut accidental = Accidental::Natural;
         let mut degree_start = 0;
         
-        match chars[0] {
-            '♭' => {
-                accidental = Accidental::Flat;
-                degree_start = 1;
-            },
-            '♯' => {
-                accidental = Accidental::Sharp;
-                degree_start = 1;
-            },
-            '𝄫' => {
-                accidental = Accidental::DoubleFlat;
-                degree_start = 1;
-            },
-            '𝄪' => {
-                accidental = Accidental::DoubleSharp;
-                degree_start = 1;
-            },
-            _ => {}
+        // Try double accidentals first (longer strings)
+        for prefix_len in (1..=s.len()).rev() {
+            if let Some(prefix) = s.get(0..prefix_len) {
+                if let Ok(parsed_accidental) = Accidental::from_str(prefix) {
+                    accidental = parsed_accidental;
+                    degree_start = prefix_len;
+                    break;
+                }
+            }
         }
         
         // Parse the roman numeral part
-        let roman_part: String = chars[degree_start..].iter().collect();
+        let roman_part = &s[degree_start..];
+        if roman_part.is_empty() {
+            return Err(ParseError::InvalidRomanNumeral(s.to_string()));
+        }
+        
         let degree = match roman_part.to_uppercase().as_str() {
             "I" => RomanDegree::I,
             "II" => RomanDegree::II,

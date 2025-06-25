@@ -1,6 +1,7 @@
 use std::{fmt, str::FromStr};
 
 use crate::error::ParseError;
+use crate::types::chord::naming::ChordFormat;
 
 /// Accidentals that modify the pitch of a note,
 /// with numeric backing representing semitone shifts.
@@ -74,6 +75,37 @@ impl Accidental {
             Accidental::Natural => None,
             Accidental::DoubleFlat => Some(Accidental::DoubleFlat),
             Accidental::DoubleSharp => Some(Accidental::DoubleSharp),
+        }
+    }
+
+    /// Returns the string representation of the accidental for a specific output format.
+    /// This includes natural accidentals, unlike component_str.
+    pub fn render_for_format(&self, format: ChordFormat) -> &'static str {
+        match (self, format) {
+            (Accidental::Flat, ChordFormat::Unicode) => "♭",
+            (Accidental::Flat, ChordFormat::Ascii) => "b",
+            (Accidental::Flat, ChordFormat::Html) => "&flat;",
+            (Accidental::Sharp, ChordFormat::Unicode) => "♯",
+            (Accidental::Sharp, ChordFormat::Ascii) => "#",
+            (Accidental::Sharp, ChordFormat::Html) => "&sharp;",
+            (Accidental::Natural, ChordFormat::Unicode) => "♮",
+            (Accidental::Natural, ChordFormat::Ascii) => "♮",
+            (Accidental::Natural, ChordFormat::Html) => "&natural;",
+            (Accidental::DoubleFlat, ChordFormat::Unicode) => "𝄫",
+            (Accidental::DoubleFlat, ChordFormat::Ascii) => "bb",
+            (Accidental::DoubleFlat, ChordFormat::Html) => "&bb;",
+            (Accidental::DoubleSharp, ChordFormat::Unicode) => "𝄪",
+            (Accidental::DoubleSharp, ChordFormat::Ascii) => "##",
+            (Accidental::DoubleSharp, ChordFormat::Html) => "&x;",
+        }
+    }
+
+    /// Returns the string representation of the accidental for use as a component in 
+    /// another string for a specific output format. Natural accidentals return empty string.
+    pub fn component_str_for_format(&self, format: ChordFormat) -> &'static str {
+        match self {
+            Accidental::Natural => "",
+            _ => self.render_for_format(format),
         }
     }
 }

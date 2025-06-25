@@ -69,13 +69,7 @@ impl ChordRenderer {
         if matches!(chord_name.seventh, Some(SeventhType::HalfDiminished | SeventhType::Diminished)) && matches!(chord_name.root, ChordRoot::Roman(_)) {
             // For diminished seventh Roman chords, render root with diminished case but no quality symbol
             if let ChordRoot::Roman(roman) = &chord_name.root {
-                let accidental_str = match roman.accidental {
-                    Accidental::Natural => "",
-                    Accidental::Sharp => "♯",
-                    Accidental::Flat => "♭",
-                    Accidental::DoubleSharp => "𝄪",
-                    Accidental::DoubleFlat => "𝄫",
-                };
+                let accidental_str = roman.accidental.component_str_for_format(self.format);
                 let base = roman.degree.lowercase_string(); // Use lowercase for diminished quality
                 result.push_str(&format!("{}{}", accidental_str, base));
             }
@@ -180,14 +174,8 @@ impl ChordRenderer {
             ChordQuality::Minor | ChordQuality::Diminished => roman.degree.lowercase_string(),
         };
         
-        // Render accidental
-        let accidental_str = match roman.accidental {
-            Accidental::Natural => "",
-            Accidental::Sharp => "♯",
-            Accidental::Flat => "♭",
-            Accidental::DoubleSharp => "𝄪",
-            Accidental::DoubleFlat => "𝄫",
-        };
+        // Render accidental using centralized method
+        let accidental_str = roman.accidental.component_str_for_format(self.format);
         
         // Add quality suffix
         let quality_suffix = match quality {
@@ -202,12 +190,15 @@ impl ChordRenderer {
     fn render_note_name(&self, note: &NoteName) -> String {
         match self.format {
             ChordFormat::Unicode => format!("{}", note),
-            ChordFormat::Ascii => note.to_string().replace('♯', "#").replace('♭', "b"),
-            ChordFormat::Html => note.to_string()
-                .replace('♯', "&sharp;")
-                .replace('♭', "&flat;")
-                .replace('𝄪', "&x;")
-                .replace('𝄫', "&bb;"),
+            _ => {
+                // Use centralized accidental rendering for other formats
+                let letter = note.letter();
+                let accidental = note.accidental();
+                match accidental {
+                    Accidental::Natural => format!("{}", letter),
+                    _ => format!("{}{}", letter, accidental.render_for_format(self.format)),
+                }
+            }
         }
     }
     
