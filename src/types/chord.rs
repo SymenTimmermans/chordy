@@ -297,31 +297,6 @@ impl Chord {
         self.intervals.contains(&Interval::MAJOR_THIRD)
     }
 
-    /// Returns the chord quality if it can be determined.
-    ///
-    /// It mainly considers the third and fifth intervals to determine the quality.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use chordy::{Chord, note, ChordQuality};
-    ///
-    /// let d_major = Chord::from_notes_and_root(
-    ///     &[note!("D"), note!("F#"), note!("A")],
-    ///     note!("D")
-    /// );
-    /// assert_eq!(d_major.quality(), Some(ChordQuality::Major));
-    ///
-    /// let b_minor_diad = Chord::from_notes_and_root(
-    ///    &[note!("B"), note!("D")],
-    ///    note!("B")
-    /// );
-    /// assert_eq!(b_minor_diad.quality(), Some(ChordQuality::Minor));
-    ///
-    /// ```
-    pub fn quality(&self) -> Option<ChordQuality> {
-        ChordQuality::detect(self)
-    }
 
 
     /// Return abbreviated name of the chord.

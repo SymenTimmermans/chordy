@@ -1,6 +1,6 @@
 use std::{fmt::Display, str::FromStr};
 use super::{Interval, Key, Chord, Accidental, ChordQuality};
-use crate::error::ParseError;
+use crate::{error::ParseError, traits::HasIntervals};
 
 /// Roman degree representation (I-VII), analogous to Letter enum
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -152,30 +152,6 @@ impl RomanNumeral {
         self.accidental
     }
     
-    /// Display this roman numeral for a given chord quality
-    /// Quality determines case: Major/Augmented = uppercase, Minor/Diminished = lowercase
-    pub fn display_for_quality(self, quality: ChordQuality) -> String {
-        let base = match quality {
-            ChordQuality::Major | ChordQuality::Augmented => self.degree.base_string(),
-            ChordQuality::Minor | ChordQuality::Diminished => self.degree.lowercase_string(),
-        };
-        
-        let accidental_str = match self.accidental {
-            Accidental::Natural => "",
-            Accidental::Sharp => "♯",
-            Accidental::Flat => "♭",
-            Accidental::DoubleSharp => "𝄪",
-            Accidental::DoubleFlat => "𝄫",
-        };
-        
-        let quality_suffix = match quality {
-            ChordQuality::Diminished => "°",
-            ChordQuality::Augmented => "+",
-            _ => "",
-        };
-        
-        format!("{}{}{}", accidental_str, base, quality_suffix)
-    }
 }
 
 impl Display for RomanNumeral {
@@ -254,6 +230,33 @@ impl RomanChord {
     pub fn new(root: RomanNumeral, intervals: Vec<Interval>) -> Self {
         RomanChord { root, intervals }
     }
+    
+    /// Create a simple roman chord with basic quality (triad intervals)
+    pub fn simple(root: RomanNumeral, quality: ChordQuality) -> Self {
+        let intervals = match quality {
+            ChordQuality::Major => vec![
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::PERFECT_FIFTH,
+            ],
+            ChordQuality::Minor => vec![
+                Interval::PERFECT_UNISON,
+                Interval::MINOR_THIRD,
+                Interval::PERFECT_FIFTH,
+            ],
+            ChordQuality::Diminished => vec![
+                Interval::PERFECT_UNISON,
+                Interval::MINOR_THIRD,
+                Interval::DIMINISHED_FIFTH,
+            ],
+            ChordQuality::Augmented => vec![
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::AUGMENTED_FIFTH,
+            ],
+        };
+        Self::new(root, intervals)
+    }
 
     /// Get the root roman numeral
     pub fn root(&self) -> RomanNumeral {
@@ -261,7 +264,7 @@ impl RomanChord {
     }
 
     /// Get the intervals
-    pub fn intervals(&self) -> &Vec<Interval> {
+    pub fn intervals(&self) -> &[Interval] {
         &self.intervals
     }
 
@@ -363,15 +366,6 @@ impl RomanChord {
         Chord::new(root_note, self.intervals.clone())
     }
     
-    /// Get the chord quality from the intervals
-    pub fn quality(&self) -> Option<ChordQuality> {
-        // Use the existing chord quality detection
-        let temp_chord = Chord::new(
-            super::NoteName::new(super::Letter::C, Accidental::Natural), 
-            self.intervals.clone()
-        );
-        temp_chord.quality()
-    }
     
     /// Convert this roman chord to a ChordName using the new naming system
     pub fn to_chord_name(&self) -> super::chord::ChordName {
@@ -425,5 +419,15 @@ impl From<u8> for RomanNumeral {
         let degree = RomanDegree::from_number(degree_num)
             .expect("Degree number must be in range 1-7");
         RomanNumeral::new(degree, Accidental::Natural)
+    }
+}
+
+impl HasIntervals for RomanChord {
+    fn intervals(&self) -> &[Interval] {
+        &self.intervals
+    }
+
+    fn intervals_mut(&mut self) -> &mut Vec<Interval> {
+        &mut self.intervals
     }
 }

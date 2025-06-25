@@ -4,7 +4,7 @@
 //! formatted strings, supporting different output formats (Unicode, ASCII, HTML) and
 //! naming conventions (Jazz, Classical, Lead Sheet).
 
-use crate::types::{ChordQuality, NoteName};
+use crate::types::{ChordQuality, NoteName, Accidental, RomanNumeral};
 use super::types::*;
 
 /// Rendering format for chord names
@@ -65,12 +65,41 @@ impl ChordRenderer {
     pub fn render(&self, chord_name: &ChordName) -> String {
         let mut result = String::new();
         
-        // Render root with quality-aware formatting
-        result.push_str(&self.render_root_with_quality(&chord_name.root, chord_name.quality));
+        // Render root with quality-aware formatting (except for diminished seventh Roman chords)
+        if matches!(chord_name.seventh, Some(SeventhType::HalfDiminished | SeventhType::Diminished)) && matches!(chord_name.root, ChordRoot::Roman(_)) {
+            // For diminished seventh Roman chords, render root with diminished case but no quality symbol
+            if let ChordRoot::Roman(roman) = &chord_name.root {
+                let accidental_str = match roman.accidental {
+                    Accidental::Natural => "",
+                    Accidental::Sharp => "♯",
+                    Accidental::Flat => "♭",
+                    Accidental::DoubleSharp => "𝄪",
+                    Accidental::DoubleFlat => "𝄫",
+                };
+                let base = roman.degree.lowercase_string(); // Use lowercase for diminished quality
+                result.push_str(&format!("{}{}", accidental_str, base));
+            }
+        } else {
+            result.push_str(&self.render_root_with_quality(&chord_name.root, chord_name.quality));
+        }
         
-        // Handle special case for half-diminished seventh
+        // Handle special cases for diminished seventh chords
         if let Some(SeventhType::HalfDiminished) = chord_name.seventh {
             result.push_str(&self.render_half_diminished_for_root(&chord_name.root));
+            
+            // Add extensions and alterations (but skip ♭5 since it's implied)
+            if let Some(ext) = chord_name.highest_extension() {
+                result.push_str(&self.render_extension(ext));
+            }
+            
+            for alteration in &chord_name.alterations {
+                if !matches!(alteration, Alteration::FlatFifth) {
+                    result.push_str(&self.render_alteration(*alteration));
+                }
+            }
+        } else if let Some(SeventhType::Diminished) = chord_name.seventh {
+            // Handle fully diminished seventh chords
+            result.push_str(&self.render_diminished_seventh_for_root(&chord_name.root));
             
             // Add extensions and alterations (but skip ♭5 since it's implied)
             if let Some(ext) = chord_name.highest_extension() {
@@ -140,8 +169,34 @@ impl ChordRenderer {
     fn render_root_with_quality(&self, root: &ChordRoot, quality: ChordQuality) -> String {
         match root {
             ChordRoot::Note(note) => self.render_note_name(note),
-            ChordRoot::Roman(roman) => roman.display_for_quality(quality),
+            ChordRoot::Roman(roman) => self.render_roman_with_quality(roman, quality),
         }
+    }
+    
+    fn render_roman_with_quality(&self, roman: &RomanNumeral, quality: ChordQuality) -> String {
+        // Determine case based on quality: Major/Augmented = uppercase, Minor/Diminished = lowercase
+        let base = match quality {
+            ChordQuality::Major | ChordQuality::Augmented => roman.degree.base_string(),
+            ChordQuality::Minor | ChordQuality::Diminished => roman.degree.lowercase_string(),
+        };
+        
+        // Render accidental
+        let accidental_str = match roman.accidental {
+            Accidental::Natural => "",
+            Accidental::Sharp => "♯",
+            Accidental::Flat => "♭",
+            Accidental::DoubleSharp => "𝄪",
+            Accidental::DoubleFlat => "𝄫",
+        };
+        
+        // Add quality suffix
+        let quality_suffix = match quality {
+            ChordQuality::Diminished => "°",
+            ChordQuality::Augmented => "+",
+            _ => "",
+        };
+        
+        format!("{}{}{}", accidental_str, base, quality_suffix)
     }
     
     fn render_note_name(&self, note: &NoteName) -> String {
@@ -200,8 +255,32 @@ impl ChordRenderer {
                 }
             },
             ChordRoot::Roman(_) => {
-                // Roman numerals encode quality via display_for_quality, just add the seventh number
-                "7".to_string()
+                // For half-diminished Roman numerals, we need the ø symbol + 7
+                match self.format {
+                    ChordFormat::Unicode => "ø7".to_string(),
+                    ChordFormat::Ascii => "ø7".to_string(), // Keep ø even in ASCII for half-diminished
+                    ChordFormat::Html => "&oslash;7".to_string(),
+                }
+            }
+        }
+    }
+    
+    fn render_diminished_seventh_for_root(&self, root: &ChordRoot) -> String {
+        match root {
+            ChordRoot::Note(_) => {
+                match self.format {
+                    ChordFormat::Unicode => "°7".to_string(),
+                    ChordFormat::Ascii => "dim7".to_string(),
+                    ChordFormat::Html => "&deg;7".to_string(),
+                }
+            },
+            ChordRoot::Roman(_) => {
+                // For fully diminished Roman numerals, we need the ° symbol + 7
+                match self.format {
+                    ChordFormat::Unicode => "°7".to_string(),
+                    ChordFormat::Ascii => "°7".to_string(), // Keep ° even in ASCII for fully diminished
+                    ChordFormat::Html => "&deg;7".to_string(),
+                }
             }
         }
     }

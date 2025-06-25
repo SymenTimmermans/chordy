@@ -1,5 +1,5 @@
 //! Traits for musical structures
-use crate::{Chord, Interval, NoteName};
+use crate::{Chord, Interval, NoteName, ChordQuality};
 
 /// A trait for musical structures that have a root note
 pub trait HasRoot {
@@ -25,6 +25,14 @@ pub trait HasIntervals {
     /// Checks if the structure contains a specific interval
     fn contains_interval(&self, interval: Interval) -> bool {
         self.intervals().contains(&interval)
+    }
+
+    /// Detects the chord quality based on the intervals
+    /// 
+    /// Analyzes the third and fifth intervals to determine the chord quality.
+    /// Returns None if the quality cannot be determined (e.g., no clear third).
+    fn quality(&self) -> Option<ChordQuality> {
+        ChordQuality::from_intervals(self.intervals())
     }
 }
 
