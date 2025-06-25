@@ -373,6 +373,153 @@ fn test_from_interval_for_roman_numeral() {
     assert_eq!(roman_from_aug_fourth.accidental(), Accidental::Sharp);
 }
 
+#[test]
+fn test_scale_degree_to_interval_basic() {
+    // Test basic scale degrees to interval conversion
+    let tonic = ScaleDegree::new(1, None);
+    assert_eq!(tonic.to_interval(), Interval::PERFECT_UNISON);
+    
+    let supertonic = ScaleDegree::new(2, None);
+    assert_eq!(supertonic.to_interval(), Interval::MAJOR_SECOND);
+    
+    let mediant = ScaleDegree::new(3, None);
+    assert_eq!(mediant.to_interval(), Interval::MAJOR_THIRD);
+    
+    let subdominant = ScaleDegree::new(4, None);
+    assert_eq!(subdominant.to_interval(), Interval::PERFECT_FOURTH);
+    
+    let dominant = ScaleDegree::new(5, None);
+    assert_eq!(dominant.to_interval(), Interval::PERFECT_FIFTH);
+    
+    let submediant = ScaleDegree::new(6, None);
+    assert_eq!(submediant.to_interval(), Interval::MAJOR_SIXTH);
+    
+    let leading_tone = ScaleDegree::new(7, None);
+    assert_eq!(leading_tone.to_interval(), Interval::MAJOR_SEVENTH);
+}
+
+#[test]
+fn test_scale_degree_to_interval_flat() {
+    // Test flat scale degrees to interval conversion
+    let flat_second = ScaleDegree::new(2, Some(Accidental::Flat));
+    assert_eq!(flat_second.to_interval(), Interval::MINOR_SECOND);
+    
+    let flat_third = ScaleDegree::new(3, Some(Accidental::Flat));
+    assert_eq!(flat_third.to_interval(), Interval::MINOR_THIRD);
+    
+    let flat_fifth = ScaleDegree::new(5, Some(Accidental::Flat));
+    assert_eq!(flat_fifth.to_interval(), Interval::DIMINISHED_FIFTH);
+    
+    let flat_sixth = ScaleDegree::new(6, Some(Accidental::Flat));
+    assert_eq!(flat_sixth.to_interval(), Interval::MINOR_SIXTH);
+    
+    let flat_seventh = ScaleDegree::new(7, Some(Accidental::Flat));
+    assert_eq!(flat_seventh.to_interval(), Interval::MINOR_SEVENTH);
+}
+
+#[test]
+fn test_scale_degree_to_interval_sharp() {
+    // Test sharp scale degrees to interval conversion
+    let sharp_first = ScaleDegree::new(1, Some(Accidental::Sharp));
+    assert_eq!(sharp_first.to_interval(), Interval::AUGMENTED_UNISON);
+    
+    let sharp_second = ScaleDegree::new(2, Some(Accidental::Sharp));
+    assert_eq!(sharp_second.to_interval(), Interval::AUGMENTED_SECOND);
+    
+    let sharp_fourth = ScaleDegree::new(4, Some(Accidental::Sharp));
+    assert_eq!(sharp_fourth.to_interval(), Interval::AUGMENTED_FOURTH);
+    
+    let sharp_fifth = ScaleDegree::new(5, Some(Accidental::Sharp));
+    assert_eq!(sharp_fifth.to_interval(), Interval::AUGMENTED_FIFTH);
+}
+
+#[test]
+fn test_roman_numeral_to_interval_basic() {
+    // Test basic roman numerals to interval conversion
+    let i = RomanNumeral::new(RomanDegree::I, Accidental::Natural);
+    assert_eq!(i.to_interval(), Interval::PERFECT_UNISON);
+    
+    let ii = RomanNumeral::new(RomanDegree::II, Accidental::Natural);
+    assert_eq!(ii.to_interval(), Interval::MAJOR_SECOND);
+    
+    let iii = RomanNumeral::new(RomanDegree::III, Accidental::Natural);
+    assert_eq!(iii.to_interval(), Interval::MAJOR_THIRD);
+    
+    let v = RomanNumeral::new(RomanDegree::V, Accidental::Natural);
+    assert_eq!(v.to_interval(), Interval::PERFECT_FIFTH);
+}
+
+#[test]
+fn test_roman_numeral_to_interval_accidentals() {
+    // Test roman numerals with accidentals to interval conversion
+    let flat_ii = RomanNumeral::new(RomanDegree::II, Accidental::Flat);
+    assert_eq!(flat_ii.to_interval(), Interval::MINOR_SECOND);
+    
+    let flat_iii = RomanNumeral::new(RomanDegree::III, Accidental::Flat);
+    assert_eq!(flat_iii.to_interval(), Interval::MINOR_THIRD);
+    
+    let sharp_iv = RomanNumeral::new(RomanDegree::IV, Accidental::Sharp);
+    assert_eq!(sharp_iv.to_interval(), Interval::AUGMENTED_FOURTH);
+    
+    let flat_vi = RomanNumeral::new(RomanDegree::VI, Accidental::Flat);
+    assert_eq!(flat_vi.to_interval(), Interval::MINOR_SIXTH);
+    
+    let flat_vii = RomanNumeral::new(RomanDegree::VII, Accidental::Flat);
+    assert_eq!(flat_vii.to_interval(), Interval::MINOR_SEVENTH);
+}
+
+#[test]
+fn test_interval_roundtrip_conversion() {
+    // Test that Interval -> ScaleDegree -> Interval roundtrips correctly
+    let intervals = [
+        Interval::PERFECT_UNISON,
+        Interval::MINOR_SECOND,
+        Interval::MAJOR_SECOND,
+        Interval::MINOR_THIRD,
+        Interval::MAJOR_THIRD,
+        Interval::PERFECT_FOURTH,
+        Interval::AUGMENTED_FOURTH,
+        Interval::DIMINISHED_FIFTH,
+        Interval::PERFECT_FIFTH,
+        Interval::AUGMENTED_FIFTH,
+        Interval::MINOR_SIXTH,
+        Interval::MAJOR_SIXTH,
+        Interval::MINOR_SEVENTH,
+        Interval::MAJOR_SEVENTH,
+    ];
+    
+    for interval in intervals.iter() {
+        let scale_degree = ScaleDegree::from(*interval);
+        let converted_back = scale_degree.to_interval();
+        assert_eq!(*interval, converted_back, 
+                   "Roundtrip failed for interval: {:?}", interval);
+    }
+}
+
+#[test]
+fn test_roman_chord_in_key_with_to_interval() {
+    // Test that RomanChord::in_key works correctly with the new to_interval method
+    let c_major_key = Key::Major(note!("C"));
+    
+    // Test basic triads
+    let i_chord = RomanChord::major(RomanNumeral::new(RomanDegree::I, Accidental::Natural));
+    let actual_chord = i_chord.in_key(&c_major_key);
+    assert_eq!(actual_chord.root, note!("C"));
+    
+    let v_chord = RomanChord::major(RomanNumeral::new(RomanDegree::V, Accidental::Natural));
+    let actual_chord = v_chord.in_key(&c_major_key);
+    assert_eq!(actual_chord.root, note!("G"));
+    
+    // Test with accidentals
+    let flat_ii_chord = RomanChord::minor(RomanNumeral::new(RomanDegree::II, Accidental::Flat));
+    let actual_chord = flat_ii_chord.in_key(&c_major_key);
+    assert_eq!(actual_chord.root, note!("Db"));
+    
+    let sharp_iv_chord = RomanChord::major(RomanNumeral::new(RomanDegree::IV, Accidental::Sharp));
+    let actual_chord = sharp_iv_chord.in_key(&c_major_key);
+    assert_eq!(actual_chord.root, note!("F#"));
+}
+
 macro_rules! roman_naming_test {
     ($name:ident, $chord_str:expr, $key:expr, $expected:expr) => {
         #[test]

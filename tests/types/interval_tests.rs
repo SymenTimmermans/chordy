@@ -50,6 +50,83 @@ fn test_parse_augmented_diminished() {
 }
 
 #[test]
+fn test_parse_doubly_augmented_diminished() {
+    assert_eq!(
+        "dd1".parse::<Interval>().unwrap(),
+        Interval::DOUBLY_DIMINISHED_UNISON
+    );
+    assert_eq!(
+        "AA1".parse::<Interval>().unwrap(),
+        Interval::DOUBLY_AUGMENTED_UNISON
+    );
+    assert_eq!(
+        "dd5".parse::<Interval>().unwrap(),
+        Interval::DOUBLY_DIMINISHED_FIFTH
+    );
+    assert_eq!(
+        "AA5".parse::<Interval>().unwrap(),
+        Interval::DOUBLY_AUGMENTED_FIFTH
+    );
+    assert_eq!(
+        "dd7".parse::<Interval>().unwrap(),
+        Interval::DOUBLY_DIMINISHED_SEVENTH
+    );
+    assert_eq!(
+        "AA7".parse::<Interval>().unwrap(),
+        Interval::DOUBLY_AUGMENTED_SEVENTH
+    );
+}
+
+#[test]
+fn test_interval_classification_with_double_accidentals() {
+    // Test is_fifth()
+    assert!(Interval::DOUBLY_DIMINISHED_FIFTH.is_fifth());
+    assert!(Interval::DIMINISHED_FIFTH.is_fifth());
+    assert!(Interval::PERFECT_FIFTH.is_fifth());
+    assert!(Interval::AUGMENTED_FIFTH.is_fifth());
+    assert!(Interval::DOUBLY_AUGMENTED_FIFTH.is_fifth());
+    
+    // Test is_third()
+    assert!(Interval::DOUBLY_DIMINISHED_THIRD.is_third());
+    assert!(Interval::DIMINISHED_THIRD.is_third());
+    assert!(Interval::MINOR_THIRD.is_third());
+    assert!(Interval::MAJOR_THIRD.is_third());
+    assert!(Interval::AUGMENTED_THIRD.is_third());
+    assert!(Interval::DOUBLY_AUGMENTED_THIRD.is_third());
+    
+    // Test is_seventh()
+    assert!(Interval::DOUBLY_DIMINISHED_SEVENTH.is_seventh());
+    assert!(Interval::DIMINISHED_SEVENTH.is_seventh());
+    assert!(Interval::MINOR_SEVENTH.is_seventh());
+    assert!(Interval::MAJOR_SEVENTH.is_seventh());
+    assert!(Interval::AUGMENTED_SEVENTH.is_seventh());
+    assert!(Interval::DOUBLY_AUGMENTED_SEVENTH.is_seventh());
+}
+
+#[test]
+fn test_display_doubly_modified_intervals() {
+    // Doubly diminished
+    assert_eq!(Interval::DOUBLY_DIMINISHED_UNISON.to_string(), "dd1");
+    assert_eq!(Interval::DOUBLY_DIMINISHED_SECOND.to_string(), "dd2");
+    assert_eq!(Interval::DOUBLY_DIMINISHED_THIRD.to_string(), "dd3");
+    assert_eq!(Interval::DOUBLY_DIMINISHED_FOURTH.to_string(), "dd4");
+    assert_eq!(Interval::DOUBLY_DIMINISHED_FIFTH.to_string(), "dd5");
+    assert_eq!(Interval::DOUBLY_DIMINISHED_SIXTH.to_string(), "dd6");
+    assert_eq!(Interval::DOUBLY_DIMINISHED_SEVENTH.to_string(), "dd7");
+    assert_eq!(Interval::DOUBLY_DIMINISHED_OCTAVE.to_string(), "dd8");
+    
+    // Doubly augmented
+    assert_eq!(Interval::DOUBLY_AUGMENTED_UNISON.to_string(), "AA1");
+    assert_eq!(Interval::DOUBLY_AUGMENTED_SECOND.to_string(), "AA2");
+    assert_eq!(Interval::DOUBLY_AUGMENTED_THIRD.to_string(), "AA3");
+    assert_eq!(Interval::DOUBLY_AUGMENTED_FOURTH.to_string(), "AA4");
+    assert_eq!(Interval::DOUBLY_AUGMENTED_FIFTH.to_string(), "AA5");
+    assert_eq!(Interval::DOUBLY_AUGMENTED_SIXTH.to_string(), "AA6");
+    assert_eq!(Interval::DOUBLY_AUGMENTED_SEVENTH.to_string(), "AA7");
+    assert_eq!(Interval::DOUBLY_AUGMENTED_OCTAVE.to_string(), "AA8");
+}
+
+#[test]
 fn test_parse_multiple_augmented_diminished() {
     // Test multiple augmented/diminished (if you support AA4, dd5, etc.)
     let aa4 = "AA4".parse::<Interval>().unwrap();

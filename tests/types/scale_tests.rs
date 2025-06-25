@@ -315,3 +315,133 @@ fn test_scale_transformations() {
     assert_eq!(c_minor.tonic, note!("C"));
     assert_eq!(c_minor, scales::AEOLIAN);
 }
+
+#[test]
+fn test_scale_degree_to_interval_with_double_accidentals() {
+    // Test double flat scale degrees
+    let double_flat_2 = ScaleDegree::new(2, Some(Accidental::DoubleFlat));
+    assert_eq!(double_flat_2.to_interval(), Interval::DIMINISHED_SECOND);
+    
+    let double_flat_3 = ScaleDegree::new(3, Some(Accidental::DoubleFlat));
+    assert_eq!(double_flat_3.to_interval(), Interval::DIMINISHED_THIRD);
+    
+    let double_flat_4 = ScaleDegree::new(4, Some(Accidental::DoubleFlat));
+    assert_eq!(double_flat_4.to_interval(), Interval::DOUBLY_DIMINISHED_FOURTH);
+    
+    let double_flat_5 = ScaleDegree::new(5, Some(Accidental::DoubleFlat));
+    assert_eq!(double_flat_5.to_interval(), Interval::DOUBLY_DIMINISHED_FIFTH);
+    
+    let double_flat_6 = ScaleDegree::new(6, Some(Accidental::DoubleFlat));
+    assert_eq!(double_flat_6.to_interval(), Interval::DIMINISHED_SIXTH);
+    
+    let double_flat_7 = ScaleDegree::new(7, Some(Accidental::DoubleFlat));
+    assert_eq!(double_flat_7.to_interval(), Interval::DIMINISHED_SEVENTH);
+    
+    // Test double sharp scale degrees
+    let double_sharp_1 = ScaleDegree::new(1, Some(Accidental::DoubleSharp));
+    assert_eq!(double_sharp_1.to_interval(), Interval::DOUBLY_AUGMENTED_UNISON);
+    
+    let double_sharp_2 = ScaleDegree::new(2, Some(Accidental::DoubleSharp));
+    assert_eq!(double_sharp_2.to_interval(), Interval::DOUBLY_AUGMENTED_SECOND);
+    
+    let double_sharp_3 = ScaleDegree::new(3, Some(Accidental::DoubleSharp));
+    assert_eq!(double_sharp_3.to_interval(), Interval::DOUBLY_AUGMENTED_THIRD);
+    
+    let double_sharp_4 = ScaleDegree::new(4, Some(Accidental::DoubleSharp));
+    assert_eq!(double_sharp_4.to_interval(), Interval::DOUBLY_AUGMENTED_FOURTH);
+    
+    let double_sharp_5 = ScaleDegree::new(5, Some(Accidental::DoubleSharp));
+    assert_eq!(double_sharp_5.to_interval(), Interval::DOUBLY_AUGMENTED_FIFTH);
+    
+    let double_sharp_6 = ScaleDegree::new(6, Some(Accidental::DoubleSharp));
+    assert_eq!(double_sharp_6.to_interval(), Interval::DOUBLY_AUGMENTED_SIXTH);
+    
+    let double_sharp_7 = ScaleDegree::new(7, Some(Accidental::DoubleSharp));
+    assert_eq!(double_sharp_7.to_interval(), Interval::DOUBLY_AUGMENTED_SEVENTH);
+}
+
+#[test]
+fn test_interval_to_scale_degree_with_double_accidentals() {
+    // Test doubly diminished intervals
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_DIMINISHED_UNISON),
+        ScaleDegree::new(1, Some(Accidental::DoubleFlat))
+    );
+    
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_DIMINISHED_SECOND),
+        ScaleDegree::new(2, Some(Accidental::DoubleFlat))
+    );
+    
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_DIMINISHED_THIRD),
+        ScaleDegree::new(3, Some(Accidental::DoubleFlat))
+    );
+    
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_DIMINISHED_FOURTH),
+        ScaleDegree::new(4, Some(Accidental::DoubleFlat))
+    );
+    
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_DIMINISHED_FIFTH),
+        ScaleDegree::new(5, Some(Accidental::DoubleFlat))
+    );
+    
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_DIMINISHED_SIXTH),
+        ScaleDegree::new(6, Some(Accidental::DoubleFlat))
+    );
+    
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_DIMINISHED_SEVENTH),
+        ScaleDegree::new(7, Some(Accidental::DoubleFlat))
+    );
+    
+    // Test doubly augmented intervals
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_AUGMENTED_UNISON),
+        ScaleDegree::new(1, Some(Accidental::DoubleSharp))
+    );
+    
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_AUGMENTED_SECOND),
+        ScaleDegree::new(2, Some(Accidental::DoubleSharp))
+    );
+    
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_AUGMENTED_THIRD),
+        ScaleDegree::new(3, Some(Accidental::DoubleSharp))
+    );
+    
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_AUGMENTED_FOURTH),
+        ScaleDegree::new(4, Some(Accidental::DoubleSharp))
+    );
+    
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_AUGMENTED_FIFTH),
+        ScaleDegree::new(5, Some(Accidental::DoubleSharp))
+    );
+    
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_AUGMENTED_SIXTH),
+        ScaleDegree::new(6, Some(Accidental::DoubleSharp))
+    );
+    
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_AUGMENTED_SEVENTH),
+        ScaleDegree::new(7, Some(Accidental::DoubleSharp))
+    );
+    
+    // Test compound intervals with double accidentals
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_DIMINISHED_NINTH),
+        ScaleDegree::new(2, Some(Accidental::DoubleFlat))
+    );
+    
+    assert_eq!(
+        ScaleDegree::from(Interval::DOUBLY_AUGMENTED_TENTH),
+        ScaleDegree::new(3, Some(Accidental::DoubleSharp))
+    );
+}

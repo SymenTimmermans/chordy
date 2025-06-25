@@ -95,83 +95,111 @@ impl From<Interval> for ScaleDegree {
     fn from(interval: Interval) -> Self {
         match interval {
             // Unisons
+            Interval::DOUBLY_DIMINISHED_UNISON => Self::new(1, Some(Accidental::DoubleFlat)),
             Interval::DIMINISHED_UNISON => Self::new(1, Some(Accidental::Flat)),
             Interval::PERFECT_UNISON => Self::TONIC,
             Interval::AUGMENTED_UNISON => Self::new(1, Some(Accidental::Sharp)),
+            Interval::DOUBLY_AUGMENTED_UNISON => Self::new(1, Some(Accidental::DoubleSharp)),
 
             // Seconds  
+            Interval::DOUBLY_DIMINISHED_SECOND => Self::new(2, Some(Accidental::DoubleFlat)),  // ♭♭2 = 2 with double flat
             Interval::DIMINISHED_SECOND => Self::new(2, Some(Accidental::DoubleFlat)),
             Interval::MINOR_SECOND => Self::new(2, Some(Accidental::Flat)),
             Interval::MAJOR_SECOND => Self::new(2, None),
             Interval::AUGMENTED_SECOND => Self::new(2, Some(Accidental::Sharp)),
+            Interval::DOUBLY_AUGMENTED_SECOND => Self::new(2, Some(Accidental::DoubleSharp)),
 
             // Thirds
+            Interval::DOUBLY_DIMINISHED_THIRD => Self::new(3, Some(Accidental::DoubleFlat)),  // ♭♭3
             Interval::DIMINISHED_THIRD => Self::new(3, Some(Accidental::DoubleFlat)),
             Interval::MINOR_THIRD => Self::new(3, Some(Accidental::Flat)),
             Interval::MAJOR_THIRD => Self::new(3, None),
             Interval::AUGMENTED_THIRD => Self::new(3, Some(Accidental::Sharp)),
+            Interval::DOUBLY_AUGMENTED_THIRD => Self::new(3, Some(Accidental::DoubleSharp)),
 
             // Fourths
+            Interval::DOUBLY_DIMINISHED_FOURTH => Self::new(4, Some(Accidental::DoubleFlat)),
             Interval::DIMINISHED_FOURTH => Self::new(4, Some(Accidental::Flat)),
             Interval::PERFECT_FOURTH => Self::new(4, None),
             Interval::AUGMENTED_FOURTH => Self::new(4, Some(Accidental::Sharp)),
+            Interval::DOUBLY_AUGMENTED_FOURTH => Self::new(4, Some(Accidental::DoubleSharp)),
 
             // Fifths
+            Interval::DOUBLY_DIMINISHED_FIFTH => Self::new(5, Some(Accidental::DoubleFlat)),
             Interval::DIMINISHED_FIFTH => Self::new(5, Some(Accidental::Flat)),
             Interval::PERFECT_FIFTH => Self::new(5, None),
             Interval::AUGMENTED_FIFTH => Self::new(5, Some(Accidental::Sharp)),
+            Interval::DOUBLY_AUGMENTED_FIFTH => Self::new(5, Some(Accidental::DoubleSharp)),
 
             // Sixths
+            Interval::DOUBLY_DIMINISHED_SIXTH => Self::new(6, Some(Accidental::DoubleFlat)),  // ♭♭6
             Interval::DIMINISHED_SIXTH => Self::new(6, Some(Accidental::DoubleFlat)),
             Interval::MINOR_SIXTH => Self::new(6, Some(Accidental::Flat)),
             Interval::MAJOR_SIXTH => Self::new(6, None),
             Interval::AUGMENTED_SIXTH => Self::new(6, Some(Accidental::Sharp)),
+            Interval::DOUBLY_AUGMENTED_SIXTH => Self::new(6, Some(Accidental::DoubleSharp)),
 
             // Sevenths
+            Interval::DOUBLY_DIMINISHED_SEVENTH => Self::new(7, Some(Accidental::DoubleFlat)),  // ♭♭7
             Interval::DIMINISHED_SEVENTH => Self::new(7, Some(Accidental::DoubleFlat)),
             Interval::MINOR_SEVENTH => Self::new(7, Some(Accidental::Flat)),
             Interval::MAJOR_SEVENTH => Self::new(7, None),
             Interval::AUGMENTED_SEVENTH => Self::new(7, Some(Accidental::Sharp)),
+            Interval::DOUBLY_AUGMENTED_SEVENTH => Self::new(7, Some(Accidental::DoubleSharp)),
 
             // Octaves (wrap back to 1)
+            Interval::DOUBLY_DIMINISHED_OCTAVE => Self::new(1, Some(Accidental::DoubleFlat)),
             Interval::DIMINISHED_OCTAVE => Self::new(1, Some(Accidental::Flat)),
             Interval::OCTAVE => Self::TONIC,
             Interval::AUGMENTED_OCTAVE => Self::new(1, Some(Accidental::Sharp)),
+            Interval::DOUBLY_AUGMENTED_OCTAVE => Self::new(1, Some(Accidental::DoubleSharp)),
 
             // Compound intervals (reduce to simple intervals)
             // Ninths -> Seconds
+            Interval::DOUBLY_DIMINISHED_NINTH => Self::new(2, Some(Accidental::DoubleFlat)),
             Interval::DIMINISHED_NINTH => Self::new(2, Some(Accidental::DoubleFlat)),
             Interval::MINOR_NINTH => Self::new(2, Some(Accidental::Flat)),
             Interval::MAJOR_NINTH => Self::new(2, None),
             Interval::AUGMENTED_NINTH => Self::new(2, Some(Accidental::Sharp)),
+            Interval::DOUBLY_AUGMENTED_NINTH => Self::new(2, Some(Accidental::DoubleSharp)),
 
             // Tenths -> Thirds  
+            Interval::DOUBLY_DIMINISHED_TENTH => Self::new(3, Some(Accidental::DoubleFlat)),
             Interval::DIMINISHED_TENTH => Self::new(3, Some(Accidental::DoubleFlat)),
             Interval::MINOR_TENTH => Self::new(3, Some(Accidental::Flat)),
             Interval::MAJOR_TENTH => Self::new(3, None),
             Interval::AUGMENTED_TENTH => Self::new(3, Some(Accidental::Sharp)),
+            Interval::DOUBLY_AUGMENTED_TENTH => Self::new(3, Some(Accidental::DoubleSharp)),
 
             // Elevenths -> Fourths
+            Interval::DOUBLY_DIMINISHED_ELEVENTH => Self::new(4, Some(Accidental::DoubleFlat)),
             Interval::DIMINISHED_ELEVENTH => Self::new(4, Some(Accidental::Flat)),
             Interval::PERFECT_ELEVENTH => Self::new(4, None),
             Interval::AUGMENTED_ELEVENTH => Self::new(4, Some(Accidental::Sharp)),
+            Interval::DOUBLY_AUGMENTED_ELEVENTH => Self::new(4, Some(Accidental::DoubleSharp)),
 
             // Twelfths -> Fifths
+            Interval::DOUBLY_DIMINISHED_TWELFTH => Self::new(5, Some(Accidental::DoubleFlat)),
             Interval::DIMINISHED_TWELFTH => Self::new(5, Some(Accidental::Flat)),
             Interval::PERFECT_TWELFTH => Self::new(5, None),
             Interval::AUGMENTED_TWELFTH => Self::new(5, Some(Accidental::Sharp)),
+            Interval::DOUBLY_AUGMENTED_TWELFTH => Self::new(5, Some(Accidental::DoubleSharp)),
 
             // Thirteenths -> Sixths
+            Interval::DOUBLY_DIMINISHED_THIRTEENTH => Self::new(6, Some(Accidental::DoubleFlat)),
             Interval::DIMINISHED_THIRTEENTH => Self::new(6, Some(Accidental::DoubleFlat)),
             Interval::MINOR_THIRTEENTH => Self::new(6, Some(Accidental::Flat)),
             Interval::MAJOR_THIRTEENTH => Self::new(6, None),
             Interval::AUGMENTED_THIRTEENTH => Self::new(6, Some(Accidental::Sharp)),
+            Interval::DOUBLY_AUGMENTED_THIRTEENTH => Self::new(6, Some(Accidental::DoubleSharp)),
 
             // Fourteenths -> Sevenths
+            Interval::DOUBLY_DIMINISHED_FOURTEENTH => Self::new(7, Some(Accidental::DoubleFlat)),
             Interval::DIMINISHED_FOURTEENTH => Self::new(7, Some(Accidental::DoubleFlat)),
             Interval::MINOR_FOURTEENTH => Self::new(7, Some(Accidental::Flat)),
             Interval::MAJOR_FOURTEENTH => Self::new(7, None),
             Interval::AUGMENTED_FOURTEENTH => Self::new(7, Some(Accidental::Sharp)),
+            Interval::DOUBLY_AUGMENTED_FOURTEENTH => Self::new(7, Some(Accidental::DoubleSharp)),
 
             // For any other intervals, calculate the scale degree from the fifths position
             _ => {
@@ -182,6 +210,89 @@ impl From<Interval> for ScaleDegree {
                 let reduced_degree = ((generic_num - 1) % 7) + 1;
                 Self::new(reduced_degree as u8, None)
             }
+        }
+    }
+}
+
+impl ScaleDegree {
+    /// Convert this scale degree to its corresponding interval from the tonic
+    ///
+    /// Maps scale degrees to intervals considering both the step (1-7) and any accidental.
+    /// This is the reverse operation of `From<Interval> for ScaleDegree`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{ScaleDegree, Interval, Accidental};
+    ///
+    /// let major_third = ScaleDegree::new(3, None);
+    /// assert_eq!(major_third.to_interval(), Interval::MAJOR_THIRD);
+    ///
+    /// let minor_third = ScaleDegree::new(3, Some(Accidental::Flat));
+    /// assert_eq!(minor_third.to_interval(), Interval::MINOR_THIRD);
+    ///
+    /// let augmented_fourth = ScaleDegree::new(4, Some(Accidental::Sharp));
+    /// assert_eq!(augmented_fourth.to_interval(), Interval::AUGMENTED_FOURTH);
+    /// ```
+    pub fn to_interval(&self) -> Interval {
+        // Get the base interval for the scale degree
+        let base_interval = match self.step {
+            1 => Interval::PERFECT_UNISON,
+            2 => Interval::MAJOR_SECOND,
+            3 => Interval::MAJOR_THIRD,
+            4 => Interval::PERFECT_FOURTH,
+            5 => Interval::PERFECT_FIFTH,
+            6 => Interval::MAJOR_SIXTH,
+            7 => Interval::MAJOR_SEVENTH,
+            _ => panic!("Invalid scale degree step: {}", self.step),
+        };
+
+        // Apply accidental modifications
+        match self.alteration {
+            None | Some(Accidental::Natural) => base_interval,
+            Some(Accidental::Flat) => match base_interval {
+                Interval::MAJOR_SECOND => Interval::MINOR_SECOND,
+                Interval::MAJOR_THIRD => Interval::MINOR_THIRD,
+                Interval::PERFECT_FOURTH => Interval::DIMINISHED_FOURTH,
+                Interval::PERFECT_FIFTH => Interval::DIMINISHED_FIFTH,
+                Interval::MAJOR_SIXTH => Interval::MINOR_SIXTH,
+                Interval::MAJOR_SEVENTH => Interval::MINOR_SEVENTH,
+                Interval::PERFECT_UNISON => Interval::DIMINISHED_UNISON,
+                _ => base_interval, // Shouldn't happen with valid scale degrees
+            },
+            Some(Accidental::Sharp) => match base_interval {
+                Interval::PERFECT_UNISON => Interval::AUGMENTED_UNISON,
+                Interval::MAJOR_SECOND => Interval::AUGMENTED_SECOND,
+                Interval::MAJOR_THIRD => Interval::AUGMENTED_THIRD,
+                Interval::PERFECT_FOURTH => Interval::AUGMENTED_FOURTH,
+                Interval::PERFECT_FIFTH => Interval::AUGMENTED_FIFTH,
+                Interval::MAJOR_SIXTH => Interval::AUGMENTED_SIXTH,
+                Interval::MAJOR_SEVENTH => Interval::AUGMENTED_SEVENTH,
+                _ => base_interval, // Shouldn't happen with valid scale degrees
+            },
+            Some(Accidental::DoubleFlat) => match base_interval {
+                Interval::MAJOR_SECOND => Interval::DIMINISHED_SECOND,
+                Interval::MAJOR_THIRD => Interval::DIMINISHED_THIRD,
+                Interval::MAJOR_SIXTH => Interval::DIMINISHED_SIXTH,
+                Interval::MAJOR_SEVENTH => Interval::DIMINISHED_SEVENTH,
+                // Perfect intervals become doubly diminished when double-flatted
+                Interval::PERFECT_UNISON => Interval::DOUBLY_DIMINISHED_UNISON,
+                Interval::PERFECT_FOURTH => Interval::DOUBLY_DIMINISHED_FOURTH,
+                Interval::PERFECT_FIFTH => Interval::DOUBLY_DIMINISHED_FIFTH,
+                _ => base_interval,
+            },
+            Some(Accidental::DoubleSharp) => match base_interval {
+                // Major intervals become doubly augmented when double-sharped
+                Interval::MAJOR_SECOND => Interval::DOUBLY_AUGMENTED_SECOND,
+                Interval::MAJOR_THIRD => Interval::DOUBLY_AUGMENTED_THIRD,
+                Interval::MAJOR_SIXTH => Interval::DOUBLY_AUGMENTED_SIXTH,
+                Interval::MAJOR_SEVENTH => Interval::DOUBLY_AUGMENTED_SEVENTH,
+                // Perfect intervals become doubly augmented when double-sharped
+                Interval::PERFECT_UNISON => Interval::DOUBLY_AUGMENTED_UNISON,
+                Interval::PERFECT_FOURTH => Interval::DOUBLY_AUGMENTED_FOURTH,
+                Interval::PERFECT_FIFTH => Interval::DOUBLY_AUGMENTED_FIFTH,
+                _ => base_interval,
+            },
         }
     }
 }

@@ -96,6 +96,49 @@ impl Interval {
     pub const MINOR_FOURTEENTH: Self = Self { fifths: -2, octaves: 1};
     pub const MAJOR_FOURTEENTH: Self = Self { fifths: 5, octaves: 1};
     pub const AUGMENTED_FOURTEENTH: Self = Self { fifths: 12, octaves: 1};
+
+    // Doubly diminished and doubly augmented intervals
+    pub const DOUBLY_DIMINISHED_UNISON: Self = Self { fifths: -14, octaves: 0};
+    pub const DOUBLY_AUGMENTED_UNISON: Self = Self { fifths: 14, octaves: 0};
+
+    pub const DOUBLY_DIMINISHED_SECOND: Self = Self { fifths: -19, octaves: 0};
+    pub const DOUBLY_AUGMENTED_SECOND: Self = Self { fifths: 16, octaves: 0};
+
+    pub const DOUBLY_DIMINISHED_THIRD: Self = Self { fifths: -17, octaves: 0};
+    pub const DOUBLY_AUGMENTED_THIRD: Self = Self { fifths: 18, octaves: 0};
+
+    pub const DOUBLY_DIMINISHED_FOURTH: Self = Self { fifths: -15, octaves: 0};
+    pub const DOUBLY_AUGMENTED_FOURTH: Self = Self { fifths: 13, octaves: 0};
+
+    pub const DOUBLY_DIMINISHED_FIFTH: Self = Self { fifths: -13, octaves: 0};
+    pub const DOUBLY_AUGMENTED_FIFTH: Self = Self { fifths: 15, octaves: 0};
+
+    pub const DOUBLY_DIMINISHED_SIXTH: Self = Self { fifths: -18, octaves: 0};
+    pub const DOUBLY_AUGMENTED_SIXTH: Self = Self { fifths: 17, octaves: 0};
+
+    pub const DOUBLY_DIMINISHED_SEVENTH: Self = Self { fifths: -16, octaves: 0};
+    pub const DOUBLY_AUGMENTED_SEVENTH: Self = Self { fifths: 19, octaves: 0};
+
+    pub const DOUBLY_DIMINISHED_OCTAVE: Self = Self { fifths: -14, octaves: 1};
+    pub const DOUBLY_AUGMENTED_OCTAVE: Self = Self { fifths: 14, octaves: 1};
+
+    pub const DOUBLY_DIMINISHED_NINTH: Self = Self { fifths: -19, octaves: 1};
+    pub const DOUBLY_AUGMENTED_NINTH: Self = Self { fifths: 16, octaves: 1};
+
+    pub const DOUBLY_DIMINISHED_TENTH: Self = Self { fifths: -17, octaves: 1};
+    pub const DOUBLY_AUGMENTED_TENTH: Self = Self { fifths: 18, octaves: 1};
+
+    pub const DOUBLY_DIMINISHED_ELEVENTH: Self = Self { fifths: -15, octaves: 1};
+    pub const DOUBLY_AUGMENTED_ELEVENTH: Self = Self { fifths: 13, octaves: 1};
+
+    pub const DOUBLY_DIMINISHED_TWELFTH: Self = Self { fifths: -13, octaves: 1};
+    pub const DOUBLY_AUGMENTED_TWELFTH: Self = Self { fifths: 15, octaves: 1};
+
+    pub const DOUBLY_DIMINISHED_THIRTEENTH: Self = Self { fifths: -18, octaves: 1};
+    pub const DOUBLY_AUGMENTED_THIRTEENTH: Self = Self { fifths: 17, octaves: 1};
+
+    pub const DOUBLY_DIMINISHED_FOURTEENTH: Self = Self { fifths: -16, octaves: 1};
+    pub const DOUBLY_AUGMENTED_FOURTEENTH: Self = Self { fifths: 19, octaves: 1};
     
 
     /// Create a new interval with specified fifths and octaves.
@@ -172,25 +215,31 @@ impl Interval {
 
     /// Returns true if the interval is a fifth of some kind.
     pub fn is_fifth(&self) -> bool {
+        *self == Self::DOUBLY_DIMINISHED_FIFTH ||
+        *self == Self::DIMINISHED_FIFTH ||
         *self == Self::PERFECT_FIFTH || 
         *self == Self::AUGMENTED_FIFTH || 
-        *self == Self::DIMINISHED_FIFTH
+        *self == Self::DOUBLY_AUGMENTED_FIFTH
     }
 
     /// Returns true if the interval is a third of some kind.
     pub fn is_third(&self) -> bool {
+        *self == Self::DOUBLY_DIMINISHED_THIRD ||
+        *self == Self::DIMINISHED_THIRD ||
+        *self == Self::MINOR_THIRD ||
         *self == Self::MAJOR_THIRD || 
-        *self == Self::MINOR_THIRD || 
         *self == Self::AUGMENTED_THIRD || 
-        *self == Self::DIMINISHED_THIRD
+        *self == Self::DOUBLY_AUGMENTED_THIRD
     }
 
     /// Returns true if the interval is a seventh of some kind.
     pub fn is_seventh(&self) -> bool {
+        *self == Self::DOUBLY_DIMINISHED_SEVENTH ||
         *self == Self::DIMINISHED_SEVENTH ||
         *self == Self::MINOR_SEVENTH ||
         *self == Self::MAJOR_SEVENTH ||
-        *self == Self::AUGMENTED_SEVENTH
+        *self == Self::AUGMENTED_SEVENTH ||
+        *self == Self::DOUBLY_AUGMENTED_SEVENTH
     }
 }
 
@@ -296,6 +345,35 @@ impl fmt::Display for Interval {
             Self::MINOR_FOURTEENTH => write!(f, "m14"),
             Self::MAJOR_FOURTEENTH => write!(f, "M14"),
             Self::AUGMENTED_FOURTEENTH => write!(f, "A14"),
+            // Doubly diminished and doubly augmented
+            Self::DOUBLY_DIMINISHED_UNISON => write!(f, "dd1"),
+            Self::DOUBLY_AUGMENTED_UNISON => write!(f, "AA1"),
+            Self::DOUBLY_DIMINISHED_SECOND => write!(f, "dd2"),
+            Self::DOUBLY_AUGMENTED_SECOND => write!(f, "AA2"),
+            Self::DOUBLY_DIMINISHED_THIRD => write!(f, "dd3"),
+            Self::DOUBLY_AUGMENTED_THIRD => write!(f, "AA3"),
+            Self::DOUBLY_DIMINISHED_FOURTH => write!(f, "dd4"),
+            Self::DOUBLY_AUGMENTED_FOURTH => write!(f, "AA4"),
+            Self::DOUBLY_DIMINISHED_FIFTH => write!(f, "dd5"),
+            Self::DOUBLY_AUGMENTED_FIFTH => write!(f, "AA5"),
+            Self::DOUBLY_DIMINISHED_SIXTH => write!(f, "dd6"),
+            Self::DOUBLY_AUGMENTED_SIXTH => write!(f, "AA6"),
+            Self::DOUBLY_DIMINISHED_SEVENTH => write!(f, "dd7"),
+            Self::DOUBLY_AUGMENTED_SEVENTH => write!(f, "AA7"),
+            Self::DOUBLY_DIMINISHED_OCTAVE => write!(f, "dd8"),
+            Self::DOUBLY_AUGMENTED_OCTAVE => write!(f, "AA8"),
+            Self::DOUBLY_DIMINISHED_NINTH => write!(f, "dd9"),
+            Self::DOUBLY_AUGMENTED_NINTH => write!(f, "AA9"),
+            Self::DOUBLY_DIMINISHED_TENTH => write!(f, "dd10"),
+            Self::DOUBLY_AUGMENTED_TENTH => write!(f, "AA10"),
+            Self::DOUBLY_DIMINISHED_ELEVENTH => write!(f, "dd11"),
+            Self::DOUBLY_AUGMENTED_ELEVENTH => write!(f, "AA11"),
+            Self::DOUBLY_DIMINISHED_TWELFTH => write!(f, "dd12"),
+            Self::DOUBLY_AUGMENTED_TWELFTH => write!(f, "AA12"),
+            Self::DOUBLY_DIMINISHED_THIRTEENTH => write!(f, "dd13"),
+            Self::DOUBLY_AUGMENTED_THIRTEENTH => write!(f, "AA13"),
+            Self::DOUBLY_DIMINISHED_FOURTEENTH => write!(f, "dd14"),
+            Self::DOUBLY_AUGMENTED_FOURTEENTH => write!(f, "AA14"),
             _ => {
                 // Fall back to algorithmic approach for uncommon intervals
                 let generic_num = self.generic_interval_number();

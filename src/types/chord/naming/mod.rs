@@ -285,7 +285,7 @@ mod tests {
         use crate::Interval;
         
         // Test omit5 in 7th chord
-        let c7_omit5 = ChordAnalyzer::analyze(
+        let _c7_omit5 = ChordAnalyzer::analyze(
             note!("C"),
             &[Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::MINOR_SEVENTH]
         );

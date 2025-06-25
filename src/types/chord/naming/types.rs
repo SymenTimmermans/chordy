@@ -3,7 +3,7 @@
 //! This module contains all the enums and structs that represent the intermediate
 //! representation of chord names, separating the structure from analysis and rendering logic.
 
-use crate::types::{ChordQuality, Interval, NoteName, RomanNumeral};
+use crate::types::{ChordQuality, NoteName, RomanNumeral};
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
 /// Root of a chord - either a concrete note or a roman numeral

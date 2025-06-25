@@ -152,6 +152,33 @@ impl RomanNumeral {
         self.accidental
     }
     
+    /// Convert this roman numeral to its corresponding interval from the tonic
+    ///
+    /// This delegates to the underlying ScaleDegree conversion, providing a convenient
+    /// way to get the interval representation of a roman numeral.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{RomanNumeral, RomanDegree, Accidental, Interval};
+    ///
+    /// let v = RomanNumeral::new(RomanDegree::V, Accidental::Natural);
+    /// assert_eq!(v.to_interval(), Interval::PERFECT_FIFTH);
+    ///
+    /// let flat_ii = RomanNumeral::new(RomanDegree::II, Accidental::Flat);
+    /// assert_eq!(flat_ii.to_interval(), Interval::MINOR_SECOND);
+    ///
+    /// let sharp_iv = RomanNumeral::new(RomanDegree::IV, Accidental::Sharp);
+    /// assert_eq!(sharp_iv.to_interval(), Interval::AUGMENTED_FOURTH);
+    /// ```
+    pub fn to_interval(self) -> Interval {
+        // Convert RomanNumeral to ScaleDegree manually since From trait doesn't exist in reverse
+        let scale_degree = super::scale::ScaleDegree::new(
+            self.degree.to_number(), 
+            self.accidental.as_alteration()
+        );
+        scale_degree.to_interval()
+    }
 }
 
 impl Display for RomanNumeral {
@@ -318,44 +345,11 @@ impl RomanChord {
             Key::Major(note) | Key::Minor(note) => *note,
         };
         
-        // Calculate the interval for this degree
-        let degree_interval = match self.root.degree {
-            RomanDegree::I => Interval::PERFECT_UNISON,
-            RomanDegree::II => Interval::MAJOR_SECOND,
-            RomanDegree::III => Interval::MAJOR_THIRD,
-            RomanDegree::IV => Interval::PERFECT_FOURTH,
-            RomanDegree::V => Interval::PERFECT_FIFTH,
-            RomanDegree::VI => Interval::MAJOR_SIXTH,
-            RomanDegree::VII => Interval::MAJOR_SEVENTH,
-        };
+        // Use the new to_interval() method to get the interval for this roman numeral
+        let interval = self.root.to_interval();
         
-        // Apply the accidental
-        let interval_with_accidental = match self.root.accidental {
-            Accidental::Natural => degree_interval,
-            Accidental::Flat => match degree_interval {
-                Interval::MAJOR_SECOND => Interval::MINOR_SECOND,
-                Interval::MAJOR_THIRD => Interval::MINOR_THIRD,
-                Interval::PERFECT_FOURTH => Interval::DIMINISHED_FOURTH,
-                Interval::PERFECT_FIFTH => Interval::DIMINISHED_FIFTH,
-                Interval::MAJOR_SIXTH => Interval::MINOR_SIXTH,
-                Interval::MAJOR_SEVENTH => Interval::MINOR_SEVENTH,
-                _ => degree_interval, // PERFECT_UNISON stays the same
-            },
-            Accidental::Sharp => match degree_interval {
-                Interval::MAJOR_SECOND => Interval::AUGMENTED_SECOND,
-                Interval::MAJOR_THIRD => Interval::AUGMENTED_THIRD,
-                Interval::PERFECT_FOURTH => Interval::AUGMENTED_FOURTH,
-                Interval::PERFECT_FIFTH => Interval::AUGMENTED_FIFTH,
-                Interval::MAJOR_SIXTH => Interval::AUGMENTED_SIXTH,
-                Interval::MAJOR_SEVENTH => Interval::AUGMENTED_SEVENTH,
-                _ => degree_interval,
-            },
-            // TODO: Implement double accidentals
-            _ => degree_interval,
-        };
-        
-        // Calculate the root note
-        let root_note = key_root + interval_with_accidental;
+        // Calculate the root note by transposing the key root by the interval
+        let root_note = key_root + interval;
         
         // Create the chord with the calculated root note
         Chord::new(root_note, self.intervals.clone())
