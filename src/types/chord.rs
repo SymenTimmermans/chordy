@@ -323,6 +323,13 @@ impl Chord {
         ChordRenderer::legacy().render(&chord_name)
     }
 
+    /// Returns the HTML representation of the chord.
+    pub fn to_html(&self) -> String {
+        // Use the new ChordAnalyzer with HTML renderer
+        let chord_name = self.to_chord_name();
+        ChordRenderer::html().render(&chord_name)
+    }
+
     /// Convert this chord to a roman numeral chord in the given key
     pub fn to_roman(&self, key: &super::Key) -> Option<super::RomanChord> {
         use super::RomanNumeral;
