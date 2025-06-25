@@ -1,5 +1,5 @@
 use crate::traits::{ChordLike, HasIntervals, HasRoot};
-use super::{chord::HarmonicFunction, Accidental, Chord, Interval, NoteName};
+use super::{chord::HarmonicFunction, Accidental, Chord, Interval, NoteName, Key};
 
 pub mod definition;
 pub use definition::ScaleDefinition;
@@ -346,6 +346,41 @@ impl Scale {
     pub fn leading_tone_chord(&self) -> Chord {
         self.chord_at_degree(7)
     }
+    
+    /// Returns the major or minor key signature for this scale
+    /// 
+    /// Determines the key based on the third interval of the scale:
+    /// - Scales with a major third map to major keys
+    /// - Scales with a minor third map to minor keys
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use chordy::prelude::*;
+    /// 
+    /// let c_major = Scale::major(note!("C"));
+    /// assert_eq!(c_major.key(), Key::Major(note!("C")));
+    /// 
+    /// let a_minor = Scale::minor(note!("A"));
+    /// assert_eq!(a_minor.key(), Key::Minor(note!("A")));
+    /// 
+    /// // Modes also map to their appropriate key signatures
+    /// let d_dorian = Scale::from_definition(note!("D"), scales::DORIAN);
+    /// assert_eq!(d_dorian.key(), Key::Minor(note!("D")));
+    /// 
+    /// let f_lydian = Scale::from_definition(note!("F"), scales::LYDIAN);
+    /// assert_eq!(f_lydian.key(), Key::Major(note!("F")));
+    /// ```
+    pub fn key(&self) -> Key {
+        // Check if the scale contains a major or minor third
+        if self.intervals.contains(&Interval::MAJOR_THIRD) {
+            Key::Major(self.tonic)
+        } else {
+            // Default to minor for scales with minor third or no third
+            Key::Minor(self.tonic)
+        }
+    }
+    
     /// Returns the relative major/minor of this scale
     pub fn relative(&self) -> Option<Scale> {
         if *self == scales::IONIAN {
