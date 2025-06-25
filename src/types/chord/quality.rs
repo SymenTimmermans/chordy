@@ -18,55 +18,40 @@ pub enum ChordQuality {
 }
 
 impl ChordQuality {
-    /// Detects the quality of a type based on its intervals.
-    pub fn detect<T>(c: &T) -> Option<Self> where T: HasIntervals {
-        let intervals = c.intervals();
+    /// Detects the quality of a chord based on its intervals.
+    /// 
+    /// Uses simple boolean logic to determine chord quality by checking for the presence
+    /// of specific third and fifth intervals. This method is more straightforward than
+    /// counting intervals and handles the common chord quality cases effectively.
+    pub fn detect<T>(chord: &T) -> Option<Self> 
+    where 
+        T: HasIntervals 
+    {
+        Self::from_intervals(chord.intervals())
+    }
+    
+    /// Determine chord quality from a slice of intervals.
+    /// 
+    /// This is the core logic used by both the generic `detect` method and the 
+    /// chord analyzer. It prioritizes clarity and correctness over complex counting.
+    pub fn from_intervals(intervals: &[Interval]) -> Option<Self> {
+        let has_major_third = intervals.contains(&Interval::MAJOR_THIRD);
+        let has_minor_third = intervals.contains(&Interval::MINOR_THIRD);
+        let has_perfect_fifth = intervals.contains(&Interval::PERFECT_FIFTH);
+        let has_diminished_fifth = intervals.contains(&Interval::DIMINISHED_FIFTH);
+        let has_augmented_fifth = intervals.contains(&Interval::AUGMENTED_FIFTH);
         
-        // Count occurrences of each type of third and fifth
-        let mut major_thirds = 0;
-        let mut minor_thirds = 0;
-        let mut perfect_fifths = 0;
-        let mut diminished_fifths = 0;
-        let mut augmented_fifths = 0;
-
-        for interval in intervals {
-            match *interval {
-                Interval::MAJOR_THIRD => major_thirds += 1,
-                Interval::MINOR_THIRD => minor_thirds += 1,
-                Interval::PERFECT_FIFTH => perfect_fifths += 1,
-                Interval::DIMINISHED_FIFTH => diminished_fifths += 1,
-                Interval::AUGMENTED_FIFTH => augmented_fifths += 1,
-                _ => continue,
-            }
-        }
-
-        // Determine the most prevalent third and fifth types
-        let third_type = match (major_thirds, minor_thirds) {
-            (maj, min) if maj > min => Some(true),  // Major third
-            (maj, min) if min > maj => Some(false), // Minor third
-            (0, 0) => None,                         // No third
-            _ => None,                              // Equal number - ambiguous
-        };
-
-        let fifth_type = match (perfect_fifths, diminished_fifths, augmented_fifths) {
-            (perf, dim, aug) if perf > dim && perf > aug => Some(0),  // Perfect
-            (perf, dim, aug) if dim > perf && dim > aug => Some(-1),  // Diminished
-            (perf, dim, aug) if aug > perf && aug > dim => Some(1),   // Augmented
-            (0, 0, 0) => None,                                       // No fifth
-            _ => None,                                                // Ambiguous
-        };
-
-        // Determine quality based on third and fifth types
-        match (third_type, fifth_type) {
-            (Some(true), Some(0)) => Some(ChordQuality::Major),
-            (Some(false), Some(0)) => Some(ChordQuality::Minor),
-            (Some(false), Some(-1)) => Some(ChordQuality::Diminished),
-            (Some(true), Some(1)) => Some(ChordQuality::Augmented),
-            // Classify diads as major/minor
-            (Some(false), None) => Some(ChordQuality::Minor),
-            (Some(true), None) => Some(ChordQuality::Major),
-            // Any other combination is ambiguous
-            _ => None, 
+        match (has_major_third, has_minor_third, has_perfect_fifth, has_diminished_fifth, has_augmented_fifth) {
+            // Augmented: Major third + Augmented fifth (no perfect fifth)
+            (true, false, false, false, true) => Some(ChordQuality::Augmented),
+            // Diminished: Minor third + Diminished fifth (no perfect fifth)
+            (false, true, false, true, false) => Some(ChordQuality::Diminished),
+            // Minor: Minor third (regardless of fifth, as long as it's not diminished-only)
+            (false, true, _, _, _) => Some(ChordQuality::Minor),
+            // Major: Major third (regardless of fifth, as long as it's not augmented-only)
+            (true, false, _, _, _) => Some(ChordQuality::Major),
+            // No clear third: return None (ambiguous)
+            _ => None,
         }
     }
 }
