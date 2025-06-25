@@ -91,7 +91,7 @@ naming_test!(test_c_major_13, "C,E,G,B,D,F,A", "Cmaj13");
 naming_test!(test_c_minor_major_13, "C,Eb,G,B,D,F,A", "Cm(maj13)");
 // no11 chords
 naming_test!(test_g13_no11, "G,B,D,F,A,E", "G13(no11)");
-naming_test!(test_a_minor_13_no11, "A,C,E,G,B,F", "Am13(no11)");
+naming_test!(test_a_minor_13_no11, "A,C,E,G,B,F", "Am9♭13");
 naming_test!(test_c_major_13_no11, "C,E,G,B,D,A", "Cmaj13(no11)");
 
 
@@ -100,18 +100,19 @@ naming_test!(test_g_sus2, "G,A,D", "Gsus2");
 naming_test!(test_g_sus4, "G,C,D", "Gsus4");
 
 
+
 // --- EXTENSIONS with ALTERATIONS CHORDS ---
 naming_test!(test_g7b9, "G,B,D,F,A♭", "G7♭9");
 naming_test!(test_g7s9, "G,B,D,F,A♯", "G7♯9");
-naming_test!(test_g7b13, "G,B,D,F,A,E♭", "G7♭13");
-naming_test!(test_g7s11, "G,B,D,F,A,C♯", "G7♯11");
+naming_test!(test_g7b13, "G,B,D,F,A,E♭", "G9♭13"); // Has natural 9th (A), so it's a 9th chord
+naming_test!(test_g7s11, "G,B,D,F,A,C♯", "G9♯11"); // Has natural 9th (A), so it's a 9th chord
 
 // Minor chords with alterations
 naming_test!(test_am7b9, "A,C,E,G,B♭", "Am7♭9");
 naming_test!(test_am7s9, "A,C,E,G,B♯", "Am7♯9");
 
 // Major chords with alterations  
-naming_test!(test_cmaj7s11, "C,E,G,B,D,F♯", "Cmaj7♯11");
-naming_test!(test_cmaj7b13, "C,E,G,B,D,A♭", "Cmaj7♭13");
+naming_test!(test_cmaj7s11, "C,E,G,B,D,F♯", "Cmaj9♯11"); // Has natural 9th (D), so it's a 9th chord
+naming_test!(test_cmaj7b13, "C,E,G,B,D,A♭", "Cmaj9♭13"); // Has natural 9th (D), so it's a 9th chord
 
 

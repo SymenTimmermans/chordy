@@ -649,14 +649,17 @@ impl ChordRenderer {
     }
     
     fn render_added_tone(&self, added_tone: AddedTone, has_seventh: bool) -> String {
-        let base = match (added_tone, self.convention) {
-            // Legacy convention: fourth becomes add11
-            (AddedTone::Fourth, NamingConvention::LeadSheet) => "add11".to_string(),
+        let base = match (added_tone, self.convention, has_seventh) {
+            // Legacy convention: fourth with seventh becomes add11 (compound interval case)
+            (AddedTone::Fourth, NamingConvention::LeadSheet, true) => "add11".to_string(),
+            // Special case: fourth in legacy mode without seventh also becomes add11
+            // This handles the ordered parsing case where P11 becomes AddedTone::Fourth
+            (AddedTone::Fourth, NamingConvention::LeadSheet, false) => "add11".to_string(),
             // Standard conventions
-            (AddedTone::Second, _) => "add2".to_string(),
-            (AddedTone::Fourth, _) => "add4".to_string(),
-            (AddedTone::Sixth, _) => "add6".to_string(),
-            (AddedTone::Ninth, _) => "add9".to_string(),
+            (AddedTone::Second, _, _) => "add2".to_string(),
+            (AddedTone::Fourth, _, _) => "add4".to_string(),
+            (AddedTone::Sixth, _, _) => "add6".to_string(),
+            (AddedTone::Ninth, _, _) => "add9".to_string(),
         };
         
         // In legacy mode, use parentheses for added tones when seventh is present
@@ -778,6 +781,7 @@ impl ChordAnalyzer {
     }
     
     /// Analyze extension intervals (9, 11, 13)
+    /// Only natural extensions count as extensions - altered intervals are handled as alterations
     fn analyze_extensions(intervals: &[Interval]) -> Vec<Extension> {
         let mut extensions = Vec::new();
         
@@ -786,32 +790,30 @@ impl ChordAnalyzer {
         
         // Only treat as extensions if we have a seventh (extensions imply the seventh)
         if has_seventh {
-            // Check for both simple and compound intervals that indicate extensions
-            // 9th: major second OR major ninth
-            let has_ninth = intervals.contains(&Interval::MAJOR_NINTH) || 
-                           intervals.contains(&Interval::MINOR_NINTH) ||
-                           intervals.contains(&Interval::MAJOR_SECOND);
+            // 9th: Only NATURAL ninth (major second OR major ninth)
+            // MINOR_NINTH is an alteration, not an extension
+            let has_natural_ninth = intervals.contains(&Interval::MAJOR_NINTH) || 
+                                   intervals.contains(&Interval::MAJOR_SECOND);
             
-            if has_ninth {
+            if has_natural_ninth {
                 extensions.push(Extension::Ninth);
             }
             
-            // 11th: perfect fourth OR perfect eleventh (but only if 9th is also present)
-            let has_eleventh = intervals.contains(&Interval::PERFECT_ELEVENTH) || 
-                              intervals.contains(&Interval::AUGMENTED_ELEVENTH) ||
-                              intervals.contains(&Interval::PERFECT_FOURTH);
+            // 11th: Only NATURAL eleventh (perfect eleventh) AND must have 9th to be extension
+            // PERFECT_FOURTH is now handled separately (no longer converted to 11th)
+            // AUGMENTED_ELEVENTH is an alteration, not an extension
+            let has_natural_eleventh = intervals.contains(&Interval::PERFECT_ELEVENTH);
                               
-            if has_eleventh && has_ninth {
+            if has_natural_eleventh && has_natural_ninth {
                 extensions.push(Extension::Eleventh);
             }
             
-            // 13th: major sixth OR major thirteenth (requires 9th and typically 11th)
-            let has_thirteenth = intervals.contains(&Interval::MAJOR_THIRTEENTH) || 
-                               intervals.contains(&Interval::MINOR_THIRTEENTH) ||
-                               intervals.contains(&Interval::MAJOR_SIXTH) ||
-                               intervals.contains(&Interval::MINOR_SIXTH);
+            // 13th: Only NATURAL thirteenth (major thirteenth)
+            // Minor thirteenth is always an alteration (♭13), never an extension
+            // MAJOR_SIXTH is now handled separately
+            let has_natural_thirteenth = intervals.contains(&Interval::MAJOR_THIRTEENTH);
                                
-            if has_thirteenth && has_ninth {
+            if has_natural_thirteenth {
                 extensions.push(Extension::Thirteenth);
             }
         }
@@ -852,6 +854,7 @@ impl ChordAnalyzer {
             alterations.push(Alteration::SharpEleventh);
         }
         
+        // Minor 13th is always an alteration (♭13), never an extension
         if intervals.contains(&Interval::MINOR_THIRTEENTH) {
             alterations.push(Alteration::FlatThirteenth);
         }
@@ -879,16 +882,21 @@ impl ChordAnalyzer {
             added_tones.push(AddedTone::Ninth);
         }
         
-        // Add11 - perfect fourth with third present (not suspension) 
-        // Can be with or without seventh, but if seventh is present, 9th must be absent
-        let has_ninth = intervals.contains(&Interval::MAJOR_SECOND) || 
-                       intervals.contains(&Interval::MAJOR_NINTH) ||
-                       intervals.contains(&Interval::MINOR_NINTH);
-                       
+        // Add4/Add11 - perfect fourth with third present (not suspension)
+        // With ordered parsing, P4 is now a simple fourth, not converted to 11th
         if intervals.contains(&Interval::PERFECT_FOURTH) && 
            (has_major_third || has_minor_third) &&
-           (!has_seventh || (has_seventh && !has_ninth)) {
-            added_tones.push(AddedTone::Fourth); // Will be rendered as add11 in legacy mode
+           !has_seventh {
+            added_tones.push(AddedTone::Fourth);
+        }
+        
+        // Add11 - perfect eleventh (compound interval)
+        // This handles cases like "G,B,D,C" where C is a P11 due to ordered parsing
+        // Also handles cases like "C,E,G,B,F" where F is P11 but it's add11 because no 9th
+        if intervals.contains(&Interval::PERFECT_ELEVENTH) && 
+           (has_major_third || has_minor_third) &&
+           (!intervals.contains(&Interval::MAJOR_NINTH) && !intervals.contains(&Interval::MAJOR_SECOND)) {
+            added_tones.push(AddedTone::Fourth); // Rendered as add11 for compound interval
         }
         
         // Add6 - major sixth without seventh
