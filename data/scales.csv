@@ -1,13 +1,48 @@
 Name;Intervals;ModeOf;DegreeOffset
 Ionian;P1,M2,M3,P4,P5,M6,M7;;
+Ionian Sharp 5;P1,M2,M3,P4,A5,M6,M7;Harmonic Minor;2
 Dorian;P1,M2,m3,P4,P5,M6,m7;Ionian;1
+Dorian Altered;P1,M2,m3,A4,P5,M6,m7;Harmonic Minor;3
+Dorian Flat 2;P1,m2,m3,P4,P5,M6,m7;Melodic Minor;1
 Phrygian;P1,m2,m3,P4,P5,m6,m7;Ionian;2
+Phrygian Dominant;P1,m2,M3,P4,P5,m6,m7;Harmonic Minor;4
 Lydian;P1,M2,M3,A4,P5,M6,M7;Ionian;3
+Lydian Sharp 2;P1,A2,M3,A4,P5,M6,M7;Harmonic Minor;5
+Lydian Augmented;P1,M2,M3,A4,A5,M6,M7;Melodic Minor;2
+Lydian Dominant;P1,M2,M3,A4,P5,M6,m7;Melodic Minor;3
 Mixolydian;P1,M2,M3,P4,P5,M6,m7;Ionian;4
+Mixolydian Flat 6;P1,M2,M3,P4,P5,m6,m7;Melodic Minor;4
 Aeolian;P1,M2,m3,P4,P5,m6,m7;Ionian;5
 Harmonic Minor;P1,M2,m3,P4,P5,m6,M7;;
 Melodic Minor;P1,M2,m3,P4,P5,M6,M7;;
 Locrian;P1,m2,m3,P4,d5,m6,m7;Ionian;6
+Locrian Natural 2;P1,M2,m3,P4,d5,m6,m7;Melodic Minor;5
+Locrian Natural 6;P1,m2,m3,P4,d5,M6,m7;Harmonic Minor;2
+Super Locrian;P1,m2,m3,M3,d5,m6,m7;Melodic Minor;6
+Ultralocrian;P1,m2,m3,d4,d5,m6,d7;Harmonic Minor;6
 Whole Tone;P1,M2,M3,A4,A5,A6;;
 Hungarian Minor;P1,M2,m3,A4,P5,m6,M7;;
 Altered;P1,m2,m3,d4,d5,m6,m7;;
+Algerian;P1,M2,m3,A4,P5,m6,M7;;
+Augmented;P1,m3,M3,P5,A5,M7;;
+Bebop Dominant;P1,M2,M3,P4,P5,M6,m7,M7;;
+Blues;P1,m3,P4,d5,P5,m7;;
+Double Harmonic;P1,m2,M3,P4,P5,m6,M7;;
+Enigmatic;P1,m2,M3,A4,A5,A6,M7;;
+Flamenco;P1,m2,M3,P4,P5,m6,M7;;
+Gypsy;P1,M2,m3,A4,P5,m6,m7;;
+Half Diminished;P1,M2,m3,P4,d5,m6,m7;;
+Harmonic Major;P1,M2,M3,P4,P5,m6,M7;;
+Hungarian Major;P1,A2,M3,A4,P5,M6,m7;;
+Major Bebop;P1,M2,M3,P4,P5,A5,M6,M7;;
+Major Locrian;P1,M2,M3,P4,d5,m6,m7;;
+Major Pentatonic;P1,M2,M3,P5,M6;;
+Neapolitan Major;P1,m2,m3,P4,P5,M6,M7;;
+Neapolitan Minor;P1,m2,m3,P4,P5,m6,M7;;
+Octatonic 1;P1,M2,m3,P4,d5,m6,M6,m7;;
+Octatonic 2;P1,m2,m3,M3,A4,P5,M6,m7;;
+Persian;P1,m2,M3,P4,d5,m6,M7;;
+Prometheus;P1,M2,M3,A4,M6,m7;;
+Tritone;P1,m2,M3,d5,P5,m7;;
+Ukranian Dorian;P1,M2,m3,A4,P5,M6,m7;;
+
