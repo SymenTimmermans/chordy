@@ -53,13 +53,13 @@ fn test_roman_numeral_creation() {
 #[test]
 fn test_roman_numeral_display_major_context() {
     // Test display in major key context using chord naming system (uppercase for major/aug, lowercase for minor/dim)
-    let major_one = RomanChord::simple(RomanNumeral::new(RomanDegree::I, Accidental::Natural), ChordQuality::Major);
-    let minor_two = RomanChord::simple(RomanNumeral::new(RomanDegree::II, Accidental::Natural), ChordQuality::Minor);
-    let minor_three = RomanChord::simple(RomanNumeral::new(RomanDegree::III, Accidental::Natural), ChordQuality::Minor);
-    let major_four = RomanChord::simple(RomanNumeral::new(RomanDegree::IV, Accidental::Natural), ChordQuality::Major);
-    let major_five = RomanChord::simple(RomanNumeral::new(RomanDegree::V, Accidental::Natural), ChordQuality::Major);
-    let minor_six = RomanChord::simple(RomanNumeral::new(RomanDegree::VI, Accidental::Natural), ChordQuality::Minor);
-    let dim_seven = RomanChord::simple(RomanNumeral::new(RomanDegree::VII, Accidental::Natural), ChordQuality::Diminished);
+    let major_one = RomanChord::major(RomanNumeral::new(RomanDegree::I, Accidental::Natural));
+    let minor_two = RomanChord::minor(RomanNumeral::new(RomanDegree::II, Accidental::Natural));
+    let minor_three = RomanChord::minor(RomanNumeral::new(RomanDegree::III, Accidental::Natural));
+    let major_four = RomanChord::major(RomanNumeral::new(RomanDegree::IV, Accidental::Natural));
+    let major_five = RomanChord::major(RomanNumeral::new(RomanDegree::V, Accidental::Natural));
+    let minor_six = RomanChord::minor(RomanNumeral::new(RomanDegree::VI, Accidental::Natural));
+    let dim_seven = RomanChord::diminished(RomanNumeral::new(RomanDegree::VII, Accidental::Natural));
     
     // Display depends on chord quality context
     assert_eq!(major_one.to_string(), "I");
@@ -74,13 +74,13 @@ fn test_roman_numeral_display_major_context() {
 #[test]
 fn test_roman_numeral_display_minor_context() {
     // Test display in minor key context using chord naming system with proper accidentals
-    let minor_one = RomanChord::simple(RomanNumeral::new(RomanDegree::I, Accidental::Natural), ChordQuality::Minor);
-    let dim_two = RomanChord::simple(RomanNumeral::new(RomanDegree::II, Accidental::Natural), ChordQuality::Diminished);
-    let major_flat_three = RomanChord::simple(RomanNumeral::new(RomanDegree::III, Accidental::Flat), ChordQuality::Major);
-    let minor_four = RomanChord::simple(RomanNumeral::new(RomanDegree::IV, Accidental::Natural), ChordQuality::Minor);
-    let minor_five = RomanChord::simple(RomanNumeral::new(RomanDegree::V, Accidental::Natural), ChordQuality::Minor);
-    let major_flat_six = RomanChord::simple(RomanNumeral::new(RomanDegree::VI, Accidental::Flat), ChordQuality::Major);
-    let major_flat_seven = RomanChord::simple(RomanNumeral::new(RomanDegree::VII, Accidental::Flat), ChordQuality::Major);
+    let minor_one = RomanChord::minor(RomanNumeral::new(RomanDegree::I, Accidental::Natural));
+    let dim_two = RomanChord::diminished(RomanNumeral::new(RomanDegree::II, Accidental::Natural));
+    let major_flat_three = RomanChord::major(RomanNumeral::new(RomanDegree::III, Accidental::Flat));
+    let minor_four = RomanChord::minor(RomanNumeral::new(RomanDegree::IV, Accidental::Natural));
+    let minor_five = RomanChord::minor(RomanNumeral::new(RomanDegree::V, Accidental::Natural));
+    let major_flat_six = RomanChord::major(RomanNumeral::new(RomanDegree::VI, Accidental::Flat));
+    let major_flat_seven = RomanChord::major(RomanNumeral::new(RomanDegree::VII, Accidental::Flat));
     
     assert_eq!(minor_one.to_string(), "i");
     assert_eq!(dim_two.to_string(), "ii°");

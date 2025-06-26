@@ -1,6 +1,6 @@
 use std::{fmt::Display, str::FromStr};
 use super::{Interval, Key, Chord, Accidental, ChordQuality};
-use crate::{error::ParseError, traits::HasIntervals};
+use crate::{error::ParseError, traits::{HasIntervals, HasRoot}};
 
 /// Roman degree representation (I-VII), analogous to Letter enum
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -340,21 +340,38 @@ impl RomanChord {
 
     /// Convert this roman chord to an actual chord in the given key
     pub fn in_key(&self, key: &Key) -> Chord {
-        // Get the root note of the key
-        let key_root = match key {
-            Key::Major(note) | Key::Minor(note) => *note,
-        };
-        
-        // Use the new to_interval() method to get the interval for this roman numeral
-        let interval = self.root.to_interval();
-        
-        // Calculate the root note by transposing the key root by the interval
-        let root_note = key_root + interval;
-        
-        // Create the chord with the calculated root note
-        Chord::new(root_note, self.intervals.clone())
+        self.of(key)
     }
-    
+
+    /// Creates a concrete `Chord` from this `RomanChord` relative to the root of another musical structure.
+    ///
+    /// This allows for music theory analysis operations like secondary dominants.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{RomanChord, RomanNumeral, RomanDegree, Chord, NoteName, Letter, Accidental, Key};
+    /// use chordy::traits::{HasRoot, HasIntervals};
+    ///
+    /// let c_major_key = Key::Major(NoteName::new(Letter::C, Accidental::Natural));
+    /// let roman_five = RomanChord::simple(RomanNumeral::V(), ChordQuality::Major);
+    ///
+    /// // Get the dominant chord of C major (G major)
+    /// let g_major_chord = roman_five.of(&c_major_key);
+    /// assert_eq!(g_major_chord.root(), NoteName::new(Letter::G, Accidental::Natural));
+    /// assert_eq!(g_major_chord.intervals.len(), 3);
+    ///
+    /// // You can also use it with a Chord directly if it implements HasRoot
+    /// let c_major_chord = Chord::major(NoteName::new(Letter::C, Accidental::Natural));
+    /// let g_major_from_chord = roman_five.of(&c_major_chord);
+    /// assert_eq!(g_major_from_chord.root(), NoteName::new(Letter::G, Accidental::Natural));
+    /// ```
+    pub fn of<T: HasRoot>(&self, c: &T) -> Chord {
+        let base_root = c.root();
+        let interval_from_base = self.root.to_interval();
+        let actual_root = base_root + interval_from_base;
+        Chord::new(actual_root, self.intervals.clone())
+    }
     
     /// Convert this roman chord to a ChordName using the new naming system
     pub fn to_chord_name(&self) -> super::chord::ChordName {
