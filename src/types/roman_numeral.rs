@@ -350,7 +350,7 @@ impl RomanChord {
     /// # Examples
     ///
     /// ```
-    /// use chordy::{RomanChord, RomanNumeral, RomanDegree, Chord, NoteName, Letter, Accidental, Key};
+    /// use chordy::{RomanChord, RomanNumeral, RomanDegree, Chord, NoteName, Letter, Accidental, Key, ChordQuality};
     /// use chordy::traits::{HasRoot, HasIntervals};
     ///
     /// let c_major_key = Key::Major(NoteName::new(Letter::C, Accidental::Natural));
