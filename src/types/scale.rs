@@ -434,6 +434,62 @@ impl Scale {
     }
     */
 
+    /// Returns intervals spanning multiple octaves
+    ///
+    /// Generates intervals from the scale that span the specified number of octaves.
+    /// For example, with 2 octaves, a major scale would include intervals up to the 14th.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use chordy::prelude::*;
+    ///
+    /// let c_major = Scale::major(note!("C"));
+    /// let extended = c_major.extended_intervals(2);
+    /// 
+    /// // Should include 9th, 11th, 13th intervals
+    /// assert!(extended.iter().any(|i| i.semitones() == 14)); // Major 9th
+    /// assert!(extended.iter().any(|i| i.semitones() == 17)); // Perfect 11th  
+    /// assert!(extended.iter().any(|i| i.semitones() == 21)); // Major 13th
+    /// ```
+    pub fn extended_intervals(&self, octaves: u8) -> Vec<Interval> {
+        let mut extended = Vec::new();
+        
+        for octave in 0..octaves {
+            for &interval in &self.intervals {
+                let extended_interval = interval + Interval::new(0, octave as i8);
+                extended.push(extended_interval);
+            }
+        }
+        
+        extended.sort_by_key(|i| i.semitones());
+        extended.dedup();
+        extended
+    }
+
+    /// Returns notes spanning multiple octaves  
+    ///
+    /// Generates all notes in the scale across the specified number of octaves.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use chordy::prelude::*;
+    ///
+    /// let c_major = Scale::major(note!("C"));
+    /// let extended_notes = c_major.extended_notes(2);
+    /// 
+    /// // Should have 14 notes (7 per octave x 2 octaves)
+    /// assert_eq!(extended_notes.len(), 14);
+    /// ```
+    pub fn extended_notes(&self, octaves: u8) -> Vec<NoteName> {
+        let extended_intervals = self.extended_intervals(octaves);
+        extended_intervals
+            .iter()
+            .map(|&interval| self.tonic + interval)
+            .collect()
+    }
+
     /// Join two scales together, returning a new scale that combines their intervals
     ///
     /// The new scale will have the tonic of the first scale, and it will have the notes of both
