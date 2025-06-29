@@ -34,6 +34,100 @@ pub trait HasIntervals {
     fn quality(&self) -> Option<ChordQuality> {
         ChordQuality::from_intervals(self.intervals())
     }
+
+    /// Calculates the dissonance level of the intervals
+    /// 
+    /// Returns a value between 0.0 (perfectly consonant) and 1.0 (highly dissonant).
+    /// The calculation considers:
+    /// - Dissonance of intervals from the root
+    /// - Dissonance between adjacent intervals in the chord
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use chordy::prelude::*;
+    /// 
+    /// let c_major = Chord::major(note!("C"));
+    /// assert!(c_major.dissonance_level() < 0.2); // Very consonant
+    /// 
+    /// let c_dim = Chord::diminished(note!("C"));
+    /// assert!(c_dim.dissonance_level() > 0.5); // Quite dissonant
+    /// ```
+    fn dissonance_level(&self) -> f32 {
+        use crate::Interval;
+        
+        let intervals = self.intervals();
+        if intervals.is_empty() {
+            return 0.0;
+        }
+        
+        // Define dissonance weights for intervals
+        let interval_dissonance = |interval: &Interval| -> f32 {
+            match interval.semitones() % 12 {
+                0 => 0.0,   // Unison/Octave - perfect consonance
+                1 => 0.8,   // Minor second - harsh dissonance
+                2 => 0.4,   // Major second - mild dissonance
+                3 => 0.15,  // Minor third - imperfect consonance
+                4 => 0.1,   // Major third - imperfect consonance
+                5 => 0.2,   // Perfect fourth - contextual
+                6 => 0.9,   // Tritone - strong dissonance
+                7 => 0.0,   // Perfect fifth - perfect consonance
+                8 => 0.45,  // Augmented fifth/Minor sixth - moderately dissonant
+                9 => 0.15,  // Major sixth - imperfect consonance
+                10 => 0.35, // Minor seventh - mild dissonance
+                11 => 0.4,  // Major seventh - mild dissonance
+                _ => 0.5,   // Should not happen
+            }
+        };
+        
+        // Calculate dissonance from root
+        let mut total_dissonance = 0.0;
+        let mut count = 0.0;
+        
+        for interval in intervals {
+            // Skip unison
+            if interval.semitones() != 0 {
+                let mut weight = interval_dissonance(interval);
+                
+                // Add extra weight for extended intervals
+                if interval.semitones() > 12 {
+                    weight += 0.1; // 9ths, 11ths, 13ths add tension
+                }
+                
+                total_dissonance += weight;
+                count += 1.0;
+            }
+        }
+        
+        // Calculate dissonance between chord tones
+        let notes: Vec<_> = intervals.iter()
+            .map(|i| i.semitones() % 12)
+            .collect();
+            
+        for i in 0..notes.len() {
+            for j in i+1..notes.len() {
+                let interval_between = (notes[j] - notes[i] + 12) % 12;
+                let dissonance = match interval_between {
+                    1 => 0.7,  // Minor second between chord tones
+                    2 => 0.3,  // Major second between chord tones
+                    6 => 0.6,  // Tritone between chord tones
+                    11 => 0.5, // Major seventh between chord tones
+                    _ => 0.0,
+                };
+                if dissonance > 0.0 {
+                    total_dissonance += dissonance * 0.5; // Weight internal dissonances less
+                    count += 0.5;
+                }
+            }
+        }
+        
+        // Normalize to 0.0-1.0 range
+        if count > 0.0 {
+            (total_dissonance / count).min(1.0)
+        } else {
+            0.0
+        }
+    }
 }
 
 /// A trait for structures that can be inverted
