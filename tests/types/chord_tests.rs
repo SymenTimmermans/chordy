@@ -48,6 +48,81 @@ fn test_chord_notes() {
 }
 
 #[test]
+fn test_chord_pitches_ascending_order() {
+    use chordy::Pitch;
+    
+    // Test basic triad - should stay in same octave
+    let c_major = Chord::major(note!("C"));
+    let pitches = c_major.pitches(4);
+    let expected = vec![
+        Pitch::new(Letter::C, Accidental::Natural, 4),
+        Pitch::new(Letter::E, Accidental::Natural, 4),
+        Pitch::new(Letter::G, Accidental::Natural, 4),
+    ];
+    assert_eq!(pitches, expected);
+    
+    // Test Dm7 - C should cross to next octave (D3, F3, A3, C4)
+    let d_minor_7 = Chord::minor_7th(note!("D"));
+    let pitches = d_minor_7.pitches(3);
+    let expected = vec![
+        Pitch::new(Letter::D, Accidental::Natural, 3),
+        Pitch::new(Letter::F, Accidental::Natural, 3),
+        Pitch::new(Letter::A, Accidental::Natural, 3),
+        Pitch::new(Letter::C, Accidental::Natural, 4), // Should cross to octave 4
+    ];
+    assert_eq!(pitches, expected);
+    
+    // Test extended chord with 9th
+    let c_maj9 = Chord::new(note!("C"), vec![
+        Interval::PERFECT_UNISON,
+        Interval::MAJOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MAJOR_SEVENTH,
+        Interval::MAJOR_NINTH,
+    ]);
+    let pitches = c_maj9.pitches(4);
+    let expected = vec![
+        Pitch::new(Letter::C, Accidental::Natural, 4),
+        Pitch::new(Letter::E, Accidental::Natural, 4),
+        Pitch::new(Letter::G, Accidental::Natural, 4),
+        Pitch::new(Letter::B, Accidental::Natural, 4),
+        Pitch::new(Letter::D, Accidental::Natural, 5), // 9th in next octave
+    ];
+    assert_eq!(pitches, expected);
+    
+    // Test chord with intervals that create octave crossings
+    let f_chord = Chord::new(note!("F"), vec![
+        Interval::PERFECT_UNISON,    // F
+        Interval::MAJOR_SEVENTH,     // E - would be lower than F in same octave
+        Interval::MAJOR_NINTH,       // G - already in next octave
+    ]);
+    let pitches = f_chord.pitches(4);
+    let expected = vec![
+        Pitch::new(Letter::F, Accidental::Natural, 4),
+        Pitch::new(Letter::E, Accidental::Natural, 5), // E should bump to next octave
+        Pitch::new(Letter::G, Accidental::Natural, 5), // 9th already in next octave
+    ];
+    assert_eq!(pitches, expected);
+}
+
+#[test]
+fn test_chord_pitches_midi_ordering() {
+    // Test that MIDI numbers are always ascending
+    let d_minor_7 = Chord::minor_7th(note!("D"));
+    let pitches = d_minor_7.pitches(3);
+    
+    let midi_numbers: Vec<i8> = pitches.iter().map(|p| p.midi_number()).collect();
+    
+    // Check that each MIDI number is greater than the previous
+    for window in midi_numbers.windows(2) {
+        assert!(window[1] > window[0], 
+            "MIDI numbers should be ascending, but {} <= {}", 
+            window[1], window[0]
+        );
+    }
+}
+
+#[test]
 fn test_triads_from_scale_c_major() {
     // start with a scale
     let scale = Scale::from_definition(note!("C"), scales::IONIAN);

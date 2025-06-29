@@ -490,6 +490,53 @@ impl Chord {
     pub fn as_augmented(self) -> Self {
         Chord::augmented(self.root)
     }
+
+    /// Returns the pitches of this chord at the specified octave
+    ///
+    /// This method ensures proper voice leading by placing each pitch at or above
+    /// the previous pitch. The root note is always at the specified octave, and
+    /// subsequent notes are placed in ascending order, crossing into higher octaves
+    /// as needed.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note, Letter, Accidental};
+    ///
+    /// let c_major = Chord::major(note!("C"));
+    /// let pitches = c_major.pitches(4);
+    /// // Returns [C4, E4, G4]
+    ///
+    /// let d_minor_7 = Chord::minor_7th(note!("D"));
+    /// let pitches = d_minor_7.pitches(3);
+    /// // Returns [D3, F3, A3, C4] - note the C crosses to octave 4
+    /// ```
+    pub fn pitches(&self, octave: i8) -> Vec<super::Pitch> {
+        let mut pitches = Vec::new();
+        let mut last_midi = None;
+        
+        for &interval in &self.intervals {
+            let note = self.root + interval;
+            let mut pitch_octave = octave + interval.octaves();
+            
+            // Calculate MIDI number for this pitch  
+            let mut midi_note = note.base_midi_number() + ((pitch_octave + 2) * 12);
+            
+            // If this note would be lower than or equal to the previous note, bump it up an octave
+            if let Some(last) = last_midi {
+                while midi_note <= last {
+                    pitch_octave += 1;
+                    midi_note = note.base_midi_number() + ((pitch_octave + 2) * 12);
+                }
+            }
+            
+            let pitch = note.to_pitch(pitch_octave);
+            pitches.push(pitch);
+            last_midi = Some(midi_note);
+        }
+        
+        pitches
+    }
 }
 
 impl Display for Chord {
