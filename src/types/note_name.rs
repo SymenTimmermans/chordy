@@ -152,6 +152,32 @@ impl NoteName {
     pub fn interval_to(self, other: Self) -> Interval {
         other.difference(&self)
     }
+
+    /// Returns the HTML representation of the note name with accidentals as superscripts
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{NoteName, Letter, Accidental};
+    /// let c_sharp = NoteName::new(Letter::C, Accidental::Sharp);
+    /// assert_eq!(c_sharp.to_html(), "C<sup>&sharp;</sup>");
+    ///
+    /// let b_flat = NoteName::new(Letter::B, Accidental::Flat);
+    /// assert_eq!(b_flat.to_html(), "B<sup>&flat;</sup>");
+    ///
+    /// let d_natural = NoteName::new(Letter::D, Accidental::Natural);
+    /// assert_eq!(d_natural.to_html(), "D");
+    /// ```
+    pub fn to_html(&self) -> String {
+        use crate::types::chord::naming::ChordFormat;
+        match self.accidental() {
+            Accidental::Natural => self.letter().to_string(),
+            acc => format!("{}<sup>{}</sup>", 
+                self.letter(), 
+                acc.render_for_format(ChordFormat::Html)
+            ),
+        }
+    }
 }
 
 // Torsor action: Note + Interval → Note

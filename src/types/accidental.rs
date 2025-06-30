@@ -93,10 +93,10 @@ impl Accidental {
             (Accidental::Natural, ChordFormat::Html) => "&natural;",
             (Accidental::DoubleFlat, ChordFormat::Unicode) => "𝄫",
             (Accidental::DoubleFlat, ChordFormat::Ascii) => "bb",
-            (Accidental::DoubleFlat, ChordFormat::Html) => "&bb;",
+            (Accidental::DoubleFlat, ChordFormat::Html) => "&#119083;", // 𝄫 Unicode entity
             (Accidental::DoubleSharp, ChordFormat::Unicode) => "𝄪",
             (Accidental::DoubleSharp, ChordFormat::Ascii) => "##",
-            (Accidental::DoubleSharp, ChordFormat::Html) => "&x;",
+            (Accidental::DoubleSharp, ChordFormat::Html) => "&#119082;", // 𝄪 Unicode entity
         }
     }
 
