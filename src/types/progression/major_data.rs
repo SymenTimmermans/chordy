@@ -70,6 +70,17 @@ pub static I_MAJ9: ProgressionNode = ProgressionNode {
     base_function: "I",
 };
 
+static MINOR_II_INTERVALS: [Interval; 3] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH];
+
+pub static MINOR_II: ProgressionNode = ProgressionNode {
+    id: "ii",
+    display_name: "ii",
+    node_type: NodeType::Primary,
+    roman_numeral: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
+    intervals: &MINOR_II_INTERVALS,
+    base_function: "ii",
+};
+
 static MINOR_II_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH];
 
 pub static MINOR_II_7: ProgressionNode = ProgressionNode {
@@ -114,6 +125,17 @@ pub static MINOR_II_7_PLUS__FLAT_9: ProgressionNode = ProgressionNode {
     base_function: "ii",
 };
 
+static MINOR_III_INTERVALS: [Interval; 3] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH];
+
+pub static MINOR_III: ProgressionNode = ProgressionNode {
+    id: "iii",
+    display_name: "iii",
+    node_type: NodeType::Primary,
+    roman_numeral: RomanNumeral::new(RomanDegree::III, Accidental::Natural),
+    intervals: &MINOR_III_INTERVALS,
+    base_function: "iii",
+};
+
 static MINOR_III_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH];
 
 pub static MINOR_III_7: ProgressionNode = ProgressionNode {
@@ -134,6 +156,17 @@ pub static MINOR_III_M7: ProgressionNode = ProgressionNode {
     roman_numeral: RomanNumeral::new(RomanDegree::III, Accidental::Natural),
     intervals: &MINOR_III_M7_INTERVALS,
     base_function: "iii",
+};
+
+static IV_INTERVALS: [Interval; 3] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH];
+
+pub static IV: ProgressionNode = ProgressionNode {
+    id: "IV",
+    display_name: "IV",
+    node_type: NodeType::Primary,
+    roman_numeral: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
+    intervals: &IV_INTERVALS,
+    base_function: "IV",
 };
 
 static IV_6_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MAJOR_SIXTH];
@@ -189,6 +222,17 @@ pub static IV__SHARP_11: ProgressionNode = ProgressionNode {
     roman_numeral: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
     intervals: &IV__SHARP_11_INTERVALS,
     base_function: "IV",
+};
+
+static V_INTERVALS: [Interval; 3] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH];
+
+pub static V: ProgressionNode = ProgressionNode {
+    id: "V",
+    display_name: "V",
+    node_type: NodeType::Primary,
+    roman_numeral: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
+    intervals: &V_INTERVALS,
+    base_function: "V",
 };
 
 static V_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH];
@@ -257,6 +301,17 @@ pub static V_7_PLUS__SHARP_9: ProgressionNode = ProgressionNode {
     base_function: "V",
 };
 
+static MINOR_VI_INTERVALS: [Interval; 3] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH];
+
+pub static MINOR_VI: ProgressionNode = ProgressionNode {
+    id: "vi",
+    display_name: "vi",
+    node_type: NodeType::Primary,
+    roman_numeral: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
+    intervals: &MINOR_VI_INTERVALS,
+    base_function: "vi",
+};
+
 static MINOR_VI_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH];
 
 pub static MINOR_VI_7: ProgressionNode = ProgressionNode {
@@ -288,6 +343,17 @@ pub static MINOR_VI_M7: ProgressionNode = ProgressionNode {
     roman_numeral: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
     intervals: &MINOR_VI_M7_INTERVALS,
     base_function: "vi",
+};
+
+static MINOR_VII_INTERVALS: [Interval; 3] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH];
+
+pub static MINOR_VII: ProgressionNode = ProgressionNode {
+    id: "vii",
+    display_name: "vii",
+    node_type: NodeType::Primary,
+    roman_numeral: RomanNumeral::new(RomanDegree::VII, Accidental::Natural),
+    intervals: &MINOR_VII_INTERVALS,
+    base_function: "vii",
 };
 
 static MINOR_VII__FLAT_5_INTERVALS: [Interval; 3] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::DIMINISHED_FIFTH];
@@ -378,6 +444,11 @@ pub static MINOR_FLAT_VII_9: ProgressionNode = ProgressionNode {
     base_function: "bVII",
 };
 
+pub static EDGE_I_TO_IV: ProgressionEdge = ProgressionEdge {
+    from: &I,
+    to: &IV,
+};
+
 pub static EDGE_I_TO_IV_6: ProgressionEdge = ProgressionEdge {
     from: &I,
     to: &IV_6,
@@ -401,6 +472,11 @@ pub static EDGE_I_TO_IV_MAJ7: ProgressionEdge = ProgressionEdge {
 pub static EDGE_I_TO_IV__SHARP_11: ProgressionEdge = ProgressionEdge {
     from: &I,
     to: &IV__SHARP_11,
+};
+
+pub static EDGE_I_6_TO_IV: ProgressionEdge = ProgressionEdge {
+    from: &I_6,
+    to: &IV,
 };
 
 pub static EDGE_I_6_TO_IV_6: ProgressionEdge = ProgressionEdge {
@@ -428,6 +504,11 @@ pub static EDGE_I_6_TO_IV__SHARP_11: ProgressionEdge = ProgressionEdge {
     to: &IV__SHARP_11,
 };
 
+pub static EDGE_I_7_TO_IV: ProgressionEdge = ProgressionEdge {
+    from: &I_7,
+    to: &IV,
+};
+
 pub static EDGE_I_7_TO_IV_6: ProgressionEdge = ProgressionEdge {
     from: &I_7,
     to: &IV_6,
@@ -451,6 +532,11 @@ pub static EDGE_I_7_TO_IV_MAJ7: ProgressionEdge = ProgressionEdge {
 pub static EDGE_I_7_TO_IV__SHARP_11: ProgressionEdge = ProgressionEdge {
     from: &I_7,
     to: &IV__SHARP_11,
+};
+
+pub static EDGE_I_9_TO_IV: ProgressionEdge = ProgressionEdge {
+    from: &I_9,
+    to: &IV,
 };
 
 pub static EDGE_I_9_TO_IV_6: ProgressionEdge = ProgressionEdge {
@@ -478,6 +564,11 @@ pub static EDGE_I_9_TO_IV__SHARP_11: ProgressionEdge = ProgressionEdge {
     to: &IV__SHARP_11,
 };
 
+pub static EDGE_I_MAJ7_TO_IV: ProgressionEdge = ProgressionEdge {
+    from: &I_MAJ7,
+    to: &IV,
+};
+
 pub static EDGE_I_MAJ7_TO_IV_6: ProgressionEdge = ProgressionEdge {
     from: &I_MAJ7,
     to: &IV_6,
@@ -503,6 +594,11 @@ pub static EDGE_I_MAJ7_TO_IV__SHARP_11: ProgressionEdge = ProgressionEdge {
     to: &IV__SHARP_11,
 };
 
+pub static EDGE_I_MAJ9_TO_IV: ProgressionEdge = ProgressionEdge {
+    from: &I_MAJ9,
+    to: &IV,
+};
+
 pub static EDGE_I_MAJ9_TO_IV_6: ProgressionEdge = ProgressionEdge {
     from: &I_MAJ9,
     to: &IV_6,
@@ -526,6 +622,11 @@ pub static EDGE_I_MAJ9_TO_IV_MAJ7: ProgressionEdge = ProgressionEdge {
 pub static EDGE_I_MAJ9_TO_IV__SHARP_11: ProgressionEdge = ProgressionEdge {
     from: &I_MAJ9,
     to: &IV__SHARP_11,
+};
+
+pub static EDGE_I_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &I,
+    to: &V,
 };
 
 pub static EDGE_I_TO_V_7: ProgressionEdge = ProgressionEdge {
@@ -558,6 +659,11 @@ pub static EDGE_I_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionEdge {
     to: &V_7_PLUS__SHARP_9,
 };
 
+pub static EDGE_I_6_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &I_6,
+    to: &V,
+};
+
 pub static EDGE_I_6_TO_V_7: ProgressionEdge = ProgressionEdge {
     from: &I_6,
     to: &V_7,
@@ -586,6 +692,11 @@ pub static EDGE_I_6_TO_V_7_PLUS__FLAT_9: ProgressionEdge = ProgressionEdge {
 pub static EDGE_I_6_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionEdge {
     from: &I_6,
     to: &V_7_PLUS__SHARP_9,
+};
+
+pub static EDGE_I_7_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &I_7,
+    to: &V,
 };
 
 pub static EDGE_I_7_TO_V_7: ProgressionEdge = ProgressionEdge {
@@ -618,6 +729,11 @@ pub static EDGE_I_7_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionEdge {
     to: &V_7_PLUS__SHARP_9,
 };
 
+pub static EDGE_I_9_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &I_9,
+    to: &V,
+};
+
 pub static EDGE_I_9_TO_V_7: ProgressionEdge = ProgressionEdge {
     from: &I_9,
     to: &V_7,
@@ -646,6 +762,11 @@ pub static EDGE_I_9_TO_V_7_PLUS__FLAT_9: ProgressionEdge = ProgressionEdge {
 pub static EDGE_I_9_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionEdge {
     from: &I_9,
     to: &V_7_PLUS__SHARP_9,
+};
+
+pub static EDGE_I_MAJ7_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &I_MAJ7,
+    to: &V,
 };
 
 pub static EDGE_I_MAJ7_TO_V_7: ProgressionEdge = ProgressionEdge {
@@ -678,6 +799,11 @@ pub static EDGE_I_MAJ7_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionEdge {
     to: &V_7_PLUS__SHARP_9,
 };
 
+pub static EDGE_I_MAJ9_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &I_MAJ9,
+    to: &V,
+};
+
 pub static EDGE_I_MAJ9_TO_V_7: ProgressionEdge = ProgressionEdge {
     from: &I_MAJ9,
     to: &V_7,
@@ -708,6 +834,11 @@ pub static EDGE_I_MAJ9_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionEdge {
     to: &V_7_PLUS__SHARP_9,
 };
 
+pub static EDGE_I_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &I,
+    to: &MINOR_VI,
+};
+
 pub static EDGE_I_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
     from: &I,
     to: &MINOR_VI_7,
@@ -721,6 +852,11 @@ pub static EDGE_I_TO_MINOR_VI_9: ProgressionEdge = ProgressionEdge {
 pub static EDGE_I_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEdge {
     from: &I,
     to: &MINOR_VI_M7,
+};
+
+pub static EDGE_I_6_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &I_6,
+    to: &MINOR_VI,
 };
 
 pub static EDGE_I_6_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
@@ -738,6 +874,11 @@ pub static EDGE_I_6_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEdge {
     to: &MINOR_VI_M7,
 };
 
+pub static EDGE_I_7_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &I_7,
+    to: &MINOR_VI,
+};
+
 pub static EDGE_I_7_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
     from: &I_7,
     to: &MINOR_VI_7,
@@ -751,6 +892,11 @@ pub static EDGE_I_7_TO_MINOR_VI_9: ProgressionEdge = ProgressionEdge {
 pub static EDGE_I_7_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEdge {
     from: &I_7,
     to: &MINOR_VI_M7,
+};
+
+pub static EDGE_I_9_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &I_9,
+    to: &MINOR_VI,
 };
 
 pub static EDGE_I_9_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
@@ -768,6 +914,11 @@ pub static EDGE_I_9_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEdge {
     to: &MINOR_VI_M7,
 };
 
+pub static EDGE_I_MAJ7_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &I_MAJ7,
+    to: &MINOR_VI,
+};
+
 pub static EDGE_I_MAJ7_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
     from: &I_MAJ7,
     to: &MINOR_VI_7,
@@ -783,6 +934,11 @@ pub static EDGE_I_MAJ7_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEdge {
     to: &MINOR_VI_M7,
 };
 
+pub static EDGE_I_MAJ9_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &I_MAJ9,
+    to: &MINOR_VI,
+};
+
 pub static EDGE_I_MAJ9_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
     from: &I_MAJ9,
     to: &MINOR_VI_7,
@@ -796,6 +952,46 @@ pub static EDGE_I_MAJ9_TO_MINOR_VI_9: ProgressionEdge = ProgressionEdge {
 pub static EDGE_I_MAJ9_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEdge {
     from: &I_MAJ9,
     to: &MINOR_VI_M7,
+};
+
+pub static EDGE_MINOR_II_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II,
+    to: &V,
+};
+
+pub static EDGE_MINOR_II_TO_V_7: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II,
+    to: &V_7,
+};
+
+pub static EDGE_MINOR_II_TO_V_9: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II,
+    to: &V_9,
+};
+
+pub static EDGE_MINOR_II_TO_V_11: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II,
+    to: &V_11,
+};
+
+pub static EDGE_MINOR_II_TO_V_13: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II,
+    to: &V_13,
+};
+
+pub static EDGE_MINOR_II_TO_V_7_PLUS__FLAT_9: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II,
+    to: &V_7_PLUS__FLAT_9,
+};
+
+pub static EDGE_MINOR_II_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II,
+    to: &V_7_PLUS__SHARP_9,
+};
+
+pub static EDGE_MINOR_II_7_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II_7,
+    to: &V,
 };
 
 pub static EDGE_MINOR_II_7_TO_V_7: ProgressionEdge = ProgressionEdge {
@@ -828,6 +1024,11 @@ pub static EDGE_MINOR_II_7_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionEd
     to: &V_7_PLUS__SHARP_9,
 };
 
+pub static EDGE_MINOR_II_9_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II_9,
+    to: &V,
+};
+
 pub static EDGE_MINOR_II_9_TO_V_7: ProgressionEdge = ProgressionEdge {
     from: &MINOR_II_9,
     to: &V_7,
@@ -856,6 +1057,11 @@ pub static EDGE_MINOR_II_9_TO_V_7_PLUS__FLAT_9: ProgressionEdge = ProgressionEdg
 pub static EDGE_MINOR_II_9_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionEdge {
     from: &MINOR_II_9,
     to: &V_7_PLUS__SHARP_9,
+};
+
+pub static EDGE_MINOR_II_11_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II_11,
+    to: &V,
 };
 
 pub static EDGE_MINOR_II_11_TO_V_7: ProgressionEdge = ProgressionEdge {
@@ -888,6 +1094,11 @@ pub static EDGE_MINOR_II_11_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionE
     to: &V_7_PLUS__SHARP_9,
 };
 
+pub static EDGE_MINOR_II_7_PLUS__FLAT_9_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II_7_PLUS__FLAT_9,
+    to: &V,
+};
+
 pub static EDGE_MINOR_II_7_PLUS__FLAT_9_TO_V_7: ProgressionEdge = ProgressionEdge {
     from: &MINOR_II_7_PLUS__FLAT_9,
     to: &V_7,
@@ -918,6 +1129,26 @@ pub static EDGE_MINOR_II_7_PLUS__FLAT_9_TO_V_7_PLUS__SHARP_9: ProgressionEdge = 
     to: &V_7_PLUS__SHARP_9,
 };
 
+pub static EDGE_MINOR_II_TO_MINOR_VII: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II,
+    to: &MINOR_VII,
+};
+
+pub static EDGE_MINOR_II_TO_MINOR_VII__FLAT_5: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II,
+    to: &MINOR_VII__FLAT_5,
+};
+
+pub static EDGE_MINOR_II_TO_MINOR_VII_M7_FLAT_5: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II,
+    to: &MINOR_VII_M7_FLAT_5,
+};
+
+pub static EDGE_MINOR_II_7_TO_MINOR_VII: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II_7,
+    to: &MINOR_VII,
+};
+
 pub static EDGE_MINOR_II_7_TO_MINOR_VII__FLAT_5: ProgressionEdge = ProgressionEdge {
     from: &MINOR_II_7,
     to: &MINOR_VII__FLAT_5,
@@ -926,6 +1157,11 @@ pub static EDGE_MINOR_II_7_TO_MINOR_VII__FLAT_5: ProgressionEdge = ProgressionEd
 pub static EDGE_MINOR_II_7_TO_MINOR_VII_M7_FLAT_5: ProgressionEdge = ProgressionEdge {
     from: &MINOR_II_7,
     to: &MINOR_VII_M7_FLAT_5,
+};
+
+pub static EDGE_MINOR_II_9_TO_MINOR_VII: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II_9,
+    to: &MINOR_VII,
 };
 
 pub static EDGE_MINOR_II_9_TO_MINOR_VII__FLAT_5: ProgressionEdge = ProgressionEdge {
@@ -938,6 +1174,11 @@ pub static EDGE_MINOR_II_9_TO_MINOR_VII_M7_FLAT_5: ProgressionEdge = Progression
     to: &MINOR_VII_M7_FLAT_5,
 };
 
+pub static EDGE_MINOR_II_11_TO_MINOR_VII: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II_11,
+    to: &MINOR_VII,
+};
+
 pub static EDGE_MINOR_II_11_TO_MINOR_VII__FLAT_5: ProgressionEdge = ProgressionEdge {
     from: &MINOR_II_11,
     to: &MINOR_VII__FLAT_5,
@@ -948,6 +1189,11 @@ pub static EDGE_MINOR_II_11_TO_MINOR_VII_M7_FLAT_5: ProgressionEdge = Progressio
     to: &MINOR_VII_M7_FLAT_5,
 };
 
+pub static EDGE_MINOR_II_7_PLUS__FLAT_9_TO_MINOR_VII: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_II_7_PLUS__FLAT_9,
+    to: &MINOR_VII,
+};
+
 pub static EDGE_MINOR_II_7_PLUS__FLAT_9_TO_MINOR_VII__FLAT_5: ProgressionEdge = ProgressionEdge {
     from: &MINOR_II_7_PLUS__FLAT_9,
     to: &MINOR_VII__FLAT_5,
@@ -956,6 +1202,31 @@ pub static EDGE_MINOR_II_7_PLUS__FLAT_9_TO_MINOR_VII__FLAT_5: ProgressionEdge = 
 pub static EDGE_MINOR_II_7_PLUS__FLAT_9_TO_MINOR_VII_M7_FLAT_5: ProgressionEdge = ProgressionEdge {
     from: &MINOR_II_7_PLUS__FLAT_9,
     to: &MINOR_VII_M7_FLAT_5,
+};
+
+pub static EDGE_MINOR_III_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_III,
+    to: &MINOR_VI,
+};
+
+pub static EDGE_MINOR_III_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_III,
+    to: &MINOR_VI_7,
+};
+
+pub static EDGE_MINOR_III_TO_MINOR_VI_9: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_III,
+    to: &MINOR_VI_9,
+};
+
+pub static EDGE_MINOR_III_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_III,
+    to: &MINOR_VI_M7,
+};
+
+pub static EDGE_MINOR_III_7_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_III_7,
+    to: &MINOR_VI,
 };
 
 pub static EDGE_MINOR_III_7_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
@@ -973,6 +1244,11 @@ pub static EDGE_MINOR_III_7_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEdge {
     to: &MINOR_VI_M7,
 };
 
+pub static EDGE_MINOR_III_M7_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_III_M7,
+    to: &MINOR_VI,
+};
+
 pub static EDGE_MINOR_III_M7_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
     from: &MINOR_III_M7,
     to: &MINOR_VI_7,
@@ -986,6 +1262,41 @@ pub static EDGE_MINOR_III_M7_TO_MINOR_VI_9: ProgressionEdge = ProgressionEdge {
 pub static EDGE_MINOR_III_M7_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEdge {
     from: &MINOR_III_M7,
     to: &MINOR_VI_M7,
+};
+
+pub static EDGE_MINOR_III_TO_IV: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_III,
+    to: &IV,
+};
+
+pub static EDGE_MINOR_III_TO_IV_6: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_III,
+    to: &IV_6,
+};
+
+pub static EDGE_MINOR_III_TO_IV_7: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_III,
+    to: &IV_7,
+};
+
+pub static EDGE_MINOR_III_TO_IV_9: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_III,
+    to: &IV_9,
+};
+
+pub static EDGE_MINOR_III_TO_IV_MAJ7: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_III,
+    to: &IV_MAJ7,
+};
+
+pub static EDGE_MINOR_III_TO_IV__SHARP_11: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_III,
+    to: &IV__SHARP_11,
+};
+
+pub static EDGE_MINOR_III_7_TO_IV: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_III_7,
+    to: &IV,
 };
 
 pub static EDGE_MINOR_III_7_TO_IV_6: ProgressionEdge = ProgressionEdge {
@@ -1013,6 +1324,11 @@ pub static EDGE_MINOR_III_7_TO_IV__SHARP_11: ProgressionEdge = ProgressionEdge {
     to: &IV__SHARP_11,
 };
 
+pub static EDGE_MINOR_III_M7_TO_IV: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_III_M7,
+    to: &IV,
+};
+
 pub static EDGE_MINOR_III_M7_TO_IV_6: ProgressionEdge = ProgressionEdge {
     from: &MINOR_III_M7,
     to: &IV_6,
@@ -1036,6 +1352,36 @@ pub static EDGE_MINOR_III_M7_TO_IV_MAJ7: ProgressionEdge = ProgressionEdge {
 pub static EDGE_MINOR_III_M7_TO_IV__SHARP_11: ProgressionEdge = ProgressionEdge {
     from: &MINOR_III_M7,
     to: &IV__SHARP_11,
+};
+
+pub static EDGE_IV_TO_I: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &I,
+};
+
+pub static EDGE_IV_TO_I_6: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &I_6,
+};
+
+pub static EDGE_IV_TO_I_7: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &I_7,
+};
+
+pub static EDGE_IV_TO_I_9: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &I_9,
+};
+
+pub static EDGE_IV_TO_I_MAJ7: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &I_MAJ7,
+};
+
+pub static EDGE_IV_TO_I_MAJ9: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &I_MAJ9,
 };
 
 pub static EDGE_IV_6_TO_I: ProgressionEdge = ProgressionEdge {
@@ -1188,6 +1534,36 @@ pub static EDGE_IV__SHARP_11_TO_I_MAJ9: ProgressionEdge = ProgressionEdge {
     to: &I_MAJ9,
 };
 
+pub static EDGE_IV_TO_MINOR_II: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &MINOR_II,
+};
+
+pub static EDGE_IV_TO_MINOR_II_7: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &MINOR_II_7,
+};
+
+pub static EDGE_IV_TO_MINOR_II_9: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &MINOR_II_9,
+};
+
+pub static EDGE_IV_TO_MINOR_II_11: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &MINOR_II_11,
+};
+
+pub static EDGE_IV_TO_MINOR_II_7_PLUS__FLAT_9: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &MINOR_II_7_PLUS__FLAT_9,
+};
+
+pub static EDGE_IV_6_TO_MINOR_II: ProgressionEdge = ProgressionEdge {
+    from: &IV_6,
+    to: &MINOR_II,
+};
+
 pub static EDGE_IV_6_TO_MINOR_II_7: ProgressionEdge = ProgressionEdge {
     from: &IV_6,
     to: &MINOR_II_7,
@@ -1206,6 +1582,11 @@ pub static EDGE_IV_6_TO_MINOR_II_11: ProgressionEdge = ProgressionEdge {
 pub static EDGE_IV_6_TO_MINOR_II_7_PLUS__FLAT_9: ProgressionEdge = ProgressionEdge {
     from: &IV_6,
     to: &MINOR_II_7_PLUS__FLAT_9,
+};
+
+pub static EDGE_IV_7_TO_MINOR_II: ProgressionEdge = ProgressionEdge {
+    from: &IV_7,
+    to: &MINOR_II,
 };
 
 pub static EDGE_IV_7_TO_MINOR_II_7: ProgressionEdge = ProgressionEdge {
@@ -1228,6 +1609,11 @@ pub static EDGE_IV_7_TO_MINOR_II_7_PLUS__FLAT_9: ProgressionEdge = ProgressionEd
     to: &MINOR_II_7_PLUS__FLAT_9,
 };
 
+pub static EDGE_IV_9_TO_MINOR_II: ProgressionEdge = ProgressionEdge {
+    from: &IV_9,
+    to: &MINOR_II,
+};
+
 pub static EDGE_IV_9_TO_MINOR_II_7: ProgressionEdge = ProgressionEdge {
     from: &IV_9,
     to: &MINOR_II_7,
@@ -1246,6 +1632,11 @@ pub static EDGE_IV_9_TO_MINOR_II_11: ProgressionEdge = ProgressionEdge {
 pub static EDGE_IV_9_TO_MINOR_II_7_PLUS__FLAT_9: ProgressionEdge = ProgressionEdge {
     from: &IV_9,
     to: &MINOR_II_7_PLUS__FLAT_9,
+};
+
+pub static EDGE_IV_MAJ7_TO_MINOR_II: ProgressionEdge = ProgressionEdge {
+    from: &IV_MAJ7,
+    to: &MINOR_II,
 };
 
 pub static EDGE_IV_MAJ7_TO_MINOR_II_7: ProgressionEdge = ProgressionEdge {
@@ -1268,6 +1659,11 @@ pub static EDGE_IV_MAJ7_TO_MINOR_II_7_PLUS__FLAT_9: ProgressionEdge = Progressio
     to: &MINOR_II_7_PLUS__FLAT_9,
 };
 
+pub static EDGE_IV__SHARP_11_TO_MINOR_II: ProgressionEdge = ProgressionEdge {
+    from: &IV__SHARP_11,
+    to: &MINOR_II,
+};
+
 pub static EDGE_IV__SHARP_11_TO_MINOR_II_7: ProgressionEdge = ProgressionEdge {
     from: &IV__SHARP_11,
     to: &MINOR_II_7,
@@ -1286,6 +1682,46 @@ pub static EDGE_IV__SHARP_11_TO_MINOR_II_11: ProgressionEdge = ProgressionEdge {
 pub static EDGE_IV__SHARP_11_TO_MINOR_II_7_PLUS__FLAT_9: ProgressionEdge = ProgressionEdge {
     from: &IV__SHARP_11,
     to: &MINOR_II_7_PLUS__FLAT_9,
+};
+
+pub static EDGE_IV_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &V,
+};
+
+pub static EDGE_IV_TO_V_7: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &V_7,
+};
+
+pub static EDGE_IV_TO_V_9: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &V_9,
+};
+
+pub static EDGE_IV_TO_V_11: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &V_11,
+};
+
+pub static EDGE_IV_TO_V_13: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &V_13,
+};
+
+pub static EDGE_IV_TO_V_7_PLUS__FLAT_9: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &V_7_PLUS__FLAT_9,
+};
+
+pub static EDGE_IV_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionEdge {
+    from: &IV,
+    to: &V_7_PLUS__SHARP_9,
+};
+
+pub static EDGE_IV_6_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &IV_6,
+    to: &V,
 };
 
 pub static EDGE_IV_6_TO_V_7: ProgressionEdge = ProgressionEdge {
@@ -1318,6 +1754,11 @@ pub static EDGE_IV_6_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionEdge {
     to: &V_7_PLUS__SHARP_9,
 };
 
+pub static EDGE_IV_7_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &IV_7,
+    to: &V,
+};
+
 pub static EDGE_IV_7_TO_V_7: ProgressionEdge = ProgressionEdge {
     from: &IV_7,
     to: &V_7,
@@ -1346,6 +1787,11 @@ pub static EDGE_IV_7_TO_V_7_PLUS__FLAT_9: ProgressionEdge = ProgressionEdge {
 pub static EDGE_IV_7_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionEdge {
     from: &IV_7,
     to: &V_7_PLUS__SHARP_9,
+};
+
+pub static EDGE_IV_9_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &IV_9,
+    to: &V,
 };
 
 pub static EDGE_IV_9_TO_V_7: ProgressionEdge = ProgressionEdge {
@@ -1378,6 +1824,11 @@ pub static EDGE_IV_9_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionEdge {
     to: &V_7_PLUS__SHARP_9,
 };
 
+pub static EDGE_IV_MAJ7_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &IV_MAJ7,
+    to: &V,
+};
+
 pub static EDGE_IV_MAJ7_TO_V_7: ProgressionEdge = ProgressionEdge {
     from: &IV_MAJ7,
     to: &V_7,
@@ -1408,6 +1859,11 @@ pub static EDGE_IV_MAJ7_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionEdge 
     to: &V_7_PLUS__SHARP_9,
 };
 
+pub static EDGE_IV__SHARP_11_TO_V: ProgressionEdge = ProgressionEdge {
+    from: &IV__SHARP_11,
+    to: &V,
+};
+
 pub static EDGE_IV__SHARP_11_TO_V_7: ProgressionEdge = ProgressionEdge {
     from: &IV__SHARP_11,
     to: &V_7,
@@ -1436,6 +1892,36 @@ pub static EDGE_IV__SHARP_11_TO_V_7_PLUS__FLAT_9: ProgressionEdge = ProgressionE
 pub static EDGE_IV__SHARP_11_TO_V_7_PLUS__SHARP_9: ProgressionEdge = ProgressionEdge {
     from: &IV__SHARP_11,
     to: &V_7_PLUS__SHARP_9,
+};
+
+pub static EDGE_V_TO_I: ProgressionEdge = ProgressionEdge {
+    from: &V,
+    to: &I,
+};
+
+pub static EDGE_V_TO_I_6: ProgressionEdge = ProgressionEdge {
+    from: &V,
+    to: &I_6,
+};
+
+pub static EDGE_V_TO_I_7: ProgressionEdge = ProgressionEdge {
+    from: &V,
+    to: &I_7,
+};
+
+pub static EDGE_V_TO_I_9: ProgressionEdge = ProgressionEdge {
+    from: &V,
+    to: &I_9,
+};
+
+pub static EDGE_V_TO_I_MAJ7: ProgressionEdge = ProgressionEdge {
+    from: &V,
+    to: &I_MAJ7,
+};
+
+pub static EDGE_V_TO_I_MAJ9: ProgressionEdge = ProgressionEdge {
+    from: &V,
+    to: &I_MAJ9,
 };
 
 pub static EDGE_V_7_TO_I: ProgressionEdge = ProgressionEdge {
@@ -1618,6 +2104,31 @@ pub static EDGE_V_7_PLUS__SHARP_9_TO_I_MAJ9: ProgressionEdge = ProgressionEdge {
     to: &I_MAJ9,
 };
 
+pub static EDGE_V_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &V,
+    to: &MINOR_VI,
+};
+
+pub static EDGE_V_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
+    from: &V,
+    to: &MINOR_VI_7,
+};
+
+pub static EDGE_V_TO_MINOR_VI_9: ProgressionEdge = ProgressionEdge {
+    from: &V,
+    to: &MINOR_VI_9,
+};
+
+pub static EDGE_V_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEdge {
+    from: &V,
+    to: &MINOR_VI_M7,
+};
+
+pub static EDGE_V_7_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &V_7,
+    to: &MINOR_VI,
+};
+
 pub static EDGE_V_7_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
     from: &V_7,
     to: &MINOR_VI_7,
@@ -1631,6 +2142,11 @@ pub static EDGE_V_7_TO_MINOR_VI_9: ProgressionEdge = ProgressionEdge {
 pub static EDGE_V_7_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEdge {
     from: &V_7,
     to: &MINOR_VI_M7,
+};
+
+pub static EDGE_V_9_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &V_9,
+    to: &MINOR_VI,
 };
 
 pub static EDGE_V_9_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
@@ -1648,6 +2164,11 @@ pub static EDGE_V_9_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEdge {
     to: &MINOR_VI_M7,
 };
 
+pub static EDGE_V_11_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &V_11,
+    to: &MINOR_VI,
+};
+
 pub static EDGE_V_11_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
     from: &V_11,
     to: &MINOR_VI_7,
@@ -1661,6 +2182,11 @@ pub static EDGE_V_11_TO_MINOR_VI_9: ProgressionEdge = ProgressionEdge {
 pub static EDGE_V_11_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEdge {
     from: &V_11,
     to: &MINOR_VI_M7,
+};
+
+pub static EDGE_V_13_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &V_13,
+    to: &MINOR_VI,
 };
 
 pub static EDGE_V_13_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
@@ -1678,6 +2204,11 @@ pub static EDGE_V_13_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEdge {
     to: &MINOR_VI_M7,
 };
 
+pub static EDGE_V_7_PLUS__FLAT_9_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &V_7_PLUS__FLAT_9,
+    to: &MINOR_VI,
+};
+
 pub static EDGE_V_7_PLUS__FLAT_9_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
     from: &V_7_PLUS__FLAT_9,
     to: &MINOR_VI_7,
@@ -1693,6 +2224,11 @@ pub static EDGE_V_7_PLUS__FLAT_9_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEd
     to: &MINOR_VI_M7,
 };
 
+pub static EDGE_V_7_PLUS__SHARP_9_TO_MINOR_VI: ProgressionEdge = ProgressionEdge {
+    from: &V_7_PLUS__SHARP_9,
+    to: &MINOR_VI,
+};
+
 pub static EDGE_V_7_PLUS__SHARP_9_TO_MINOR_VI_7: ProgressionEdge = ProgressionEdge {
     from: &V_7_PLUS__SHARP_9,
     to: &MINOR_VI_7,
@@ -1706,6 +2242,36 @@ pub static EDGE_V_7_PLUS__SHARP_9_TO_MINOR_VI_9: ProgressionEdge = ProgressionEd
 pub static EDGE_V_7_PLUS__SHARP_9_TO_MINOR_VI_M7: ProgressionEdge = ProgressionEdge {
     from: &V_7_PLUS__SHARP_9,
     to: &MINOR_VI_M7,
+};
+
+pub static EDGE_MINOR_VI_TO_MINOR_II: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI,
+    to: &MINOR_II,
+};
+
+pub static EDGE_MINOR_VI_TO_MINOR_II_7: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI,
+    to: &MINOR_II_7,
+};
+
+pub static EDGE_MINOR_VI_TO_MINOR_II_9: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI,
+    to: &MINOR_II_9,
+};
+
+pub static EDGE_MINOR_VI_TO_MINOR_II_11: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI,
+    to: &MINOR_II_11,
+};
+
+pub static EDGE_MINOR_VI_TO_MINOR_II_7_PLUS__FLAT_9: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI,
+    to: &MINOR_II_7_PLUS__FLAT_9,
+};
+
+pub static EDGE_MINOR_VI_7_TO_MINOR_II: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI_7,
+    to: &MINOR_II,
 };
 
 pub static EDGE_MINOR_VI_7_TO_MINOR_II_7: ProgressionEdge = ProgressionEdge {
@@ -1728,6 +2294,11 @@ pub static EDGE_MINOR_VI_7_TO_MINOR_II_7_PLUS__FLAT_9: ProgressionEdge = Progres
     to: &MINOR_II_7_PLUS__FLAT_9,
 };
 
+pub static EDGE_MINOR_VI_9_TO_MINOR_II: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI_9,
+    to: &MINOR_II,
+};
+
 pub static EDGE_MINOR_VI_9_TO_MINOR_II_7: ProgressionEdge = ProgressionEdge {
     from: &MINOR_VI_9,
     to: &MINOR_II_7,
@@ -1748,6 +2319,11 @@ pub static EDGE_MINOR_VI_9_TO_MINOR_II_7_PLUS__FLAT_9: ProgressionEdge = Progres
     to: &MINOR_II_7_PLUS__FLAT_9,
 };
 
+pub static EDGE_MINOR_VI_M7_TO_MINOR_II: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI_M7,
+    to: &MINOR_II,
+};
+
 pub static EDGE_MINOR_VI_M7_TO_MINOR_II_7: ProgressionEdge = ProgressionEdge {
     from: &MINOR_VI_M7,
     to: &MINOR_II_7,
@@ -1766,6 +2342,41 @@ pub static EDGE_MINOR_VI_M7_TO_MINOR_II_11: ProgressionEdge = ProgressionEdge {
 pub static EDGE_MINOR_VI_M7_TO_MINOR_II_7_PLUS__FLAT_9: ProgressionEdge = ProgressionEdge {
     from: &MINOR_VI_M7,
     to: &MINOR_II_7_PLUS__FLAT_9,
+};
+
+pub static EDGE_MINOR_VI_TO_IV: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI,
+    to: &IV,
+};
+
+pub static EDGE_MINOR_VI_TO_IV_6: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI,
+    to: &IV_6,
+};
+
+pub static EDGE_MINOR_VI_TO_IV_7: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI,
+    to: &IV_7,
+};
+
+pub static EDGE_MINOR_VI_TO_IV_9: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI,
+    to: &IV_9,
+};
+
+pub static EDGE_MINOR_VI_TO_IV_MAJ7: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI,
+    to: &IV_MAJ7,
+};
+
+pub static EDGE_MINOR_VI_TO_IV__SHARP_11: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI,
+    to: &IV__SHARP_11,
+};
+
+pub static EDGE_MINOR_VI_7_TO_IV: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI_7,
+    to: &IV,
 };
 
 pub static EDGE_MINOR_VI_7_TO_IV_6: ProgressionEdge = ProgressionEdge {
@@ -1793,6 +2404,11 @@ pub static EDGE_MINOR_VI_7_TO_IV__SHARP_11: ProgressionEdge = ProgressionEdge {
     to: &IV__SHARP_11,
 };
 
+pub static EDGE_MINOR_VI_9_TO_IV: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI_9,
+    to: &IV,
+};
+
 pub static EDGE_MINOR_VI_9_TO_IV_6: ProgressionEdge = ProgressionEdge {
     from: &MINOR_VI_9,
     to: &IV_6,
@@ -1818,6 +2434,11 @@ pub static EDGE_MINOR_VI_9_TO_IV__SHARP_11: ProgressionEdge = ProgressionEdge {
     to: &IV__SHARP_11,
 };
 
+pub static EDGE_MINOR_VI_M7_TO_IV: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VI_M7,
+    to: &IV,
+};
+
 pub static EDGE_MINOR_VI_M7_TO_IV_6: ProgressionEdge = ProgressionEdge {
     from: &MINOR_VI_M7,
     to: &IV_6,
@@ -1841,6 +2462,36 @@ pub static EDGE_MINOR_VI_M7_TO_IV_MAJ7: ProgressionEdge = ProgressionEdge {
 pub static EDGE_MINOR_VI_M7_TO_IV__SHARP_11: ProgressionEdge = ProgressionEdge {
     from: &MINOR_VI_M7,
     to: &IV__SHARP_11,
+};
+
+pub static EDGE_MINOR_VII_TO_I: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VII,
+    to: &I,
+};
+
+pub static EDGE_MINOR_VII_TO_I_6: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VII,
+    to: &I_6,
+};
+
+pub static EDGE_MINOR_VII_TO_I_7: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VII,
+    to: &I_7,
+};
+
+pub static EDGE_MINOR_VII_TO_I_9: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VII,
+    to: &I_9,
+};
+
+pub static EDGE_MINOR_VII_TO_I_MAJ7: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VII,
+    to: &I_MAJ7,
+};
+
+pub static EDGE_MINOR_VII_TO_I_MAJ9: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_VII,
+    to: &I_MAJ9,
 };
 
 pub static EDGE_MINOR_VII__FLAT_5_TO_I: ProgressionEdge = ProgressionEdge {
@@ -1903,6 +2554,11 @@ pub static EDGE_MINOR_VII_M7_FLAT_5_TO_I_MAJ9: ProgressionEdge = ProgressionEdge
     to: &I_MAJ9,
 };
 
+pub static EDGE_MINOR_FLAT_III_7_TO_IV: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_FLAT_III_7,
+    to: &IV,
+};
+
 pub static EDGE_MINOR_FLAT_III_7_TO_IV_6: ProgressionEdge = ProgressionEdge {
     from: &MINOR_FLAT_III_7,
     to: &IV_6,
@@ -1926,6 +2582,11 @@ pub static EDGE_MINOR_FLAT_III_7_TO_IV_MAJ7: ProgressionEdge = ProgressionEdge {
 pub static EDGE_MINOR_FLAT_III_7_TO_IV__SHARP_11: ProgressionEdge = ProgressionEdge {
     from: &MINOR_FLAT_III_7,
     to: &IV__SHARP_11,
+};
+
+pub static EDGE_MINOR_FLAT_III_9_TO_IV: ProgressionEdge = ProgressionEdge {
+    from: &MINOR_FLAT_III_9,
+    to: &IV,
 };
 
 pub static EDGE_MINOR_FLAT_III_9_TO_IV_6: ProgressionEdge = ProgressionEdge {
@@ -2040,26 +2701,32 @@ pub static ALL_NODES: &[&ProgressionNode] = &[
     &I_9,
     &I_MAJ7,
     &I_MAJ9,
+    &MINOR_II,
     &MINOR_II_7,
     &MINOR_II_9,
     &MINOR_II_11,
     &MINOR_II_7_PLUS__FLAT_9,
+    &MINOR_III,
     &MINOR_III_7,
     &MINOR_III_M7,
+    &IV,
     &IV_6,
     &IV_7,
     &IV_9,
     &IV_MAJ7,
     &IV__SHARP_11,
+    &V,
     &V_7,
     &V_9,
     &V_11,
     &V_13,
     &V_7_PLUS__FLAT_9,
     &V_7_PLUS__SHARP_9,
+    &MINOR_VI,
     &MINOR_VI_7,
     &MINOR_VI_9,
     &MINOR_VI_M7,
+    &MINOR_VII,
     &MINOR_VII__FLAT_5,
     &MINOR_VII_M7_FLAT_5,
     &MINOR_FLAT_III_7,
@@ -2071,138 +2738,194 @@ pub static ALL_NODES: &[&ProgressionNode] = &[
 ];
 
 pub static ALL_EDGES: &[&ProgressionEdge] = &[
+    &EDGE_I_TO_IV,
     &EDGE_I_TO_IV_6,
     &EDGE_I_TO_IV_7,
     &EDGE_I_TO_IV_9,
     &EDGE_I_TO_IV_MAJ7,
     &EDGE_I_TO_IV__SHARP_11,
+    &EDGE_I_6_TO_IV,
     &EDGE_I_6_TO_IV_6,
     &EDGE_I_6_TO_IV_7,
     &EDGE_I_6_TO_IV_9,
     &EDGE_I_6_TO_IV_MAJ7,
     &EDGE_I_6_TO_IV__SHARP_11,
+    &EDGE_I_7_TO_IV,
     &EDGE_I_7_TO_IV_6,
     &EDGE_I_7_TO_IV_7,
     &EDGE_I_7_TO_IV_9,
     &EDGE_I_7_TO_IV_MAJ7,
     &EDGE_I_7_TO_IV__SHARP_11,
+    &EDGE_I_9_TO_IV,
     &EDGE_I_9_TO_IV_6,
     &EDGE_I_9_TO_IV_7,
     &EDGE_I_9_TO_IV_9,
     &EDGE_I_9_TO_IV_MAJ7,
     &EDGE_I_9_TO_IV__SHARP_11,
+    &EDGE_I_MAJ7_TO_IV,
     &EDGE_I_MAJ7_TO_IV_6,
     &EDGE_I_MAJ7_TO_IV_7,
     &EDGE_I_MAJ7_TO_IV_9,
     &EDGE_I_MAJ7_TO_IV_MAJ7,
     &EDGE_I_MAJ7_TO_IV__SHARP_11,
+    &EDGE_I_MAJ9_TO_IV,
     &EDGE_I_MAJ9_TO_IV_6,
     &EDGE_I_MAJ9_TO_IV_7,
     &EDGE_I_MAJ9_TO_IV_9,
     &EDGE_I_MAJ9_TO_IV_MAJ7,
     &EDGE_I_MAJ9_TO_IV__SHARP_11,
+    &EDGE_I_TO_V,
     &EDGE_I_TO_V_7,
     &EDGE_I_TO_V_9,
     &EDGE_I_TO_V_11,
     &EDGE_I_TO_V_13,
     &EDGE_I_TO_V_7_PLUS__FLAT_9,
     &EDGE_I_TO_V_7_PLUS__SHARP_9,
+    &EDGE_I_6_TO_V,
     &EDGE_I_6_TO_V_7,
     &EDGE_I_6_TO_V_9,
     &EDGE_I_6_TO_V_11,
     &EDGE_I_6_TO_V_13,
     &EDGE_I_6_TO_V_7_PLUS__FLAT_9,
     &EDGE_I_6_TO_V_7_PLUS__SHARP_9,
+    &EDGE_I_7_TO_V,
     &EDGE_I_7_TO_V_7,
     &EDGE_I_7_TO_V_9,
     &EDGE_I_7_TO_V_11,
     &EDGE_I_7_TO_V_13,
     &EDGE_I_7_TO_V_7_PLUS__FLAT_9,
     &EDGE_I_7_TO_V_7_PLUS__SHARP_9,
+    &EDGE_I_9_TO_V,
     &EDGE_I_9_TO_V_7,
     &EDGE_I_9_TO_V_9,
     &EDGE_I_9_TO_V_11,
     &EDGE_I_9_TO_V_13,
     &EDGE_I_9_TO_V_7_PLUS__FLAT_9,
     &EDGE_I_9_TO_V_7_PLUS__SHARP_9,
+    &EDGE_I_MAJ7_TO_V,
     &EDGE_I_MAJ7_TO_V_7,
     &EDGE_I_MAJ7_TO_V_9,
     &EDGE_I_MAJ7_TO_V_11,
     &EDGE_I_MAJ7_TO_V_13,
     &EDGE_I_MAJ7_TO_V_7_PLUS__FLAT_9,
     &EDGE_I_MAJ7_TO_V_7_PLUS__SHARP_9,
+    &EDGE_I_MAJ9_TO_V,
     &EDGE_I_MAJ9_TO_V_7,
     &EDGE_I_MAJ9_TO_V_9,
     &EDGE_I_MAJ9_TO_V_11,
     &EDGE_I_MAJ9_TO_V_13,
     &EDGE_I_MAJ9_TO_V_7_PLUS__FLAT_9,
     &EDGE_I_MAJ9_TO_V_7_PLUS__SHARP_9,
+    &EDGE_I_TO_MINOR_VI,
     &EDGE_I_TO_MINOR_VI_7,
     &EDGE_I_TO_MINOR_VI_9,
     &EDGE_I_TO_MINOR_VI_M7,
+    &EDGE_I_6_TO_MINOR_VI,
     &EDGE_I_6_TO_MINOR_VI_7,
     &EDGE_I_6_TO_MINOR_VI_9,
     &EDGE_I_6_TO_MINOR_VI_M7,
+    &EDGE_I_7_TO_MINOR_VI,
     &EDGE_I_7_TO_MINOR_VI_7,
     &EDGE_I_7_TO_MINOR_VI_9,
     &EDGE_I_7_TO_MINOR_VI_M7,
+    &EDGE_I_9_TO_MINOR_VI,
     &EDGE_I_9_TO_MINOR_VI_7,
     &EDGE_I_9_TO_MINOR_VI_9,
     &EDGE_I_9_TO_MINOR_VI_M7,
+    &EDGE_I_MAJ7_TO_MINOR_VI,
     &EDGE_I_MAJ7_TO_MINOR_VI_7,
     &EDGE_I_MAJ7_TO_MINOR_VI_9,
     &EDGE_I_MAJ7_TO_MINOR_VI_M7,
+    &EDGE_I_MAJ9_TO_MINOR_VI,
     &EDGE_I_MAJ9_TO_MINOR_VI_7,
     &EDGE_I_MAJ9_TO_MINOR_VI_9,
     &EDGE_I_MAJ9_TO_MINOR_VI_M7,
+    &EDGE_MINOR_II_TO_V,
+    &EDGE_MINOR_II_TO_V_7,
+    &EDGE_MINOR_II_TO_V_9,
+    &EDGE_MINOR_II_TO_V_11,
+    &EDGE_MINOR_II_TO_V_13,
+    &EDGE_MINOR_II_TO_V_7_PLUS__FLAT_9,
+    &EDGE_MINOR_II_TO_V_7_PLUS__SHARP_9,
+    &EDGE_MINOR_II_7_TO_V,
     &EDGE_MINOR_II_7_TO_V_7,
     &EDGE_MINOR_II_7_TO_V_9,
     &EDGE_MINOR_II_7_TO_V_11,
     &EDGE_MINOR_II_7_TO_V_13,
     &EDGE_MINOR_II_7_TO_V_7_PLUS__FLAT_9,
     &EDGE_MINOR_II_7_TO_V_7_PLUS__SHARP_9,
+    &EDGE_MINOR_II_9_TO_V,
     &EDGE_MINOR_II_9_TO_V_7,
     &EDGE_MINOR_II_9_TO_V_9,
     &EDGE_MINOR_II_9_TO_V_11,
     &EDGE_MINOR_II_9_TO_V_13,
     &EDGE_MINOR_II_9_TO_V_7_PLUS__FLAT_9,
     &EDGE_MINOR_II_9_TO_V_7_PLUS__SHARP_9,
+    &EDGE_MINOR_II_11_TO_V,
     &EDGE_MINOR_II_11_TO_V_7,
     &EDGE_MINOR_II_11_TO_V_9,
     &EDGE_MINOR_II_11_TO_V_11,
     &EDGE_MINOR_II_11_TO_V_13,
     &EDGE_MINOR_II_11_TO_V_7_PLUS__FLAT_9,
     &EDGE_MINOR_II_11_TO_V_7_PLUS__SHARP_9,
+    &EDGE_MINOR_II_7_PLUS__FLAT_9_TO_V,
     &EDGE_MINOR_II_7_PLUS__FLAT_9_TO_V_7,
     &EDGE_MINOR_II_7_PLUS__FLAT_9_TO_V_9,
     &EDGE_MINOR_II_7_PLUS__FLAT_9_TO_V_11,
     &EDGE_MINOR_II_7_PLUS__FLAT_9_TO_V_13,
     &EDGE_MINOR_II_7_PLUS__FLAT_9_TO_V_7_PLUS__FLAT_9,
     &EDGE_MINOR_II_7_PLUS__FLAT_9_TO_V_7_PLUS__SHARP_9,
+    &EDGE_MINOR_II_TO_MINOR_VII,
+    &EDGE_MINOR_II_TO_MINOR_VII__FLAT_5,
+    &EDGE_MINOR_II_TO_MINOR_VII_M7_FLAT_5,
+    &EDGE_MINOR_II_7_TO_MINOR_VII,
     &EDGE_MINOR_II_7_TO_MINOR_VII__FLAT_5,
     &EDGE_MINOR_II_7_TO_MINOR_VII_M7_FLAT_5,
+    &EDGE_MINOR_II_9_TO_MINOR_VII,
     &EDGE_MINOR_II_9_TO_MINOR_VII__FLAT_5,
     &EDGE_MINOR_II_9_TO_MINOR_VII_M7_FLAT_5,
+    &EDGE_MINOR_II_11_TO_MINOR_VII,
     &EDGE_MINOR_II_11_TO_MINOR_VII__FLAT_5,
     &EDGE_MINOR_II_11_TO_MINOR_VII_M7_FLAT_5,
+    &EDGE_MINOR_II_7_PLUS__FLAT_9_TO_MINOR_VII,
     &EDGE_MINOR_II_7_PLUS__FLAT_9_TO_MINOR_VII__FLAT_5,
     &EDGE_MINOR_II_7_PLUS__FLAT_9_TO_MINOR_VII_M7_FLAT_5,
+    &EDGE_MINOR_III_TO_MINOR_VI,
+    &EDGE_MINOR_III_TO_MINOR_VI_7,
+    &EDGE_MINOR_III_TO_MINOR_VI_9,
+    &EDGE_MINOR_III_TO_MINOR_VI_M7,
+    &EDGE_MINOR_III_7_TO_MINOR_VI,
     &EDGE_MINOR_III_7_TO_MINOR_VI_7,
     &EDGE_MINOR_III_7_TO_MINOR_VI_9,
     &EDGE_MINOR_III_7_TO_MINOR_VI_M7,
+    &EDGE_MINOR_III_M7_TO_MINOR_VI,
     &EDGE_MINOR_III_M7_TO_MINOR_VI_7,
     &EDGE_MINOR_III_M7_TO_MINOR_VI_9,
     &EDGE_MINOR_III_M7_TO_MINOR_VI_M7,
+    &EDGE_MINOR_III_TO_IV,
+    &EDGE_MINOR_III_TO_IV_6,
+    &EDGE_MINOR_III_TO_IV_7,
+    &EDGE_MINOR_III_TO_IV_9,
+    &EDGE_MINOR_III_TO_IV_MAJ7,
+    &EDGE_MINOR_III_TO_IV__SHARP_11,
+    &EDGE_MINOR_III_7_TO_IV,
     &EDGE_MINOR_III_7_TO_IV_6,
     &EDGE_MINOR_III_7_TO_IV_7,
     &EDGE_MINOR_III_7_TO_IV_9,
     &EDGE_MINOR_III_7_TO_IV_MAJ7,
     &EDGE_MINOR_III_7_TO_IV__SHARP_11,
+    &EDGE_MINOR_III_M7_TO_IV,
     &EDGE_MINOR_III_M7_TO_IV_6,
     &EDGE_MINOR_III_M7_TO_IV_7,
     &EDGE_MINOR_III_M7_TO_IV_9,
     &EDGE_MINOR_III_M7_TO_IV_MAJ7,
     &EDGE_MINOR_III_M7_TO_IV__SHARP_11,
+    &EDGE_IV_TO_I,
+    &EDGE_IV_TO_I_6,
+    &EDGE_IV_TO_I_7,
+    &EDGE_IV_TO_I_9,
+    &EDGE_IV_TO_I_MAJ7,
+    &EDGE_IV_TO_I_MAJ9,
     &EDGE_IV_6_TO_I,
     &EDGE_IV_6_TO_I_6,
     &EDGE_IV_6_TO_I_7,
@@ -2233,56 +2956,84 @@ pub static ALL_EDGES: &[&ProgressionEdge] = &[
     &EDGE_IV__SHARP_11_TO_I_9,
     &EDGE_IV__SHARP_11_TO_I_MAJ7,
     &EDGE_IV__SHARP_11_TO_I_MAJ9,
+    &EDGE_IV_TO_MINOR_II,
+    &EDGE_IV_TO_MINOR_II_7,
+    &EDGE_IV_TO_MINOR_II_9,
+    &EDGE_IV_TO_MINOR_II_11,
+    &EDGE_IV_TO_MINOR_II_7_PLUS__FLAT_9,
+    &EDGE_IV_6_TO_MINOR_II,
     &EDGE_IV_6_TO_MINOR_II_7,
     &EDGE_IV_6_TO_MINOR_II_9,
     &EDGE_IV_6_TO_MINOR_II_11,
     &EDGE_IV_6_TO_MINOR_II_7_PLUS__FLAT_9,
+    &EDGE_IV_7_TO_MINOR_II,
     &EDGE_IV_7_TO_MINOR_II_7,
     &EDGE_IV_7_TO_MINOR_II_9,
     &EDGE_IV_7_TO_MINOR_II_11,
     &EDGE_IV_7_TO_MINOR_II_7_PLUS__FLAT_9,
+    &EDGE_IV_9_TO_MINOR_II,
     &EDGE_IV_9_TO_MINOR_II_7,
     &EDGE_IV_9_TO_MINOR_II_9,
     &EDGE_IV_9_TO_MINOR_II_11,
     &EDGE_IV_9_TO_MINOR_II_7_PLUS__FLAT_9,
+    &EDGE_IV_MAJ7_TO_MINOR_II,
     &EDGE_IV_MAJ7_TO_MINOR_II_7,
     &EDGE_IV_MAJ7_TO_MINOR_II_9,
     &EDGE_IV_MAJ7_TO_MINOR_II_11,
     &EDGE_IV_MAJ7_TO_MINOR_II_7_PLUS__FLAT_9,
+    &EDGE_IV__SHARP_11_TO_MINOR_II,
     &EDGE_IV__SHARP_11_TO_MINOR_II_7,
     &EDGE_IV__SHARP_11_TO_MINOR_II_9,
     &EDGE_IV__SHARP_11_TO_MINOR_II_11,
     &EDGE_IV__SHARP_11_TO_MINOR_II_7_PLUS__FLAT_9,
+    &EDGE_IV_TO_V,
+    &EDGE_IV_TO_V_7,
+    &EDGE_IV_TO_V_9,
+    &EDGE_IV_TO_V_11,
+    &EDGE_IV_TO_V_13,
+    &EDGE_IV_TO_V_7_PLUS__FLAT_9,
+    &EDGE_IV_TO_V_7_PLUS__SHARP_9,
+    &EDGE_IV_6_TO_V,
     &EDGE_IV_6_TO_V_7,
     &EDGE_IV_6_TO_V_9,
     &EDGE_IV_6_TO_V_11,
     &EDGE_IV_6_TO_V_13,
     &EDGE_IV_6_TO_V_7_PLUS__FLAT_9,
     &EDGE_IV_6_TO_V_7_PLUS__SHARP_9,
+    &EDGE_IV_7_TO_V,
     &EDGE_IV_7_TO_V_7,
     &EDGE_IV_7_TO_V_9,
     &EDGE_IV_7_TO_V_11,
     &EDGE_IV_7_TO_V_13,
     &EDGE_IV_7_TO_V_7_PLUS__FLAT_9,
     &EDGE_IV_7_TO_V_7_PLUS__SHARP_9,
+    &EDGE_IV_9_TO_V,
     &EDGE_IV_9_TO_V_7,
     &EDGE_IV_9_TO_V_9,
     &EDGE_IV_9_TO_V_11,
     &EDGE_IV_9_TO_V_13,
     &EDGE_IV_9_TO_V_7_PLUS__FLAT_9,
     &EDGE_IV_9_TO_V_7_PLUS__SHARP_9,
+    &EDGE_IV_MAJ7_TO_V,
     &EDGE_IV_MAJ7_TO_V_7,
     &EDGE_IV_MAJ7_TO_V_9,
     &EDGE_IV_MAJ7_TO_V_11,
     &EDGE_IV_MAJ7_TO_V_13,
     &EDGE_IV_MAJ7_TO_V_7_PLUS__FLAT_9,
     &EDGE_IV_MAJ7_TO_V_7_PLUS__SHARP_9,
+    &EDGE_IV__SHARP_11_TO_V,
     &EDGE_IV__SHARP_11_TO_V_7,
     &EDGE_IV__SHARP_11_TO_V_9,
     &EDGE_IV__SHARP_11_TO_V_11,
     &EDGE_IV__SHARP_11_TO_V_13,
     &EDGE_IV__SHARP_11_TO_V_7_PLUS__FLAT_9,
     &EDGE_IV__SHARP_11_TO_V_7_PLUS__SHARP_9,
+    &EDGE_V_TO_I,
+    &EDGE_V_TO_I_6,
+    &EDGE_V_TO_I_7,
+    &EDGE_V_TO_I_9,
+    &EDGE_V_TO_I_MAJ7,
+    &EDGE_V_TO_I_MAJ9,
     &EDGE_V_7_TO_I,
     &EDGE_V_7_TO_I_6,
     &EDGE_V_7_TO_I_7,
@@ -2319,51 +3070,84 @@ pub static ALL_EDGES: &[&ProgressionEdge] = &[
     &EDGE_V_7_PLUS__SHARP_9_TO_I_9,
     &EDGE_V_7_PLUS__SHARP_9_TO_I_MAJ7,
     &EDGE_V_7_PLUS__SHARP_9_TO_I_MAJ9,
+    &EDGE_V_TO_MINOR_VI,
+    &EDGE_V_TO_MINOR_VI_7,
+    &EDGE_V_TO_MINOR_VI_9,
+    &EDGE_V_TO_MINOR_VI_M7,
+    &EDGE_V_7_TO_MINOR_VI,
     &EDGE_V_7_TO_MINOR_VI_7,
     &EDGE_V_7_TO_MINOR_VI_9,
     &EDGE_V_7_TO_MINOR_VI_M7,
+    &EDGE_V_9_TO_MINOR_VI,
     &EDGE_V_9_TO_MINOR_VI_7,
     &EDGE_V_9_TO_MINOR_VI_9,
     &EDGE_V_9_TO_MINOR_VI_M7,
+    &EDGE_V_11_TO_MINOR_VI,
     &EDGE_V_11_TO_MINOR_VI_7,
     &EDGE_V_11_TO_MINOR_VI_9,
     &EDGE_V_11_TO_MINOR_VI_M7,
+    &EDGE_V_13_TO_MINOR_VI,
     &EDGE_V_13_TO_MINOR_VI_7,
     &EDGE_V_13_TO_MINOR_VI_9,
     &EDGE_V_13_TO_MINOR_VI_M7,
+    &EDGE_V_7_PLUS__FLAT_9_TO_MINOR_VI,
     &EDGE_V_7_PLUS__FLAT_9_TO_MINOR_VI_7,
     &EDGE_V_7_PLUS__FLAT_9_TO_MINOR_VI_9,
     &EDGE_V_7_PLUS__FLAT_9_TO_MINOR_VI_M7,
+    &EDGE_V_7_PLUS__SHARP_9_TO_MINOR_VI,
     &EDGE_V_7_PLUS__SHARP_9_TO_MINOR_VI_7,
     &EDGE_V_7_PLUS__SHARP_9_TO_MINOR_VI_9,
     &EDGE_V_7_PLUS__SHARP_9_TO_MINOR_VI_M7,
+    &EDGE_MINOR_VI_TO_MINOR_II,
+    &EDGE_MINOR_VI_TO_MINOR_II_7,
+    &EDGE_MINOR_VI_TO_MINOR_II_9,
+    &EDGE_MINOR_VI_TO_MINOR_II_11,
+    &EDGE_MINOR_VI_TO_MINOR_II_7_PLUS__FLAT_9,
+    &EDGE_MINOR_VI_7_TO_MINOR_II,
     &EDGE_MINOR_VI_7_TO_MINOR_II_7,
     &EDGE_MINOR_VI_7_TO_MINOR_II_9,
     &EDGE_MINOR_VI_7_TO_MINOR_II_11,
     &EDGE_MINOR_VI_7_TO_MINOR_II_7_PLUS__FLAT_9,
+    &EDGE_MINOR_VI_9_TO_MINOR_II,
     &EDGE_MINOR_VI_9_TO_MINOR_II_7,
     &EDGE_MINOR_VI_9_TO_MINOR_II_9,
     &EDGE_MINOR_VI_9_TO_MINOR_II_11,
     &EDGE_MINOR_VI_9_TO_MINOR_II_7_PLUS__FLAT_9,
+    &EDGE_MINOR_VI_M7_TO_MINOR_II,
     &EDGE_MINOR_VI_M7_TO_MINOR_II_7,
     &EDGE_MINOR_VI_M7_TO_MINOR_II_9,
     &EDGE_MINOR_VI_M7_TO_MINOR_II_11,
     &EDGE_MINOR_VI_M7_TO_MINOR_II_7_PLUS__FLAT_9,
+    &EDGE_MINOR_VI_TO_IV,
+    &EDGE_MINOR_VI_TO_IV_6,
+    &EDGE_MINOR_VI_TO_IV_7,
+    &EDGE_MINOR_VI_TO_IV_9,
+    &EDGE_MINOR_VI_TO_IV_MAJ7,
+    &EDGE_MINOR_VI_TO_IV__SHARP_11,
+    &EDGE_MINOR_VI_7_TO_IV,
     &EDGE_MINOR_VI_7_TO_IV_6,
     &EDGE_MINOR_VI_7_TO_IV_7,
     &EDGE_MINOR_VI_7_TO_IV_9,
     &EDGE_MINOR_VI_7_TO_IV_MAJ7,
     &EDGE_MINOR_VI_7_TO_IV__SHARP_11,
+    &EDGE_MINOR_VI_9_TO_IV,
     &EDGE_MINOR_VI_9_TO_IV_6,
     &EDGE_MINOR_VI_9_TO_IV_7,
     &EDGE_MINOR_VI_9_TO_IV_9,
     &EDGE_MINOR_VI_9_TO_IV_MAJ7,
     &EDGE_MINOR_VI_9_TO_IV__SHARP_11,
+    &EDGE_MINOR_VI_M7_TO_IV,
     &EDGE_MINOR_VI_M7_TO_IV_6,
     &EDGE_MINOR_VI_M7_TO_IV_7,
     &EDGE_MINOR_VI_M7_TO_IV_9,
     &EDGE_MINOR_VI_M7_TO_IV_MAJ7,
     &EDGE_MINOR_VI_M7_TO_IV__SHARP_11,
+    &EDGE_MINOR_VII_TO_I,
+    &EDGE_MINOR_VII_TO_I_6,
+    &EDGE_MINOR_VII_TO_I_7,
+    &EDGE_MINOR_VII_TO_I_9,
+    &EDGE_MINOR_VII_TO_I_MAJ7,
+    &EDGE_MINOR_VII_TO_I_MAJ9,
     &EDGE_MINOR_VII__FLAT_5_TO_I,
     &EDGE_MINOR_VII__FLAT_5_TO_I_6,
     &EDGE_MINOR_VII__FLAT_5_TO_I_7,
@@ -2376,11 +3160,13 @@ pub static ALL_EDGES: &[&ProgressionEdge] = &[
     &EDGE_MINOR_VII_M7_FLAT_5_TO_I_9,
     &EDGE_MINOR_VII_M7_FLAT_5_TO_I_MAJ7,
     &EDGE_MINOR_VII_M7_FLAT_5_TO_I_MAJ9,
+    &EDGE_MINOR_FLAT_III_7_TO_IV,
     &EDGE_MINOR_FLAT_III_7_TO_IV_6,
     &EDGE_MINOR_FLAT_III_7_TO_IV_7,
     &EDGE_MINOR_FLAT_III_7_TO_IV_9,
     &EDGE_MINOR_FLAT_III_7_TO_IV_MAJ7,
     &EDGE_MINOR_FLAT_III_7_TO_IV__SHARP_11,
+    &EDGE_MINOR_FLAT_III_9_TO_IV,
     &EDGE_MINOR_FLAT_III_9_TO_IV_6,
     &EDGE_MINOR_FLAT_III_9_TO_IV_7,
     &EDGE_MINOR_FLAT_III_9_TO_IV_9,
@@ -2413,26 +3199,32 @@ pub fn get_node(name: &str) -> Option<&'static ProgressionNode> {
         "I9" => Some(&I_9),
         "Imaj7" => Some(&I_MAJ7),
         "Imaj9" => Some(&I_MAJ9),
+        "ii" => Some(&MINOR_II),
         "ii7" => Some(&MINOR_II_7),
         "ii9" => Some(&MINOR_II_9),
         "ii11" => Some(&MINOR_II_11),
         "ii7+b9" => Some(&MINOR_II_7_PLUS__FLAT_9),
+        "iii" => Some(&MINOR_III),
         "iii7" => Some(&MINOR_III_7),
         "iiim7" => Some(&MINOR_III_M7),
+        "IV" => Some(&IV),
         "IV6" => Some(&IV_6),
         "IV7" => Some(&IV_7),
         "IV9" => Some(&IV_9),
         "IVmaj7" => Some(&IV_MAJ7),
         "IV#11" => Some(&IV__SHARP_11),
+        "V" => Some(&V),
         "V7" => Some(&V_7),
         "V9" => Some(&V_9),
         "V11" => Some(&V_11),
         "V13" => Some(&V_13),
         "V7+b9" => Some(&V_7_PLUS__FLAT_9),
         "V7+#9" => Some(&V_7_PLUS__SHARP_9),
+        "vi" => Some(&MINOR_VI),
         "vi7" => Some(&MINOR_VI_7),
         "vi9" => Some(&MINOR_VI_9),
         "vim7" => Some(&MINOR_VI_M7),
+        "vii" => Some(&MINOR_VII),
         "viib5" => Some(&MINOR_VII__FLAT_5),
         "viim7b5" => Some(&MINOR_VII_M7_FLAT_5),
         "bIII7" => Some(&MINOR_FLAT_III_7),

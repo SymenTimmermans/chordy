@@ -29,6 +29,9 @@ assert_ne!(c_sharp, d_flat); // Different note names
 
 - **Correct Enharmonic Handling**: Distinguish between enharmonically equivalent notes (C♯/D♭)
 - **Intelligent Transposition**: Transpose with proper music theory rules, not just semitone math
+- **Chord Progression Analysis**: Built-in progression maps with jazz harmony support
+- **Roman Numeral Analysis**: Complete system for harmonic analysis and chord functions
+- **Chord Identification**: Advanced chord naming with proper jazz conventions
 - **Zero Dependencies**: Pure Rust implementation with no external dependencies
 - **WebAssembly Compatible**: Use in browsers without modification
 - **Theoretically Sound**: Built with accuracy and musical principles as the highest priority
@@ -82,7 +85,7 @@ assert_eq!(e_sharp.name.accidental(), Accidental::Sharp);
 ### Scales and Chords
 
 ```rust
-use chordy::{NoteName, Letter, Accidental, Scale, scales, traits::ChordLike};
+use chordy::{NoteName, Letter, Accidental, Scale, Key, scales, traits::ChordLike};
 
 // Create a C major scale
 let c = NoteName::new(Letter::C, Accidental::Natural);
@@ -93,14 +96,38 @@ let notes = c_major.notes();
 // [C, D, E, F, G, A, B]
 
 // Generate a diatonic chord
-// TODO: FIX let c_major_triad = c_major.triad_at_degree(1);
+let c_major_triad = c_major.triad_at_degree(1);
 // [C, E, G]
 ```
 
+### Chord Progressions
+
+```rust
+use chordy::{Key, NoteName, Letter, Accidental};
+
+// Create a key for progression analysis
+let c_major = Key::Major(NoteName::new(Letter::C, Accidental::Natural));
+
+// Look up chord variants
+let tonic = c_major.progression_node("I").unwrap();
+let dominant_seventh = c_major.progression_node("V7").unwrap();
+
+// Get progression options from a chord
+let options = c_major.progression_options(&tonic).unwrap();
+
+// Categorized by harmonic strength
+println!("Strong progressions: {:?}", options.strong.len());
+println!("Moderate progressions: {:?}", options.moderate.len());
+println!("Weak progressions: {:?}", options.weak.len());
+```
+
+**📖 [Complete Chord Progression Guide](docs/chord-progressions.md)** - Comprehensive documentation with examples for building progressions, jazz harmony, modal progressions, and harmonic analysis.
+
 ## Project Status
 
-Chordy is currently in early development. The core pitch and interval systems are stable, with
-ongoing work on scales, chords, and more advanced music theory concepts.
+Chordy has mature implementations for core music theory concepts including pitch spelling, 
+interval relationships, scales, chords, roman numeral analysis, and chord progressions. 
+The API is stabilizing with ongoing work on advanced analysis tools and output formats.
 
 ### Roadmap
 
@@ -109,10 +136,16 @@ ongoing work on scales, chords, and more advanced music theory concepts.
 - [x] Scales and modes
 - [x] Chords and harmony
     - [x] Deriving basic triads from scales
+    - [x] Chord identification and naming system
+    - [x] Roman numeral analysis
     - [ ] Deriving extended chords from scales
     - [ ] Deriving chords from multiple scales
     - [ ] Piano chord voicings based on hand ergonomics
-- [ ] Voice leading
+- [x] Chord progressions
+    - [x] Progression graph analysis (Stephen Mugglin's map)
+    - [x] Chord variants and jazz extensions
+    - [x] Categorized progression suggestions (strong/moderate/weak)
+    - [ ] Voice leading analysis between progressions
 - [ ] Advanced analysis tools
 - [ ] MIDI integration
 - [ ] Staff writing via MusicXML or similar
@@ -139,6 +172,11 @@ Chordy is built on these core principles:
   in string representations. Disable this feature with `default-features = false` if you
   need ASCII-only output (for compatibility with terminals or systems that don't support
   these characters).
+
+## Documentation
+
+- **[Chord Progressions Guide](docs/chord-progressions.md)** - Complete guide to building and analyzing chord progressions
+- **[API Documentation](https://docs.rs/chordy)** - Full API reference with examples
 
 ## Contributing
 

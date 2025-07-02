@@ -1,6 +1,7 @@
 //! Basic tests for the chord progression system
 
 use chordy::prelude::*;
+use chordy::RomanDegree;
 
 #[test]
 fn test_major_key_progression_options() {
@@ -47,16 +48,16 @@ fn test_progression_node_lookup() {
     // Test basic node lookup
     let tonic = c_major.progression_node("I").unwrap();
     assert_eq!(tonic.display_name, "I");
-    assert_eq!(tonic.roman_numeral, "I");
+    assert_eq!(tonic.roman_numeral.degree(), RomanDegree::I);
     
     let subdominant = c_major.progression_node("IV").unwrap();
     assert_eq!(subdominant.display_name, "IV");
-    assert_eq!(subdominant.roman_numeral, "IV");
+    assert_eq!(subdominant.roman_numeral.degree(), RomanDegree::IV);
     
     // Test minor chord lookup
     let submediant = c_major.progression_node("vi").unwrap();
     assert_eq!(submediant.display_name, "vi");
-    assert_eq!(submediant.roman_numeral, "vi");
+    assert_eq!(submediant.roman_numeral.degree(), RomanDegree::VI);
 }
 
 #[test]
