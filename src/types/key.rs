@@ -1,6 +1,7 @@
 use crate::traits::HasRoot;
 
 use super::{NoteName, scale::ScaleDegree, Chord, RomanNumeral, HarmonicFunction, Scale, Accidental, Letter};
+use super::progression::{ProgressionOptions, StaticMajorGraph, StaticMinorGraph, ProgressionGraphLike, NodeRef};
 
 /// The mode of a key (Major, Minor, etc.)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -221,6 +222,85 @@ impl Key {
         }
         
         result
+    }
+
+    /// Get chord progression options from a given chord in this key
+    /// 
+    /// Returns categorized progression options based on Stephen Mugglin's progression map:
+    /// - Strong: explicit arrows showing natural voice leading
+    /// - Moderate: jumps to primary nodes (stable but less directed)
+    /// - Weak: jumps to secondary nodes (creates tension, needs resolution)
+    /// 
+    /// # Examples
+    /// 
+    /// ```rust
+    /// use chordy::{Key, note};
+    /// 
+    /// let c_major = Key::Major(note!("C"));
+    /// let options = c_major.progression_options("I").unwrap();
+    /// 
+    /// // I chord has strong progressions to IV, V, and vi
+    /// assert!(!options.strong.is_empty());
+    /// println!("From I, strong options: {:?}", options.strong);
+    /// ```
+    pub fn progression_options<'a>(&self, from: impl Into<NodeRef<'a>>) -> Option<ProgressionOptions> {
+        match self {
+            Key::Major(_) => {
+                // Create a zero-sized graph instance - all data is static
+                StaticMajorGraph.progression_options(from)
+            }
+            Key::Minor(_) => {
+                // Create a zero-sized graph instance - all data is static
+                StaticMinorGraph.progression_options(from)
+            }
+        }
+    }
+
+    /// Get a specific progression node by its roman numeral identifier
+    /// 
+    /// Looks up the node in the appropriate progression graph (major or minor)
+    /// based on this key's mode.
+    /// 
+    /// # Examples
+    /// 
+    /// ```rust
+    /// use chordy::{Key, note};
+    /// 
+    /// let c_major = Key::Major(note!("C"));
+    /// let tonic = c_major.progression_node("I").unwrap();
+    /// assert_eq!(tonic.display_name, "I");
+    /// 
+    /// let subdominant = c_major.progression_node("IV").unwrap();
+    /// assert_eq!(subdominant.display_name, "IV");
+    /// ```
+    pub fn progression_node(&self, id: &str) -> Option<&'static crate::types::progression::ProgressionNode> {
+        match self {
+            Key::Major(_) => {
+                use crate::types::progression::major_data::get_node;
+                get_node(id)
+            }
+            Key::Minor(_) => {
+                use crate::types::progression::minor_data::get_node;
+                get_node(id)
+            }
+        }
+    }
+
+    /// Get all available progression nodes for this key
+    /// 
+    /// Returns all nodes from the appropriate progression graph (major or minor).
+    /// Useful for exploring all available harmonic functions.
+    pub fn all_progression_nodes(&self) -> &'static [&'static crate::types::progression::ProgressionNode] {
+        match self {
+            Key::Major(_) => {
+                use crate::types::progression::major_data::ALL_NODES;
+                ALL_NODES
+            }
+            Key::Minor(_) => {
+                use crate::types::progression::minor_data::ALL_NODES;
+                ALL_NODES
+            }
+        }
     }
 }
 

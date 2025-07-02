@@ -65,6 +65,14 @@ fn to_interval_const_name(interval: &str) -> String {
 }
 
 fn main() {
+    // Generate scales
+    generate_scales();
+    
+    // Generate progressions
+    generate_progressions();
+}
+
+fn generate_scales() {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let csv_path = Path::new(&manifest_dir).join("data/scales.csv");
 
@@ -152,4 +160,403 @@ pub const REGISTRY: &[ScaleDefinition] = &[\n");
     let out_file = Path::new(&manifest_dir).join("src/types/scale/scales.rs");
 
     fs::write(&out_file, &generated).expect("Failed to write scales registry module.");
+}
+
+fn generate_progressions() {
+    let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    
+    // Generate major progressions
+    let major_path = Path::new(&manifest_dir).join("data/progressions/major_simple.progression");
+    let major_data = parse_progression_file(&major_path, "major");
+    let major_output = Path::new(&manifest_dir).join("src/types/progression/major_data.rs");
+    fs::write(&major_output, &major_data).expect("Failed to write major progression data");
+    
+    // Generate minor progressions  
+    let minor_path = Path::new(&manifest_dir).join("data/progressions/minor_simple.progression");
+    let minor_data = parse_progression_file(&minor_path, "minor");
+    let minor_output = Path::new(&manifest_dir).join("src/types/progression/minor_data.rs");
+    fs::write(&minor_output, &minor_data).expect("Failed to write minor progression data");
+}
+
+#[derive(Debug)]
+struct ProgressionNode {
+    id: String,
+    node_type: String,
+    roman: String,
+    variants: Vec<String>,
+}
+
+#[derive(Debug)]
+struct ProgressionEdge {
+    from: String,
+    to: String,
+}
+
+fn parse_progression_file(path: &Path, key_type: &str) -> String {
+    let file = File::open(path).expect(&format!("Failed to open {:?}", path));
+    let reader = BufReader::new(file);
+    
+    let mut nodes = Vec::new();
+    let mut edges = Vec::new();
+    
+    for line in reader.lines() {
+        let line = line.expect("Failed to read line");
+        let line = line.trim();
+        
+        // Skip comments and empty lines
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        
+        if line.contains("->") {
+            // Parse edge: "I -> IV"
+            let parts: Vec<&str> = line.split("->").map(|s| s.trim()).collect();
+            if parts.len() == 2 {
+                edges.push(ProgressionEdge {
+                    from: parts[0].to_string(),
+                    to: parts[1].to_string(),
+                });
+            }
+        } else if line.contains("|") {
+            // Parse node: "I | primary | I | ,6,7,9,maj7,maj9"
+            let parts: Vec<&str> = line.split("|").map(|s| s.trim()).collect();
+            if parts.len() >= 4 {
+                let variants = if parts[3].is_empty() {
+                    vec!["".to_string()]
+                } else {
+                    parts[3].split(',').map(|s| s.trim().to_string()).collect()
+                };
+                
+                nodes.push(ProgressionNode {
+                    id: parts[0].to_string(),
+                    node_type: parts[1].to_string(),
+                    roman: parts[2].to_string(),
+                    variants,
+                });
+            }
+        }
+    }
+    
+    generate_progression_code(&nodes, &edges, key_type)
+}
+
+fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge], key_type: &str) -> String {
+    let mut generated = String::new();
+    
+    generated.push_str(&format!(
+        "//! Generated progression data for {} keys from {}.progression\n//! Do not edit manually.\n\n",
+        key_type, key_type
+    ));
+    
+    generated.push_str("use crate::types::progression::{ProgressionNode, ProgressionEdge, NodeType};\n");
+    generated.push_str("use crate::types::{RomanChord, RomanNumeral, RomanDegree, Accidental, Interval};\n\n");
+    
+    // Generate individual node variants
+    let mut all_node_names = Vec::new();
+    let mut all_edge_names = Vec::new();
+    let mut node_map_entries = Vec::new();
+    
+    for node in nodes {
+        for variant in &node.variants {
+            let (node_name, display_name) = generate_node_variant(&node, variant);
+            all_node_names.push(node_name.clone());
+            
+            let node_type = match node.node_type.as_str() {
+                "primary" => "NodeType::Primary",
+                "secondary" => "NodeType::Secondary",
+                _ => panic!("Unknown node type: {}", node.node_type),
+            };
+            
+            let (roman_numeral_code, intervals_array_name) = generate_chord_data(&node.roman, variant, &node_name);
+            
+            // Generate the intervals array first
+            generated.push_str(&intervals_array_name);
+            
+            // Generate the node
+            generated.push_str(&format!(
+                "pub static {}: ProgressionNode = ProgressionNode {{\n    id: \"{}\",\n    display_name: \"{}\",\n    node_type: {},\n    roman_numeral: {},\n    intervals: &{}_INTERVALS,\n    base_function: \"{}\",\n}};\n\n",
+                node_name, display_name, display_name, node_type, roman_numeral_code, node_name, node.id
+            ));
+            
+            node_map_entries.push((display_name.clone(), node_name.clone()));
+        }
+    }
+    
+    // Generate edges between all variant combinations
+    for edge in edges {
+        let from_variants = get_node_variants(nodes, &edge.from);
+        let to_variants = get_node_variants(nodes, &edge.to);
+        
+        for from_variant in &from_variants {
+            for to_variant in &to_variants {
+                let from_base = sanitize_roman_numeral_id(&edge.from);
+                let to_base = sanitize_roman_numeral_id(&edge.to);
+                let from_suffix = if from_variant.is_empty() { "".to_string() } else { format!("_{}", sanitize_identifier(from_variant)) };
+                let to_suffix = if to_variant.is_empty() { "".to_string() } else { format!("_{}", sanitize_identifier(to_variant)) };
+                
+                let edge_name = format!("EDGE_{}{}_TO_{}{}", 
+                    from_base, from_suffix, to_base, to_suffix);
+                let from_node_name = format!("{}{}", from_base, from_suffix);
+                let to_node_name = format!("{}{}", to_base, to_suffix);
+                
+                generated.push_str(&format!(
+                    "pub static {}: ProgressionEdge = ProgressionEdge {{\n    from: &{},\n    to: &{},\n}};\n\n",
+                    edge_name, from_node_name, to_node_name
+                ));
+                
+                all_edge_names.push(edge_name);
+            }
+        }
+    }
+    
+    // Generate ALL_NODES array
+    generated.push_str("pub static ALL_NODES: &[&ProgressionNode] = &[\n");
+    for node_name in &all_node_names {
+        generated.push_str(&format!("    &{},\n", node_name));
+    }
+    generated.push_str("];\n\n");
+    
+    // Generate ALL_EDGES array
+    generated.push_str("pub static ALL_EDGES: &[&ProgressionEdge] = &[\n");
+    for edge_name in &all_edge_names {
+        generated.push_str(&format!("    &{},\n", edge_name));
+    }
+    generated.push_str("];\n\n");
+    
+    // Generate simple lookup function instead of PHF map
+    generated.push_str("/// Look up a progression node by its display name\n");
+    generated.push_str("pub fn get_node(name: &str) -> Option<&'static ProgressionNode> {\n");
+    generated.push_str("    match name {\n");
+    for (display_name, node_name) in &node_map_entries {
+        generated.push_str(&format!("        \"{}\" => Some(&{}),\n", display_name, node_name));
+    }
+    generated.push_str("        _ => None,\n");
+    generated.push_str("    }\n");
+    generated.push_str("}\n");
+    
+    generated
+}
+
+fn generate_node_variant(node: &ProgressionNode, variant: &str) -> (String, String) {
+    // Convert roman numerals to identifiers while preserving case semantics
+    let base_name = sanitize_roman_numeral_id(&node.id);
+    let variant_suffix = if variant.is_empty() { 
+        "".to_string() 
+    } else { 
+        format!("_{}", sanitize_identifier(variant))
+    };
+    
+    let node_name = format!("{}{}", base_name, variant_suffix);
+    
+    let display_name = if variant.is_empty() {
+        node.id.clone()
+    } else {
+        format!("{}{}", node.id, variant)
+    };
+    
+    (node_name, display_name)
+}
+
+fn sanitize_roman_numeral_id(id: &str) -> String {
+    // Special handling for roman numerals to preserve major/minor distinctions
+    let mut result = id.replace("/", "_SLASH_")
+                      .replace("b", "FLAT_");
+    
+    // Convert to uppercase but use special prefixes for lowercase roman numerals
+    // Lowercase = minor, uppercase = major in roman numeral analysis
+    if id.chars().any(|c| c.is_lowercase() && c.is_alphabetic()) {
+        result = format!("MINOR_{}", result.to_uppercase());
+    } else {
+        result = result.to_uppercase();
+    }
+    
+    result
+}
+
+fn sanitize_identifier(s: &str) -> String {
+    s.replace("+", "_PLUS_")
+     .replace("#", "_SHARP_")
+     .replace("b", "_FLAT_")
+     .replace("/", "_SLASH_")
+     .to_uppercase()
+}
+
+
+fn generate_chord_data(roman: &str, variant: &str, node_name: &str) -> (String, String) {
+    // Parse the roman numeral to get the degree and accidental
+    let (degree_code, quality_hint) = parse_roman_degree(roman);
+    
+    // Generate the intervals for this chord variant
+    let intervals = parse_chord_variant(variant, &quality_hint, "");
+    
+    // Generate the RomanNumeral code
+    let roman_numeral_code = format!(
+        "RomanNumeral::new({}, Accidental::Natural)",
+        degree_code
+    );
+    
+    // Generate the intervals array
+    let intervals_array = format!(
+        "static {}_INTERVALS: [Interval; {}] = [{}];\n\n",
+        node_name,
+        intervals.len(),
+        intervals.join(", ")
+    );
+    
+    (roman_numeral_code, intervals_array)
+}
+
+fn parse_roman_degree(roman: &str) -> (String, String) {
+    // Handle flat symbols
+    let (accidental, remainder) = if roman.starts_with('b') {
+        ("Accidental::Flat", &roman[1..])
+    } else if roman.starts_with('#') {
+        ("Accidental::Sharp", &roman[1..])
+    } else {
+        ("Accidental::Natural", roman)
+    };
+    
+    // Determine quality from case and convert to degree
+    let (degree, quality) = match remainder.to_uppercase().as_str() {
+        "I" => ("RomanDegree::I", if remainder == "i" { "minor" } else { "major" }),
+        "II" => ("RomanDegree::II", if remainder == "ii" { "minor" } else { "major" }),
+        "III" => ("RomanDegree::III", if remainder == "iii" { "minor" } else { "major" }),
+        "IV" => ("RomanDegree::IV", if remainder == "iv" { "minor" } else { "major" }),
+        "V" => ("RomanDegree::V", if remainder == "v" { "minor" } else { "major" }),
+        "VI" => ("RomanDegree::VI", if remainder == "vi" { "minor" } else { "major" }),
+        "VII" => ("RomanDegree::VII", if remainder == "vii" { "minor" } else { "major" }),
+        _ => panic!("Unknown roman degree: {}", remainder),
+    };
+    
+    let degree_with_accidental = if accidental == "Accidental::Natural" {
+        degree.to_string()
+    } else {
+        format!("RomanNumeral::new({}, {}).degree()", degree, accidental)
+    };
+    
+    (degree.to_string(), quality.to_string())
+}
+
+fn parse_chord_variant(variant: &str, quality_hint: &str, _key_type: &str) -> Vec<String> {
+    if variant.is_empty() {
+        // Base triad
+        return match quality_hint {
+            "major" => vec![
+                "Interval::PERFECT_UNISON".to_string(),
+                "Interval::MAJOR_THIRD".to_string(),
+                "Interval::PERFECT_FIFTH".to_string(),
+            ],
+            "minor" => vec![
+                "Interval::PERFECT_UNISON".to_string(),
+                "Interval::MINOR_THIRD".to_string(),
+                "Interval::PERFECT_FIFTH".to_string(),
+            ],
+            _ => vec![
+                "Interval::PERFECT_UNISON".to_string(),
+                "Interval::MAJOR_THIRD".to_string(),
+                "Interval::PERFECT_FIFTH".to_string(),
+            ],
+        };
+    }
+    
+    // Start with base triad
+    let mut intervals = match quality_hint {
+        "major" => vec![
+            "Interval::PERFECT_UNISON",
+            "Interval::MAJOR_THIRD",
+            "Interval::PERFECT_FIFTH",
+        ],
+        "minor" => vec![
+            "Interval::PERFECT_UNISON",
+            "Interval::MINOR_THIRD", 
+            "Interval::PERFECT_FIFTH",
+        ],
+        _ => vec![
+            "Interval::PERFECT_UNISON",
+            "Interval::MAJOR_THIRD",
+            "Interval::PERFECT_FIFTH",
+        ],
+    };
+    
+    // Parse variant extensions
+    match variant {
+        "6" => intervals.push("Interval::MAJOR_SIXTH"),
+        "7" => {
+            // In jazz harmony, "7" always means dominant 7 (minor seventh)
+            // regardless of chord quality
+            intervals.push("Interval::MINOR_SEVENTH");
+        },
+        "9" => {
+            intervals.push("Interval::MINOR_SEVENTH");
+            intervals.push("Interval::MAJOR_NINTH");
+        },
+        "11" => {
+            intervals.push("Interval::MINOR_SEVENTH");
+            intervals.push("Interval::MAJOR_NINTH");
+            intervals.push("Interval::PERFECT_ELEVENTH");
+        },
+        "13" => {
+            intervals.push("Interval::MINOR_SEVENTH");
+            intervals.push("Interval::MAJOR_NINTH");
+            intervals.push("Interval::PERFECT_ELEVENTH");
+            intervals.push("Interval::MAJOR_THIRTEENTH");
+        },
+        "maj7" => intervals.push("Interval::MAJOR_SEVENTH"),
+        "maj9" => {
+            intervals.push("Interval::MAJOR_SEVENTH");
+            intervals.push("Interval::MAJOR_NINTH");
+        },
+        "m7" => intervals.push("Interval::MINOR_SEVENTH"),
+        "m9" => {
+            intervals.push("Interval::MINOR_SEVENTH");
+            intervals.push("Interval::MAJOR_NINTH");
+        },
+        "7+b9" => {
+            intervals.push("Interval::MINOR_SEVENTH");
+            intervals.push("Interval::MINOR_NINTH");
+        },
+        "7+#9" => {
+            intervals.push("Interval::MINOR_SEVENTH");
+            intervals.push("Interval::AUGMENTED_NINTH");
+        },
+        "b5" => {
+            // Replace perfect fifth with diminished fifth
+            if let Some(pos) = intervals.iter().position(|&x| x == "Interval::PERFECT_FIFTH") {
+                intervals[pos] = "Interval::DIMINISHED_FIFTH";
+            }
+        },
+        "m7b5" => {
+            // Half-diminished: minor third, diminished fifth, minor seventh
+            if let Some(pos) = intervals.iter().position(|&x| x == "Interval::PERFECT_FIFTH") {
+                intervals[pos] = "Interval::DIMINISHED_FIFTH";
+            }
+            intervals.push("Interval::MINOR_SEVENTH");
+        },
+        "b5+7" => {
+            if let Some(pos) = intervals.iter().position(|&x| x == "Interval::PERFECT_FIFTH") {
+                intervals[pos] = "Interval::DIMINISHED_FIFTH";
+            }
+            intervals.push("Interval::MINOR_SEVENTH");
+        },
+        "#11" => {
+            intervals.push("Interval::MAJOR_SEVENTH");
+            intervals.push("Interval::MAJOR_NINTH");
+            intervals.push("Interval::AUGMENTED_ELEVENTH");
+        },
+        _ => {
+            // For unknown variants, just return the base triad
+            eprintln!("Warning: Unknown chord variant: {}", variant);
+        }
+    }
+    
+    intervals.into_iter().map(|s| s.to_string()).collect()
+}
+
+fn get_node_variants(nodes: &[ProgressionNode], id: &str) -> Vec<String> {
+    for node in nodes {
+        if node.id == id {
+            return node.variants.clone();
+        }
+    }
+    vec!["".to_string()]
 }

@@ -1,0 +1,36 @@
+# Major Key Progression Map with Full Chord Variants
+# Format: ID | type | roman | variants
+
+# Primary nodes (blue - diatonic, stable harmonic centers)
+I     | primary   | I   | ,6,7,9,maj7,maj9
+ii    | primary   | ii  | 7,9,11,7+b9
+iii   | primary   | iii | 7,m7
+IV    | primary   | IV  | 6,7,9,maj7,#11
+V     | primary   | V   | 7,9,11,13,7+b9,7+#9
+vi    | primary   | vi  | 7,9,m7
+vii   | primary   | vii | b5,m7b5
+
+# Secondary nodes (green - chromatic/borrowed chords, create tension)
+bIII  | secondary | bIII| 7,9
+bVI   | secondary | bVI | 7,9
+bVII  | secondary | bVII| 7,9
+
+# Explicit arrows only (strong connections - natural voice leading)
+I     -> IV
+I     -> V  
+I     -> vi
+ii    -> V
+ii    -> vii
+iii   -> vi
+iii   -> IV
+IV    -> I
+IV    -> ii
+IV    -> V
+V     -> I
+V     -> vi
+vi    -> ii
+vi    -> IV
+vii   -> I
+bIII  -> IV
+bVI   -> bVII
+bVII  -> I

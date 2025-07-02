@@ -25,3 +25,10 @@ pub use interval::*;
 
 mod roman_numeral;
 pub use roman_numeral::{RomanDegree, RomanNumeral, RomanChord};
+
+pub mod progression;
+pub use progression::{
+    ProgressionNode, NodeType, ProgressionStrength, ProgressionEdge,
+    NodeRef, ProgressionOptions, StaticMajorGraph, StaticMinorGraph, 
+    ProgressionGraph, ProgressionGraphLike
+};
