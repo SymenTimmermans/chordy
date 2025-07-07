@@ -3,7 +3,7 @@
 //! This module contains the concrete implementations of progression graphs
 //! using the static data generated from Stephen Mugglin's progression maps.
 
-use super::{ProgressionNode, ProgressionEdge, ProgressionOptions, NodeRef, NodeType};
+use super::{ProgressionNode, ProgressionOptions, NodeRef, NodeType, DynamicProgressionEdge};
 use std::collections::HashMap;
 
 /// Static progression graph for major keys using compile-time generated data
@@ -24,7 +24,7 @@ pub struct StaticMinorGraph;
 /// though with higher memory overhead than static graphs.
 pub struct ProgressionGraph {
     nodes: Vec<ProgressionNode>,
-    edges: Vec<ProgressionEdge>,
+    edges: Vec<DynamicProgressionEdge>,
     node_map: HashMap<String, usize>,
 }
 
@@ -33,6 +33,9 @@ pub struct ProgressionGraph {
 /// This trait allows uniform access to progression functionality regardless
 /// of whether the graph is static (compile-time) or dynamic (runtime).
 pub trait ProgressionGraphLike {
+    /// Iterator type for nodes in this graph
+    type NodeIter<'a>: Iterator<Item = &'a ProgressionNode> + 'a where Self: 'a;
+    
     /// Get all progression options from a given node
     /// 
     /// Returns categorized options by strength:
@@ -44,11 +47,19 @@ pub trait ProgressionGraphLike {
     /// Get a node by its string identifier
     fn get_node(&self, id: &str) -> Option<&ProgressionNode>;
     
-    /// Get all nodes in the graph
-    fn all_nodes(&self) -> &[&ProgressionNode];
+    /// Get an iterator over all nodes in the graph
+    fn nodes(&self) -> Self::NodeIter<'_>;
     
-    /// Get all edges in the graph
-    fn all_edges(&self) -> &[&ProgressionEdge];
+    /// Get the total number of nodes in the graph
+    fn node_count(&self) -> usize;
+    
+    /// Get the total number of edges in the graph  
+    fn edge_count(&self) -> usize;
+    
+    /// Check if the graph contains any nodes
+    fn is_empty(&self) -> bool {
+        self.node_count() == 0
+    }
 }
 
 impl StaticMajorGraph {
@@ -59,6 +70,8 @@ impl StaticMajorGraph {
 }
 
 impl ProgressionGraphLike for StaticMajorGraph {
+    type NodeIter<'a> = std::iter::Map<std::slice::Iter<'a, &'static ProgressionNode>, fn(&&'static ProgressionNode) -> &'a ProgressionNode>;
+    
     fn progression_options<'a>(&self, from: impl Into<NodeRef<'a>>) -> Option<ProgressionOptions> {
         use crate::types::progression::major_data::{ALL_NODES, ALL_EDGES, get_node};
         
@@ -101,14 +114,19 @@ impl ProgressionGraphLike for StaticMajorGraph {
         get_node(id)
     }
     
-    fn all_nodes(&self) -> &[&ProgressionNode] {
+    fn nodes(&self) -> Self::NodeIter<'_> {
         use crate::types::progression::major_data::ALL_NODES;
-        ALL_NODES
+        ALL_NODES.iter().map(|node_ref| -> &'_ ProgressionNode { *node_ref })
     }
     
-    fn all_edges(&self) -> &[&ProgressionEdge] {
+    fn node_count(&self) -> usize {
+        use crate::types::progression::major_data::ALL_NODES;
+        ALL_NODES.len()
+    }
+    
+    fn edge_count(&self) -> usize {
         use crate::types::progression::major_data::ALL_EDGES;
-        ALL_EDGES
+        ALL_EDGES.len()
     }
 }
 
@@ -120,6 +138,8 @@ impl StaticMinorGraph {
 }
 
 impl ProgressionGraphLike for StaticMinorGraph {
+    type NodeIter<'a> = std::iter::Map<std::slice::Iter<'a, &'static ProgressionNode>, fn(&&'static ProgressionNode) -> &'a ProgressionNode>;
+    
     fn progression_options<'a>(&self, from: impl Into<NodeRef<'a>>) -> Option<ProgressionOptions> {
         use crate::types::progression::minor_data::{ALL_NODES, ALL_EDGES, get_node};
         
@@ -162,14 +182,19 @@ impl ProgressionGraphLike for StaticMinorGraph {
         get_node(id)
     }
     
-    fn all_nodes(&self) -> &[&ProgressionNode] {
+    fn nodes(&self) -> Self::NodeIter<'_> {
         use crate::types::progression::minor_data::ALL_NODES;
-        ALL_NODES
+        ALL_NODES.iter().map(|node_ref| -> &'_ ProgressionNode { *node_ref })
     }
     
-    fn all_edges(&self) -> &[&ProgressionEdge] {
+    fn node_count(&self) -> usize {
+        use crate::types::progression::minor_data::ALL_NODES;
+        ALL_NODES.len()
+    }
+    
+    fn edge_count(&self) -> usize {
         use crate::types::progression::minor_data::ALL_EDGES;
-        ALL_EDGES
+        ALL_EDGES.len()
     }
 }
 
@@ -192,25 +217,106 @@ impl ProgressionGraph {
     
     /// Add an edge to the graph
     /// 
-    /// Note: This creates owned ProgressionEdge instances rather than static references
+    /// Creates a strong connection between two nodes identified by their display names.
+    /// Both nodes must already exist in the graph.
     pub fn add_edge(&mut self, from_id: &str, to_id: &str) -> Result<(), String> {
-        let from_idx = self.node_map.get(from_id)
+        let from_idx = *self.node_map.get(from_id)
             .ok_or_else(|| format!("Node not found: {}", from_id))?;
-        let to_idx = self.node_map.get(to_id)
+        let to_idx = *self.node_map.get(to_id)
             .ok_or_else(|| format!("Node not found: {}", to_id))?;
         
-        // For dynamic graphs, we need to work differently since we can't create
-        // static references. This is a limitation of the current design that
-        // prioritizes static efficiency.
-        Err("Dynamic edge creation not yet implemented - use static graphs".to_string())
+        // Check if edge already exists to avoid duplicates
+        if self.edges.iter().any(|edge| edge.from_index == from_idx && edge.to_index == to_idx) {
+            return Err(format!("Edge already exists: {} -> {}", from_id, to_id));
+        }
+        
+        self.edges.push(DynamicProgressionEdge {
+            from_index: from_idx,
+            to_index: to_idx,
+        });
+        
+        Ok(())
+    }
+    
+    /// Get all edges in the graph
+    pub fn edges(&self) -> &[DynamicProgressionEdge] {
+        &self.edges
+    }
+    
+    /// Check if an edge exists between two nodes
+    pub fn has_edge(&self, from_id: &str, to_id: &str) -> bool {
+        if let (Some(&from_idx), Some(&to_idx)) = (self.node_map.get(from_id), self.node_map.get(to_id)) {
+            self.edges.iter().any(|edge| edge.from_index == from_idx && edge.to_index == to_idx)
+        } else {
+            false
+        }
+    }
+    
+    /// Remove an edge from the graph
+    pub fn remove_edge(&mut self, from_id: &str, to_id: &str) -> Result<(), String> {
+        let from_idx = *self.node_map.get(from_id)
+            .ok_or_else(|| format!("Node not found: {}", from_id))?;
+        let to_idx = *self.node_map.get(to_id)
+            .ok_or_else(|| format!("Node not found: {}", to_id))?;
+        
+        let initial_len = self.edges.len();
+        self.edges.retain(|edge| !(edge.from_index == from_idx && edge.to_index == to_idx));
+        
+        if self.edges.len() == initial_len {
+            Err(format!("Edge not found: {} -> {}", from_id, to_id))
+        } else {
+            Ok(())
+        }
     }
 }
 
 impl ProgressionGraphLike for ProgressionGraph {
-    fn progression_options<'a>(&self, _from: impl Into<NodeRef<'a>>) -> Option<ProgressionOptions> {
-        // TODO: Implement dynamic progression options
-        // This requires a different approach since we can't use static references
-        None
+    type NodeIter<'a> = std::slice::Iter<'a, ProgressionNode>;
+    
+    fn progression_options<'a>(&self, from: impl Into<NodeRef<'a>>) -> Option<ProgressionOptions> {
+        let from_node = match from.into() {
+            NodeRef::Static(node) => {
+                // For static node references, find the matching node in our dynamic graph
+                self.nodes.iter().find(|n| n.display_name == node.display_name)?
+            },
+            NodeRef::Dynamic(id) => {
+                let index = self.node_map.get(&id)?;
+                self.nodes.get(*index)?
+            },
+        };
+        
+        let mut options = ProgressionOptions::new();
+        
+        // Find the index of the from_node in our nodes vector
+        let from_index = self.nodes.iter().position(|n| std::ptr::eq(n, from_node))?;
+        
+        // Find strong connections (explicit edges)
+        for edge in &self.edges {
+            if edge.from_index == from_index {
+                if let Some(to_node) = self.nodes.get(edge.to_index) {
+                    options.strong.push(to_node);
+                }
+            }
+        }
+        
+        // Find moderate and weak connections (jumps to all other nodes)
+        for (i, node) in self.nodes.iter().enumerate() {
+            if i == from_index {
+                continue; // Skip self
+            }
+            
+            // Skip if already in strong connections
+            if options.strong.iter().any(|&strong_node| std::ptr::eq(strong_node, node)) {
+                continue;
+            }
+            
+            match node.node_type {
+                NodeType::Primary => options.moderate.push(node),
+                NodeType::Secondary => options.weak.push(node),
+            }
+        }
+        
+        Some(options)
     }
     
     fn get_node(&self, id: &str) -> Option<&ProgressionNode> {
@@ -218,15 +324,16 @@ impl ProgressionGraphLike for ProgressionGraph {
         self.nodes.get(*index)
     }
     
-    fn all_nodes(&self) -> &[&ProgressionNode] {
-        // This doesn't work with the current trait design that expects static references
-        // TODO: Consider redesigning the trait for better dynamic support
-        &[]
+    fn nodes(&self) -> Self::NodeIter<'_> {
+        self.nodes.iter()
     }
     
-    fn all_edges(&self) -> &[&ProgressionEdge] {
-        // Same issue as all_nodes
-        &[]
+    fn node_count(&self) -> usize {
+        self.nodes.len()
+    }
+    
+    fn edge_count(&self) -> usize {
+        self.edges.len()
     }
 }
 
@@ -255,14 +362,14 @@ mod tests {
     #[test]
     fn test_static_major_graph_creation() {
         let graph = StaticMajorGraph::new();
-        let nodes = graph.all_nodes();
+        let nodes: Vec<_> = graph.nodes().collect();
         assert!(!nodes.is_empty(), "Major graph should have nodes");
     }
     
     #[test]
     fn test_static_minor_graph_creation() {
         let graph = StaticMinorGraph::new();
-        let nodes = graph.all_nodes();
+        let nodes: Vec<_> = graph.nodes().collect();
         assert!(!nodes.is_empty(), "Minor graph should have nodes");
     }
     

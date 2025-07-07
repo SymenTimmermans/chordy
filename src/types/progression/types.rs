@@ -78,6 +78,18 @@ pub struct ProgressionEdge {
     pub to: &'static ProgressionNode,
 }
 
+/// A dynamic edge for runtime-constructed progression graphs
+/// 
+/// Uses indices to reference nodes within a dynamic graph, allowing
+/// for owned data structures while maintaining the same logical relationships.
+#[derive(Debug, Clone)]
+pub struct DynamicProgressionEdge {
+    /// Index of the source node in the dynamic graph's node vector
+    pub from_index: usize,
+    /// Index of the destination node in the dynamic graph's node vector  
+    pub to_index: usize,
+}
+
 /// Reference to a progression node that can be either static or dynamic
 /// 
 /// This allows the API to accept both compile-time static references (for performance)
