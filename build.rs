@@ -303,8 +303,8 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
             // Generate the node
             generated.push_str(&doc_comment);
             generated.push_str(&format!(
-                "pub static {}: ProgressionNode = ProgressionNode {{\n    id: \"{}\",\n    display_name: \"{}\",\n    node_type: {},\n    roman_numeral: {},\n    intervals: {},\n    base_function: \"{}\",\n}};\n\n",
-                node_name, display_name, display_name, node_type, roman_numeral_code, intervals_array_ref.reference, node.id
+                "pub static {}: ProgressionNode = ProgressionNode {{\n    id: \"{}\",\n    node_type: {},\n    roman_numeral: {},\n    intervals: {},\n}};\n\n",
+                node_name, display_name, node_type, roman_numeral_code, intervals_array_ref.reference
             ));
             
             node_map_entries.push((display_name.clone(), node_name.clone()));

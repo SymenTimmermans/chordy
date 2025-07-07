@@ -14,11 +14,9 @@ static MINOR_TRIAD: [Interval; 3] = [Interval::PERFECT_UNISON, Interval::MINOR_T
 /// Intervals: perfect unison, major third, perfect fifth
 pub static I: ProgressionNode = ProgressionNode {
     id: "I",
-    display_name: "I",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
     intervals: &MAJOR_TRIAD,
-    base_function: "I",
 };
 
 static I_6_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MAJOR_SIXTH];
@@ -27,11 +25,9 @@ static I_6_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJOR
 /// Intervals: perfect unison, major third, perfect fifth, major sixth
 pub static I_6: ProgressionNode = ProgressionNode {
     id: "I6",
-    display_name: "I6",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
     intervals: &I_6_INTERVALS,
-    base_function: "I",
 };
 
 static I_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH];
@@ -40,11 +36,9 @@ static I_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJOR
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh
 pub static I_7: ProgressionNode = ProgressionNode {
     id: "I7",
-    display_name: "I7",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
     intervals: &I_7_INTERVALS,
-    base_function: "I",
 };
 
 static I_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, Interval::MAJOR_NINTH];
@@ -53,11 +47,9 @@ static I_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MAJOR
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh, major ninth
 pub static I_9: ProgressionNode = ProgressionNode {
     id: "I9",
-    display_name: "I9",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
     intervals: &I_9_INTERVALS,
-    base_function: "I",
 };
 
 static I_MAJ7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MAJOR_SEVENTH];
@@ -66,11 +58,9 @@ static I_MAJ7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MA
 /// Intervals: perfect unison, major third, perfect fifth, major seventh
 pub static I_MAJ7: ProgressionNode = ProgressionNode {
     id: "Imaj7",
-    display_name: "Imaj7",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
     intervals: &I_MAJ7_INTERVALS,
-    base_function: "I",
 };
 
 static I_MAJ9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MAJOR_SEVENTH, Interval::MAJOR_NINTH];
@@ -79,22 +69,18 @@ static I_MAJ9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MA
 /// Intervals: perfect unison, major third, perfect fifth, major seventh, major ninth
 pub static I_MAJ9: ProgressionNode = ProgressionNode {
     id: "Imaj9",
-    display_name: "Imaj9",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
     intervals: &I_MAJ9_INTERVALS,
-    base_function: "I",
 };
 
 /// ii chord - stable harmonic center (primary node)
 /// Intervals: perfect unison, minor third, perfect fifth
 pub static MINOR_II: ProgressionNode = ProgressionNode {
     id: "ii",
-    display_name: "ii",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
     intervals: &MINOR_TRIAD,
-    base_function: "ii",
 };
 
 static MINOR_II_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH];
@@ -103,11 +89,9 @@ static MINOR_II_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh
 pub static MINOR_II_7: ProgressionNode = ProgressionNode {
     id: "ii7",
-    display_name: "ii7",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
     intervals: &MINOR_II_7_INTERVALS,
-    base_function: "ii",
 };
 
 static MINOR_II_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, Interval::MAJOR_NINTH];
@@ -116,11 +100,9 @@ static MINOR_II_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh, major ninth
 pub static MINOR_II_9: ProgressionNode = ProgressionNode {
     id: "ii9",
-    display_name: "ii9",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
     intervals: &MINOR_II_9_INTERVALS,
-    base_function: "ii",
 };
 
 static MINOR_II_11_INTERVALS: [Interval; 6] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, Interval::MAJOR_NINTH, Interval::PERFECT_ELEVENTH];
@@ -129,11 +111,9 @@ static MINOR_II_11_INTERVALS: [Interval; 6] = [Interval::PERFECT_UNISON, Interva
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh, major ninth, perfect eleventh
 pub static MINOR_II_11: ProgressionNode = ProgressionNode {
     id: "ii11",
-    display_name: "ii11",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
     intervals: &MINOR_II_11_INTERVALS,
-    base_function: "ii",
 };
 
 static MINOR_II_7_PLUS__FLAT_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, Interval::MINOR_NINTH];
@@ -142,22 +122,18 @@ static MINOR_II_7_PLUS__FLAT_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNI
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh, minor ninth
 pub static MINOR_II_7_PLUS__FLAT_9: ProgressionNode = ProgressionNode {
     id: "ii7+b9",
-    display_name: "ii7+b9",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
     intervals: &MINOR_II_7_PLUS__FLAT_9_INTERVALS,
-    base_function: "ii",
 };
 
 /// iii chord - stable harmonic center (primary node)
 /// Intervals: perfect unison, minor third, perfect fifth
 pub static MINOR_III: ProgressionNode = ProgressionNode {
     id: "iii",
-    display_name: "iii",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::III, Accidental::Natural),
     intervals: &MINOR_TRIAD,
-    base_function: "iii",
 };
 
 static MINOR_III_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH];
@@ -166,11 +142,9 @@ static MINOR_III_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interva
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh
 pub static MINOR_III_7: ProgressionNode = ProgressionNode {
     id: "iii7",
-    display_name: "iii7",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::III, Accidental::Natural),
     intervals: &MINOR_III_7_INTERVALS,
-    base_function: "iii",
 };
 
 static MINOR_III_M7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH];
@@ -179,22 +153,18 @@ static MINOR_III_M7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interv
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh
 pub static MINOR_III_M7: ProgressionNode = ProgressionNode {
     id: "iiim7",
-    display_name: "iiim7",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::III, Accidental::Natural),
     intervals: &MINOR_III_M7_INTERVALS,
-    base_function: "iii",
 };
 
 /// IV chord - stable harmonic center (primary node)
 /// Intervals: perfect unison, major third, perfect fifth
 pub static IV: ProgressionNode = ProgressionNode {
     id: "IV",
-    display_name: "IV",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
     intervals: &MAJOR_TRIAD,
-    base_function: "IV",
 };
 
 static IV_6_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MAJOR_SIXTH];
@@ -203,11 +173,9 @@ static IV_6_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJO
 /// Intervals: perfect unison, major third, perfect fifth, major sixth
 pub static IV_6: ProgressionNode = ProgressionNode {
     id: "IV6",
-    display_name: "IV6",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
     intervals: &IV_6_INTERVALS,
-    base_function: "IV",
 };
 
 static IV_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH];
@@ -216,11 +184,9 @@ static IV_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJO
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh
 pub static IV_7: ProgressionNode = ProgressionNode {
     id: "IV7",
-    display_name: "IV7",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
     intervals: &IV_7_INTERVALS,
-    base_function: "IV",
 };
 
 static IV_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, Interval::MAJOR_NINTH];
@@ -229,11 +195,9 @@ static IV_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MAJO
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh, major ninth
 pub static IV_9: ProgressionNode = ProgressionNode {
     id: "IV9",
-    display_name: "IV9",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
     intervals: &IV_9_INTERVALS,
-    base_function: "IV",
 };
 
 static IV_MAJ7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MAJOR_SEVENTH];
@@ -242,11 +206,9 @@ static IV_MAJ7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::M
 /// Intervals: perfect unison, major third, perfect fifth, major seventh
 pub static IV_MAJ7: ProgressionNode = ProgressionNode {
     id: "IVmaj7",
-    display_name: "IVmaj7",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
     intervals: &IV_MAJ7_INTERVALS,
-    base_function: "IV",
 };
 
 static IV__SHARP_11_INTERVALS: [Interval; 6] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MAJOR_SEVENTH, Interval::MAJOR_NINTH, Interval::AUGMENTED_ELEVENTH];
@@ -255,22 +217,18 @@ static IV__SHARP_11_INTERVALS: [Interval; 6] = [Interval::PERFECT_UNISON, Interv
 /// Intervals: perfect unison, major third, perfect fifth, major seventh, major ninth, augmented eleventh
 pub static IV__SHARP_11: ProgressionNode = ProgressionNode {
     id: "IV#11",
-    display_name: "IV#11",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
     intervals: &IV__SHARP_11_INTERVALS,
-    base_function: "IV",
 };
 
 /// V chord - stable harmonic center (primary node)
 /// Intervals: perfect unison, major third, perfect fifth
 pub static V: ProgressionNode = ProgressionNode {
     id: "V",
-    display_name: "V",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
     intervals: &MAJOR_TRIAD,
-    base_function: "V",
 };
 
 static V_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH];
@@ -279,11 +237,9 @@ static V_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJOR
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh
 pub static V_7: ProgressionNode = ProgressionNode {
     id: "V7",
-    display_name: "V7",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
     intervals: &V_7_INTERVALS,
-    base_function: "V",
 };
 
 static V_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, Interval::MAJOR_NINTH];
@@ -292,11 +248,9 @@ static V_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MAJOR
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh, major ninth
 pub static V_9: ProgressionNode = ProgressionNode {
     id: "V9",
-    display_name: "V9",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
     intervals: &V_9_INTERVALS,
-    base_function: "V",
 };
 
 static V_11_INTERVALS: [Interval; 6] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, Interval::MAJOR_NINTH, Interval::PERFECT_ELEVENTH];
@@ -305,11 +259,9 @@ static V_11_INTERVALS: [Interval; 6] = [Interval::PERFECT_UNISON, Interval::MAJO
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh, major ninth, perfect eleventh
 pub static V_11: ProgressionNode = ProgressionNode {
     id: "V11",
-    display_name: "V11",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
     intervals: &V_11_INTERVALS,
-    base_function: "V",
 };
 
 static V_13_INTERVALS: [Interval; 7] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, Interval::MAJOR_NINTH, Interval::PERFECT_ELEVENTH, Interval::MAJOR_THIRTEENTH];
@@ -318,11 +270,9 @@ static V_13_INTERVALS: [Interval; 7] = [Interval::PERFECT_UNISON, Interval::MAJO
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh, major ninth, perfect eleventh, major thirteenth
 pub static V_13: ProgressionNode = ProgressionNode {
     id: "V13",
-    display_name: "V13",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
     intervals: &V_13_INTERVALS,
-    base_function: "V",
 };
 
 static V_7_PLUS__FLAT_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, Interval::MINOR_NINTH];
@@ -331,11 +281,9 @@ static V_7_PLUS__FLAT_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, In
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh, minor ninth
 pub static V_7_PLUS__FLAT_9: ProgressionNode = ProgressionNode {
     id: "V7+b9",
-    display_name: "V7+b9",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
     intervals: &V_7_PLUS__FLAT_9_INTERVALS,
-    base_function: "V",
 };
 
 static V_7_PLUS__SHARP_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, Interval::AUGMENTED_NINTH];
@@ -344,22 +292,18 @@ static V_7_PLUS__SHARP_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, I
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh, augmented ninth
 pub static V_7_PLUS__SHARP_9: ProgressionNode = ProgressionNode {
     id: "V7+#9",
-    display_name: "V7+#9",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
     intervals: &V_7_PLUS__SHARP_9_INTERVALS,
-    base_function: "V",
 };
 
 /// vi chord - stable harmonic center (primary node)
 /// Intervals: perfect unison, minor third, perfect fifth
 pub static MINOR_VI: ProgressionNode = ProgressionNode {
     id: "vi",
-    display_name: "vi",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
     intervals: &MINOR_TRIAD,
-    base_function: "vi",
 };
 
 static MINOR_VI_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH];
@@ -368,11 +312,9 @@ static MINOR_VI_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh
 pub static MINOR_VI_7: ProgressionNode = ProgressionNode {
     id: "vi7",
-    display_name: "vi7",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
     intervals: &MINOR_VI_7_INTERVALS,
-    base_function: "vi",
 };
 
 static MINOR_VI_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, Interval::MAJOR_NINTH];
@@ -381,11 +323,9 @@ static MINOR_VI_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh, major ninth
 pub static MINOR_VI_9: ProgressionNode = ProgressionNode {
     id: "vi9",
-    display_name: "vi9",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
     intervals: &MINOR_VI_9_INTERVALS,
-    base_function: "vi",
 };
 
 static MINOR_VI_M7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH];
@@ -394,22 +334,18 @@ static MINOR_VI_M7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interva
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh
 pub static MINOR_VI_M7: ProgressionNode = ProgressionNode {
     id: "vim7",
-    display_name: "vim7",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
     intervals: &MINOR_VI_M7_INTERVALS,
-    base_function: "vi",
 };
 
 /// vii chord - stable harmonic center (primary node)
 /// Intervals: perfect unison, minor third, perfect fifth
 pub static MINOR_VII: ProgressionNode = ProgressionNode {
     id: "vii",
-    display_name: "vii",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::VII, Accidental::Natural),
     intervals: &MINOR_TRIAD,
-    base_function: "vii",
 };
 
 static MINOR_VII__FLAT_5_INTERVALS: [Interval; 3] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::DIMINISHED_FIFTH];
@@ -418,11 +354,9 @@ static MINOR_VII__FLAT_5_INTERVALS: [Interval; 3] = [Interval::PERFECT_UNISON, I
 /// Intervals: perfect unison, minor third, diminished fifth
 pub static MINOR_VII__FLAT_5: ProgressionNode = ProgressionNode {
     id: "viib5",
-    display_name: "viib5",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::VII, Accidental::Natural),
     intervals: &MINOR_VII__FLAT_5_INTERVALS,
-    base_function: "vii",
 };
 
 static MINOR_VII_M7_FLAT_5_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::DIMINISHED_FIFTH, Interval::MINOR_SEVENTH];
@@ -431,11 +365,9 @@ static MINOR_VII_M7_FLAT_5_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON,
 /// Intervals: perfect unison, minor third, diminished fifth, minor seventh
 pub static MINOR_VII_M7_FLAT_5: ProgressionNode = ProgressionNode {
     id: "viim7b5",
-    display_name: "viim7b5",
     node_type: NodeType::Primary,
     roman_numeral: RomanNumeral::new(RomanDegree::VII, Accidental::Natural),
     intervals: &MINOR_VII_M7_FLAT_5_INTERVALS,
-    base_function: "vii",
 };
 
 static MINOR_FLAT_III_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH];
@@ -444,11 +376,9 @@ static MINOR_FLAT_III_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, In
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh
 pub static MINOR_FLAT_III_7: ProgressionNode = ProgressionNode {
     id: "bIII7",
-    display_name: "bIII7",
     node_type: NodeType::Secondary,
     roman_numeral: RomanNumeral::new(RomanDegree::III, Accidental::Natural),
     intervals: &MINOR_FLAT_III_7_INTERVALS,
-    base_function: "bIII",
 };
 
 static MINOR_FLAT_III_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, Interval::MAJOR_NINTH];
@@ -457,11 +387,9 @@ static MINOR_FLAT_III_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, In
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh, major ninth
 pub static MINOR_FLAT_III_9: ProgressionNode = ProgressionNode {
     id: "bIII9",
-    display_name: "bIII9",
     node_type: NodeType::Secondary,
     roman_numeral: RomanNumeral::new(RomanDegree::III, Accidental::Natural),
     intervals: &MINOR_FLAT_III_9_INTERVALS,
-    base_function: "bIII",
 };
 
 static MINOR_FLAT_VI_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH];
@@ -470,11 +398,9 @@ static MINOR_FLAT_VI_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Int
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh
 pub static MINOR_FLAT_VI_7: ProgressionNode = ProgressionNode {
     id: "bVI7",
-    display_name: "bVI7",
     node_type: NodeType::Secondary,
     roman_numeral: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
     intervals: &MINOR_FLAT_VI_7_INTERVALS,
-    base_function: "bVI",
 };
 
 static MINOR_FLAT_VI_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, Interval::MAJOR_NINTH];
@@ -483,11 +409,9 @@ static MINOR_FLAT_VI_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Int
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh, major ninth
 pub static MINOR_FLAT_VI_9: ProgressionNode = ProgressionNode {
     id: "bVI9",
-    display_name: "bVI9",
     node_type: NodeType::Secondary,
     roman_numeral: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
     intervals: &MINOR_FLAT_VI_9_INTERVALS,
-    base_function: "bVI",
 };
 
 static MINOR_FLAT_VII_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH];
@@ -496,11 +420,9 @@ static MINOR_FLAT_VII_7_INTERVALS: [Interval; 4] = [Interval::PERFECT_UNISON, In
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh
 pub static MINOR_FLAT_VII_7: ProgressionNode = ProgressionNode {
     id: "bVII7",
-    display_name: "bVII7",
     node_type: NodeType::Secondary,
     roman_numeral: RomanNumeral::new(RomanDegree::VII, Accidental::Natural),
     intervals: &MINOR_FLAT_VII_7_INTERVALS,
-    base_function: "bVII",
 };
 
 static MINOR_FLAT_VII_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, Interval::MAJOR_NINTH];
@@ -509,11 +431,9 @@ static MINOR_FLAT_VII_9_INTERVALS: [Interval; 5] = [Interval::PERFECT_UNISON, In
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh, major ninth
 pub static MINOR_FLAT_VII_9: ProgressionNode = ProgressionNode {
     id: "bVII9",
-    display_name: "bVII9",
     node_type: NodeType::Secondary,
     roman_numeral: RomanNumeral::new(RomanDegree::VII, Accidental::Natural),
     intervals: &MINOR_FLAT_VII_9_INTERVALS,
-    base_function: "bVII",
 };
 
 /// Progression edge: I → IV

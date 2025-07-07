@@ -211,7 +211,7 @@ impl ProgressionGraph {
     /// Add a node to the graph
     pub fn add_node(&mut self, node: ProgressionNode) {
         let index = self.nodes.len();
-        self.node_map.insert(node.display_name.to_string(), index);
+        self.node_map.insert(node.id.to_string(), index);
         self.nodes.push(node);
     }
     
@@ -268,6 +268,7 @@ impl ProgressionGraph {
             Ok(())
         }
     }
+    
 }
 
 impl ProgressionGraphLike for ProgressionGraph {
@@ -277,7 +278,7 @@ impl ProgressionGraphLike for ProgressionGraph {
         let from_node = match from.into() {
             NodeRef::Static(node) => {
                 // For static node references, find the matching node in our dynamic graph
-                self.nodes.iter().find(|n| n.display_name == node.display_name)?
+                self.nodes.iter().find(|n| n.id == node.id)?
             },
             NodeRef::Dynamic(id) => {
                 let index = self.node_map.get(&id)?;

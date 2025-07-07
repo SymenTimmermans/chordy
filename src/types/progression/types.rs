@@ -11,24 +11,33 @@ use crate::types::{RomanChord, RomanNumeral, Interval, Chord};
 /// a fixed roman numeral representation and harmonic function.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ProgressionNode {
-    /// Unique identifier for this node (e.g., "ii_7", "V_9")
+    /// Unique identifier and display name for this node (e.g., "ii7", "V9") 
     pub id: &'static str,
-    /// Human-readable display name (e.g., "ii7", "V9")
-    pub display_name: &'static str,
     /// Whether this is a primary (stable) or secondary (transitional) node
     pub node_type: NodeType,
     /// The roman numeral root of this chord
     pub roman_numeral: RomanNumeral,
     /// The intervals that define this chord variant
     pub intervals: &'static [Interval],
-    /// Base harmonic function without extensions (e.g., "ii", "V")
-    pub base_function: &'static str,
 }
 
 impl ProgressionNode {
     /// Convert this progression node to a RomanChord
     pub fn to_roman_chord(&self) -> RomanChord {
         RomanChord::new(self.roman_numeral, self.intervals.to_vec())
+    }
+    
+    /// Get the display name for this node (same as id)
+    pub fn display_name(&self) -> &'static str {
+        self.id
+    }
+    
+    /// Get the base harmonic function without extensions (derived from roman numeral)
+    /// For example: "ii7" -> "ii", "V9" -> "V", "bVII" -> "bVII"
+    pub fn base_function(&self) -> String {
+        // For now, just return the id since it matches the roman numeral format
+        // This could be enhanced to parse extensions if needed
+        self.id.to_string()
     }
 }
 

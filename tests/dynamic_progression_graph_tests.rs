@@ -38,11 +38,9 @@ static UNISON_ONLY: [Interval; 1] = [
 fn create_i_major_node() -> ProgressionNode {
     ProgressionNode {
         id: "I",
-        display_name: "I",
         node_type: NodeType::Primary,
         roman_numeral: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
         intervals: &MAJOR_TRIAD_INTERVALS,
-        base_function: "I",
     }
 }
 
@@ -50,11 +48,9 @@ fn create_i_major_node() -> ProgressionNode {
 fn create_ii_minor_node() -> ProgressionNode {
     ProgressionNode {
         id: "ii",
-        display_name: "ii",
         node_type: NodeType::Primary,
         roman_numeral: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
         intervals: &MINOR_TRIAD_INTERVALS,
-        base_function: "ii",
     }
 }
 
@@ -62,11 +58,9 @@ fn create_ii_minor_node() -> ProgressionNode {
 fn create_v_dominant_node() -> ProgressionNode {
     ProgressionNode {
         id: "V",
-        display_name: "V",
         node_type: NodeType::Primary,
         roman_numeral: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
         intervals: &MAJOR_TRIAD_INTERVALS,
-        base_function: "V",
     }
 }
 
@@ -74,11 +68,9 @@ fn create_v_dominant_node() -> ProgressionNode {
 fn create_v7_dominant_node() -> ProgressionNode {
     ProgressionNode {
         id: "V7",
-        display_name: "V7",
         node_type: NodeType::Primary,
         roman_numeral: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
         intervals: &DOMINANT_SEVENTH_INTERVALS,
-        base_function: "V",
     }
 }
 
@@ -86,11 +78,9 @@ fn create_v7_dominant_node() -> ProgressionNode {
 fn create_bvii_secondary_node() -> ProgressionNode {
     ProgressionNode {
         id: "bVII",
-        display_name: "bVII",
         node_type: NodeType::Secondary,
         roman_numeral: RomanNumeral::new(RomanDegree::VII, Accidental::Flat),
         intervals: &MAJOR_TRIAD_INTERVALS,
-        base_function: "bVII",
     }
 }
 
@@ -98,11 +88,9 @@ fn create_bvii_secondary_node() -> ProgressionNode {
 fn create_vi_minor_node() -> ProgressionNode {
     ProgressionNode {
         id: "vi",
-        display_name: "vi",
         node_type: NodeType::Primary,
         roman_numeral: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
         intervals: &MINOR_TRIAD_INTERVALS,
-        base_function: "vi",
     }
 }
 
@@ -139,7 +127,7 @@ mod basic_functionality {
         
         let found_node = graph.get_node("I");
         assert!(found_node.is_some());
-        assert_eq!(found_node.unwrap().display_name, "I");
+        assert_eq!(found_node.unwrap().display_name(), "I");
         
         // Test lookup for non-existent node
         let missing_node = graph.get_node("vi");
@@ -170,7 +158,7 @@ mod basic_functionality {
         let nodes: Vec<_> = graph.nodes().collect();
         assert_eq!(nodes.len(), 2);
         
-        let display_names: Vec<_> = nodes.iter().map(|n| n.display_name).collect();
+        let display_names: Vec<_> = nodes.iter().map(|n| n.display_name()).collect();
         assert!(display_names.contains(&"I"));
         assert!(display_names.contains(&"V"));
     }
@@ -307,11 +295,11 @@ mod progression_analysis {
         
         let options = graph.progression_options("I").unwrap();
         assert_eq!(options.strong.len(), 1);
-        assert_eq!(options.strong[0].display_name, "V");
+        assert_eq!(options.strong[0].display_name(), "V");
         
         let options_ii = graph.progression_options("ii").unwrap();
         assert_eq!(options_ii.strong.len(), 1);
-        assert_eq!(options_ii.strong[0].display_name, "V");
+        assert_eq!(options_ii.strong[0].display_name(), "V");
     }
 
     #[test]
@@ -327,7 +315,7 @@ mod progression_analysis {
         assert!(options.strong.is_empty());
         assert_eq!(options.moderate.len(), 2); // V and ii are primary
         
-        let moderate_names: Vec<_> = options.moderate.iter().map(|n| n.display_name).collect();
+        let moderate_names: Vec<_> = options.moderate.iter().map(|n| n.display_name()).collect();
         assert!(moderate_names.contains(&"V"));
         assert!(moderate_names.contains(&"ii"));
     }
@@ -345,8 +333,8 @@ mod progression_analysis {
         assert_eq!(options.moderate.len(), 1); // V is primary
         assert_eq!(options.weak.len(), 1); // bVII is secondary
         
-        assert_eq!(options.moderate[0].display_name, "V");
-        assert_eq!(options.weak[0].display_name, "bVII");
+        assert_eq!(options.moderate[0].display_name(), "V");
+        assert_eq!(options.weak[0].display_name(), "bVII");
     }
 
     #[test]
@@ -366,9 +354,9 @@ mod progression_analysis {
         assert_eq!(options.moderate.len(), 1); // ii (primary, no edge)
         assert_eq!(options.weak.len(), 1); // bVII (secondary)
         
-        assert_eq!(options.strong[0].display_name, "V");
-        assert_eq!(options.moderate[0].display_name, "ii");
-        assert_eq!(options.weak[0].display_name, "bVII");
+        assert_eq!(options.strong[0].display_name(), "V");
+        assert_eq!(options.moderate[0].display_name(), "ii");
+        assert_eq!(options.weak[0].display_name(), "bVII");
     }
 
     #[test]
@@ -407,11 +395,9 @@ mod real_world_progressions {
     fn create_vi_minor_node() -> ProgressionNode {
         ProgressionNode {
             id: "vi",
-            display_name: "vi",
             node_type: NodeType::Primary,
             roman_numeral: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
             intervals: &MINOR_TRIAD_INTERVALS,
-            base_function: "vi",
         }
     }
 
@@ -419,11 +405,9 @@ mod real_world_progressions {
     fn create_iv_major_node() -> ProgressionNode {
         ProgressionNode {
             id: "IV",
-            display_name: "IV",
             node_type: NodeType::Primary,
             roman_numeral: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
             intervals: &MAJOR_TRIAD_INTERVALS,
-            base_function: "IV",
         }
     }
 
@@ -443,12 +427,12 @@ mod real_world_progressions {
         // Test ii → V7 (strong)
         let ii_options = graph.progression_options("ii").unwrap();
         assert_eq!(ii_options.strong.len(), 1);
-        assert_eq!(ii_options.strong[0].display_name, "V7");
+        assert_eq!(ii_options.strong[0].display_name(), "V7");
         
         // Test V7 → I (strong)
         let v7_options = graph.progression_options("V7").unwrap();
         assert_eq!(v7_options.strong.len(), 1);
-        assert_eq!(v7_options.strong[0].display_name, "I");
+        assert_eq!(v7_options.strong[0].display_name(), "I");
         
         // Verify the progression chain works
         assert!(graph.has_edge("ii", "V7"));
@@ -473,16 +457,16 @@ mod real_world_progressions {
         
         // Test each step of the progression
         let vi_options = graph.progression_options("vi").unwrap();
-        assert!(vi_options.strong.iter().any(|n| n.display_name == "IV"));
+        assert!(vi_options.strong.iter().any(|n| n.display_name() == "IV"));
         
         let iv_options = graph.progression_options("IV").unwrap();
-        assert!(iv_options.strong.iter().any(|n| n.display_name == "I"));
+        assert!(iv_options.strong.iter().any(|n| n.display_name() == "I"));
         
         let i_options = graph.progression_options("I").unwrap();
-        assert!(i_options.strong.iter().any(|n| n.display_name == "V"));
+        assert!(i_options.strong.iter().any(|n| n.display_name() == "V"));
         
         let v_options = graph.progression_options("V").unwrap();
-        assert!(v_options.strong.iter().any(|n| n.display_name == "vi"));
+        assert!(v_options.strong.iter().any(|n| n.display_name() == "vi"));
     }
 
     #[test]
@@ -499,13 +483,13 @@ mod real_world_progressions {
         graph.add_edge("I", "bVII").unwrap();
         
         let i_options = graph.progression_options("I").unwrap();
-        assert!(i_options.strong.iter().any(|n| n.display_name == "bVII"));
+        assert!(i_options.strong.iter().any(|n| n.display_name() == "bVII"));
         
         let bvii_options = graph.progression_options("bVII").unwrap();
-        assert!(bvii_options.strong.iter().any(|n| n.display_name == "I"));
+        assert!(bvii_options.strong.iter().any(|n| n.display_name() == "I"));
         
         // V should be available as moderate (jump to primary)
-        assert!(i_options.moderate.iter().any(|n| n.display_name == "V"));
+        assert!(i_options.moderate.iter().any(|n| n.display_name() == "V"));
     }
 }
 
@@ -569,12 +553,12 @@ mod unified_api_compatibility {
         
         // Both should have nodes with the same structure
         for node in static_nodes.iter().take(1) {
-            assert!(!node.display_name.is_empty());
+            assert!(!node.display_name().is_empty());
             assert!(!node.intervals.is_empty());
         }
         
         for node in dynamic_nodes.iter() {
-            assert!(!node.display_name.is_empty());
+            assert!(!node.display_name().is_empty());
             assert!(!node.intervals.is_empty());
         }
     }
@@ -663,11 +647,9 @@ mod performance_characteristics {
         for _i in 0..node_count {
             let node = ProgressionNode {
                 id: "test",
-                display_name: "test", 
                 node_type: NodeType::Primary,
                 roman_numeral: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
                 intervals: &UNISON_ONLY,
-                base_function: "test",
             };
             graph.add_node(node);
         }
