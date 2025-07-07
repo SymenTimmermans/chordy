@@ -96,7 +96,7 @@ let notes = c_major.notes();
 // [C, D, E, F, G, A, B]
 
 // Generate a diatonic chord
-let c_major_triad = c_major.triad_at_degree(1);
+let c_major_triad = c_major.chord_at_degree(1);
 // [C, E, G]
 ```
 
@@ -108,12 +108,11 @@ use chordy::{Key, NoteName, Letter, Accidental};
 // Create a key for progression analysis
 let c_major = Key::Major(NoteName::new(Letter::C, Accidental::Natural));
 
-// Look up chord variants
-let tonic = c_major.progression_node("I").unwrap();
-let dominant_seventh = c_major.progression_node("V7").unwrap();
+// Create a chord for analysis  
+let tonic_chord = chordy::Chord::major(chordy::note!("C"));
 
 // Get progression options from a chord
-let options = c_major.progression_options(&tonic).unwrap();
+let options = c_major.progression_options(&tonic_chord).unwrap();
 
 // Categorized by harmonic strength
 println!("Strong progressions: {:?}", options.strong.len());

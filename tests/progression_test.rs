@@ -1,27 +1,44 @@
 //! Basic tests for the chord progression system
 
 use chordy::prelude::*;
-use chordy::RomanDegree;
+
+#[test]
+fn test_chord_api() {
+    let c_major_key = Key::Major(note!("C"));
+    let g_major_chord = Chord::major(note!("G"));
+
+    let options = c_major_key.progression_options(&g_major_chord).unwrap();
+
+    // there should be a strong progression towards the C (I) chord from G (V)
+    let c_major_chord = Chord::major(note!("C"));
+    assert!(!options.strong.is_empty(), "There should be strong progression options from G to C");
+
+    assert!(options.strong.contains(&c_major_chord),
+        "There should be a strong progression to I (C) from V (G)");
+
+    
+}
 
 #[test]
 fn test_major_key_progression_options() {
     let c_major = Key::Major(note!("C"));
     
     // Test I chord progressions
-    let options = c_major.progression_options("I").unwrap();
+    let c_chord = Chord::major(note!("C")); // I chord
+    let options = c_major.progression_options(&c_chord).unwrap();
     
     // I should have strong progressions to IV, V, and vi
     assert!(!options.strong.is_empty(), "I should have strong progression options");
     assert!(!options.moderate.is_empty(), "I should have moderate progression options");
     
     // Find specific progressions
-    let has_iv = options.strong.iter().any(|node| node.display_name == "IV");
-    let has_v = options.strong.iter().any(|node| node.display_name == "V");
-    let has_vi = options.strong.iter().any(|node| node.display_name == "vi");
+    let has_f = options.strong.iter().any(|chord| chord.root() == note!("F")); // IV
+    let has_g = options.strong.iter().any(|chord| chord.root() == note!("G")); // V
+    let has_a = options.strong.iter().any(|chord| chord.root() == note!("A")); // vi
     
-    assert!(has_iv, "I should have strong progression to IV");
-    assert!(has_v, "I should have strong progression to V");
-    assert!(has_vi, "I should have strong progression to vi");
+    assert!(has_f, "I should have strong progression to IV (F)");
+    assert!(has_g, "I should have strong progression to V (G)");
+    assert!(has_a, "I should have strong progression to vi (A)");
 }
 
 #[test]
@@ -29,65 +46,35 @@ fn test_minor_key_progression_options() {
     let a_minor = Key::Minor(note!("A"));
     
     // Test i chord progressions in minor
-    let options = a_minor.progression_options("i").unwrap();
+    let a_chord = Chord::minor(note!("A")); // i chord
+    let options = a_minor.progression_options(&a_chord).unwrap();
     
     assert!(!options.strong.is_empty(), "i should have strong progression options");
     
     // Find specific progressions common in minor
-    let has_iv = options.strong.iter().any(|node| node.display_name == "iv");
-    let has_v = options.strong.iter().any(|node| node.display_name == "V");
+    let has_d = options.strong.iter().any(|chord| chord.root == note!("D")); // iv
+    let has_e = options.strong.iter().any(|chord| chord.root == note!("E")); // V
     
-    assert!(has_iv, "i should have strong progression to iv");
-    assert!(has_v, "i should have strong progression to V");
+    assert!(has_d, "i should have strong progression to iv (D)");
+    assert!(has_e, "i should have strong progression to V (E)");
 }
 
-#[test]
-fn test_progression_node_lookup() {
-    let c_major = Key::Major(note!("C"));
-    
-    // Test basic node lookup
-    let tonic = c_major.progression_node("I").unwrap();
-    assert_eq!(tonic.display_name, "I");
-    assert_eq!(tonic.roman_numeral.degree(), RomanDegree::I);
-    
-    let subdominant = c_major.progression_node("IV").unwrap();
-    assert_eq!(subdominant.display_name, "IV");
-    assert_eq!(subdominant.roman_numeral.degree(), RomanDegree::IV);
-    
-    // Test minor chord lookup
-    let submediant = c_major.progression_node("vi").unwrap();
-    assert_eq!(submediant.display_name, "vi");
-    assert_eq!(submediant.roman_numeral.degree(), RomanDegree::VI);
-}
 
 #[test]
 fn test_progression_strength_categories() {
     let c_major = Key::Major(note!("C"));
-    let options = c_major.progression_options("V").unwrap();
+    let g_chord = Chord::major(note!("G")); // V chord
+    let options = c_major.progression_options(&g_chord).unwrap();
     
     // V should have strong progressions (explicit arrows)
     assert!(!options.strong.is_empty(), "V should have strong progressions");
     
     // Should have at least I as a strong target
-    let has_i = options.strong.iter().any(|node| node.display_name == "I");
-    assert!(has_i, "V should have strong progression to I");
+    let has_c = options.strong.iter().any(|chord| chord.root == note!("C")); // I
+    assert!(has_c, "V should have strong progression to I (C)");
     
     // Should also have moderate and weak options
     assert!(!options.moderate.is_empty(), "V should have moderate progression options");
     assert!(!options.weak.is_empty(), "V should have weak progression options");
 }
 
-#[test]
-fn test_all_progression_nodes() {
-    let c_major = Key::Major(note!("C"));
-    let all_nodes = c_major.all_progression_nodes();
-    
-    assert!(!all_nodes.is_empty(), "Should have progression nodes");
-    
-    // Should have basic diatonic functions
-    let node_names: Vec<&str> = all_nodes.iter().map(|n| n.display_name).collect();
-    assert!(node_names.contains(&"I"), "Should have I");
-    assert!(node_names.contains(&"IV"), "Should have IV");
-    assert!(node_names.contains(&"V"), "Should have V");
-    assert!(node_names.contains(&"vi"), "Should have vi");
-}

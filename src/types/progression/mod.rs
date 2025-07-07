@@ -21,7 +21,8 @@
 //! use chordy::prelude::*;
 //!
 //! let key = Key::Major(note!("C"));
-//! let options = key.progression_options("I").unwrap();
+//! let tonic_chord = Chord::from_str("C").unwrap();
+//! let options = key.progression_options(&tonic_chord).unwrap();
 //!
 //! // Get different types of progressions
 //! println!("Strong progressions: {:?}", options.strong);    // IV, V, vi
@@ -42,7 +43,7 @@ pub use graph::*;
 // Re-export commonly used types
 pub use types::{
     ProgressionNode, NodeType, ProgressionStrength, ProgressionEdge,
-    NodeRef, ProgressionOptions
+    NodeRef, ProgressionOptions, ChordProgressionOptions
 };
 pub use graph::{
     StaticMajorGraph, StaticMinorGraph, ProgressionGraph, ProgressionGraphLike

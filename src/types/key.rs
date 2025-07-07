@@ -1,7 +1,7 @@
 use crate::traits::HasRoot;
 
 use super::{NoteName, scale::ScaleDegree, Chord, RomanNumeral, HarmonicFunction, Scale, Accidental, Letter};
-use super::progression::{ProgressionOptions, StaticMajorGraph, StaticMinorGraph, ProgressionGraphLike, NodeRef};
+use super::progression::{ChordProgressionOptions, StaticMajorGraph, StaticMinorGraph, ProgressionGraphLike};
 
 /// The mode of a key (Major, Minor, etc.)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -226,7 +226,8 @@ impl Key {
 
     /// Get chord progression options from a given chord in this key
     /// 
-    /// Returns categorized progression options based on Stephen Mugglin's progression map:
+    /// Returns categorized progression options as actual Chord objects
+    /// based on Stephen Mugglin's progression map:
     /// - Strong: explicit arrows showing natural voice leading
     /// - Moderate: jumps to primary nodes (stable but less directed)
     /// - Weak: jumps to secondary nodes (creates tension, needs resolution)
@@ -234,46 +235,53 @@ impl Key {
     /// # Examples
     /// 
     /// ```rust
-    /// use chordy::{Key, note};
+    /// use chordy::{Key, Chord, note};
     /// 
     /// let c_major = Key::Major(note!("C"));
-    /// let options = c_major.progression_options("I").unwrap();
+    /// let c_chord = Chord::major(note!("C"));
     /// 
-    /// // I chord has strong progressions to IV, V, and vi
+    /// let options = c_major.progression_options(&c_chord).unwrap();
     /// assert!(!options.strong.is_empty());
-    /// println!("From I, strong options: {:?}", options.strong);
     /// ```
-    pub fn progression_options<'a>(&self, from: impl Into<NodeRef<'a>>) -> Option<ProgressionOptions> {
-        match self {
-            Key::Major(_) => {
-                // Create a zero-sized graph instance - all data is static
-                StaticMajorGraph.progression_options(from)
-            }
-            Key::Minor(_) => {
-                // Create a zero-sized graph instance - all data is static
-                StaticMinorGraph.progression_options(from)
-            }
+    pub fn progression_options(&self, chord: &Chord) -> Option<ChordProgressionOptions> {
+        // Find the progression node for this chord
+        let node = self.find_node_for_chord(chord)?;
+        
+        // Get progression options using the node
+        let node_options = match self {
+            Key::Major(_) => StaticMajorGraph.progression_options(node.id),
+            Key::Minor(_) => StaticMinorGraph.progression_options(node.id),
+        }?;
+        
+        // Convert ProgressionNodes to Chords in this key context
+        let mut chord_options = ChordProgressionOptions::new();
+        
+        // Convert strong options
+        for &node in &node_options.strong {
+            let roman_chord = node.to_roman_chord();
+            let chord = roman_chord.in_key(self);
+            chord_options.strong.push(chord);
         }
+        
+        // Convert moderate options
+        for &node in &node_options.moderate {
+            let roman_chord = node.to_roman_chord();
+            let chord = roman_chord.in_key(self);
+            chord_options.moderate.push(chord);
+        }
+        
+        // Convert weak options
+        for &node in &node_options.weak {
+            let roman_chord = node.to_roman_chord();
+            let chord = roman_chord.in_key(self);
+            chord_options.weak.push(chord);
+        }
+        
+        Some(chord_options)
     }
 
-    /// Get a specific progression node by its roman numeral identifier
-    /// 
-    /// Looks up the node in the appropriate progression graph (major or minor)
-    /// based on this key's mode.
-    /// 
-    /// # Examples
-    /// 
-    /// ```rust
-    /// use chordy::{Key, note};
-    /// 
-    /// let c_major = Key::Major(note!("C"));
-    /// let tonic = c_major.progression_node("I").unwrap();
-    /// assert_eq!(tonic.display_name, "I");
-    /// 
-    /// let subdominant = c_major.progression_node("IV").unwrap();
-    /// assert_eq!(subdominant.display_name, "IV");
-    /// ```
-    pub fn progression_node(&self, id: &str) -> Option<&'static crate::types::progression::ProgressionNode> {
+    /// Internal helper to find a node by ID
+    fn find_node_by_id(&self, id: &str) -> Option<&'static crate::types::progression::ProgressionNode> {
         match self {
             Key::Major(_) => {
                 use crate::types::progression::major_data::get_node;
@@ -286,11 +294,8 @@ impl Key {
         }
     }
 
-    /// Get all available progression nodes for this key
-    /// 
-    /// Returns all nodes from the appropriate progression graph (major or minor).
-    /// Useful for exploring all available harmonic functions.
-    pub fn all_progression_nodes(&self) -> &'static [&'static crate::types::progression::ProgressionNode] {
+    /// Internal helper to get all nodes
+    fn all_nodes(&self) -> &'static [&'static crate::types::progression::ProgressionNode] {
         match self {
             Key::Major(_) => {
                 use crate::types::progression::major_data::ALL_NODES;
@@ -302,6 +307,40 @@ impl Key {
             }
         }
     }
+
+    /// Internal helper to find the progression node that best matches a given chord
+    fn find_node_for_chord(&self, chord: &Chord) -> Option<&'static crate::types::progression::ProgressionNode> {
+        // Convert chord to roman chord in this key context
+        let roman_chord = chord.to_roman(self)?;
+        
+        // Search for matching progression node
+        let nodes = self.all_nodes();
+        
+        // First try to find exact match with intervals
+        for &node in nodes {
+            if node.roman_numeral == roman_chord.root() {
+                // Check if intervals match closely
+                let node_intervals: std::collections::HashSet<_> = node.intervals.iter().collect();
+                let chord_intervals: std::collections::HashSet<_> = roman_chord.intervals().iter().collect();
+                
+                // Exact match
+                if node_intervals == chord_intervals {
+                    return Some(node);
+                }
+            }
+        }
+        
+        // Fallback to roman numeral match only (base triad)
+        for &node in nodes {
+            if node.roman_numeral == roman_chord.root() && node.intervals.len() == 3 {
+                // Found base triad match
+                return Some(node);
+            }
+        }
+        
+        None
+    }
+
 }
 
 impl std::fmt::Display for Key {
