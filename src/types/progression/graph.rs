@@ -3,7 +3,7 @@
 //! This module contains the concrete implementations of progression graphs
 //! using the static data generated from Stephen Mugglin's progression maps.
 
-use super::{ProgressionNode, ProgressionEdge, ProgressionOptions, NodeRef, NodeType, ProgressionStrength};
+use super::{ProgressionNode, ProgressionEdge, ProgressionOptions, NodeRef, NodeType};
 use std::collections::HashMap;
 
 /// Static progression graph for major keys using compile-time generated data
