@@ -193,7 +193,9 @@ struct ProgressionEdge {
 }
 
 fn parse_progression_file(path: &Path, key_type: &str) -> String {
-    let file = File::open(path).expect(&format!("Failed to open {:?}", path));
+    let file = File::open(path).unwrap_or_else(|e| {
+        panic!("Failed to open progression file {:?}: {}", path, e);
+    });
     let reader = BufReader::new(file);
     
     let mut nodes = Vec::new();
@@ -216,6 +218,8 @@ fn parse_progression_file(path: &Path, key_type: &str) -> String {
                     from: parts[0].to_string(),
                     to: parts[1].to_string(),
                 });
+            } else {
+                eprintln!("Warning: Malformed edge line: '{}'", line);
             }
         } else if line.contains("|") {
             // Parse node: "I | primary | I | ,6,7,9,maj7,maj9"
@@ -233,9 +237,14 @@ fn parse_progression_file(path: &Path, key_type: &str) -> String {
                     roman: parts[2].to_string(),
                     variants,
                 });
+            } else {
+                eprintln!("Warning: Malformed node line: '{}' (expected format: ID|type|roman|variants)", line);
             }
         }
     }
+    
+    // Validate progression data before generating code
+    validate_progression_data(&nodes, &edges);
     
     generate_progression_code(&nodes, &edges, key_type)
 }
@@ -249,7 +258,14 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
     ));
     
     generated.push_str("use crate::types::progression::{ProgressionNode, ProgressionEdge, NodeType};\n");
-    generated.push_str("use crate::types::{RomanChord, RomanNumeral, RomanDegree, Accidental, Interval};\n\n");
+    generated.push_str("use crate::types::{RomanNumeral, RomanDegree, Accidental, Interval};\n\n");
+    
+    // Generate common interval arrays to reduce duplication
+    generated.push_str("// Common interval patterns (reused across multiple chords)\n");
+    generated.push_str("/// Standard major triad intervals: root, major third, perfect fifth\n");
+    generated.push_str("static MAJOR_TRIAD: [Interval; 3] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH];\n");
+    generated.push_str("/// Standard minor triad intervals: root, minor third, perfect fifth\n");
+    generated.push_str("static MINOR_TRIAD: [Interval; 3] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH];\n\n");
     
     // Generate individual node variants
     let mut all_node_names = Vec::new();
@@ -267,15 +283,28 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
                 _ => panic!("Unknown node type: {}", node.node_type),
             };
             
-            let (roman_numeral_code, intervals_array_name) = generate_chord_data(&node.roman, variant, &node_name);
+            let (roman_numeral_code, intervals_array_ref) = generate_chord_data(&node.roman, variant, &node_name);
             
-            // Generate the intervals array first
-            generated.push_str(&intervals_array_name);
+            // Generate custom intervals array only if not using common patterns
+            if let Some(intervals_array) = &intervals_array_ref.custom_array {
+                generated.push_str(intervals_array);
+            }
+            
+            // Generate documentation for the node
+            let (_, quality_hint) = parse_roman_degree(&node.roman);
+            let doc_comment = format!(
+                "/// {} chord - {} ({} node)\n/// Intervals: {}\n",
+                display_name,
+                if node.node_type == "primary" { "stable harmonic center" } else { "creates tension, seeks resolution" },
+                node.node_type,
+                format_intervals_for_doc(&parse_chord_variant(variant, &quality_hint, ""))
+            );
             
             // Generate the node
+            generated.push_str(&doc_comment);
             generated.push_str(&format!(
-                "pub static {}: ProgressionNode = ProgressionNode {{\n    id: \"{}\",\n    display_name: \"{}\",\n    node_type: {},\n    roman_numeral: {},\n    intervals: &{}_INTERVALS,\n    base_function: \"{}\",\n}};\n\n",
-                node_name, display_name, display_name, node_type, roman_numeral_code, node_name, node.id
+                "pub static {}: ProgressionNode = ProgressionNode {{\n    id: \"{}\",\n    display_name: \"{}\",\n    node_type: {},\n    roman_numeral: {},\n    intervals: {},\n    base_function: \"{}\",\n}};\n\n",
+                node_name, display_name, display_name, node_type, roman_numeral_code, intervals_array_ref.reference, node.id
             ));
             
             node_map_entries.push((display_name.clone(), node_name.clone()));
@@ -299,6 +328,7 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
                 let from_node_name = format!("{}{}", from_base, from_suffix);
                 let to_node_name = format!("{}{}", to_base, to_suffix);
                 
+                generated.push_str(&format!("/// Progression edge: {} → {}\n", edge.from, edge.to));
                 generated.push_str(&format!(
                     "pub static {}: ProgressionEdge = ProgressionEdge {{\n    from: &{},\n    to: &{},\n}};\n\n",
                     edge_name, from_node_name, to_node_name
@@ -310,6 +340,9 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
     }
     
     // Generate ALL_NODES array
+    generated.push_str(&format!("/// Complete registry of all progression nodes for {} keys\n", key_type));
+    generated.push_str(&format!("/// \n/// Contains {} chord variants across all harmonic functions.\n", all_node_names.len()));
+    generated.push_str(&format!("/// Used internally for graph traversal and chord lookup operations.\n"));
     generated.push_str("pub static ALL_NODES: &[&ProgressionNode] = &[\n");
     for node_name in &all_node_names {
         generated.push_str(&format!("    &{},\n", node_name));
@@ -317,6 +350,9 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
     generated.push_str("];\n\n");
     
     // Generate ALL_EDGES array
+    generated.push_str(&format!("/// Complete registry of all progression edges for {} keys\n", key_type));
+    generated.push_str(&format!("/// \n/// Contains {} harmonic connections between chord variants.\n", all_edge_names.len()));
+    generated.push_str(&format!("/// Each edge represents a musically valid progression with proper voice leading.\n"));
     generated.push_str("pub static ALL_EDGES: &[&ProgressionEdge] = &[\n");
     for edge_name in &all_edge_names {
         generated.push_str(&format!("    &{},\n", edge_name));
@@ -324,7 +360,9 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
     generated.push_str("];\n\n");
     
     // Generate simple lookup function instead of PHF map
-    generated.push_str("/// Look up a progression node by its display name\n");
+    generated.push_str(&format!("/// Look up a progression node by its display name for {} keys\n", key_type));
+    generated.push_str(&format!("/// \n/// Returns the corresponding `ProgressionNode` for chord symbols like \"I\", \"V7\", \"ii9\", etc.\n"));
+    generated.push_str(&format!("/// Supports {} different chord variants.\n", node_map_entries.len()));
     generated.push_str("pub fn get_node(name: &str) -> Option<&'static ProgressionNode> {\n");
     generated.push_str("    match name {\n");
     for (display_name, node_name) in &node_map_entries {
@@ -382,7 +420,12 @@ fn sanitize_identifier(s: &str) -> String {
 }
 
 
-fn generate_chord_data(roman: &str, variant: &str, node_name: &str) -> (String, String) {
+struct IntervalsArrayRef {
+    reference: String,
+    custom_array: Option<String>,
+}
+
+fn generate_chord_data(roman: &str, variant: &str, node_name: &str) -> (String, IntervalsArrayRef) {
     // Parse the roman numeral to get the degree and accidental
     let (degree_code, quality_hint) = parse_roman_degree(roman);
     
@@ -395,15 +438,32 @@ fn generate_chord_data(roman: &str, variant: &str, node_name: &str) -> (String, 
         degree_code
     );
     
-    // Generate the intervals array
-    let intervals_array = format!(
-        "static {}_INTERVALS: [Interval; {}] = [{}];\n\n",
-        node_name,
-        intervals.len(),
-        intervals.join(", ")
-    );
+    // Check if we can use a common pattern
+    let intervals_ref = if variant.is_empty() && quality_hint == "major" {
+        IntervalsArrayRef {
+            reference: "&MAJOR_TRIAD".to_string(),
+            custom_array: None,
+        }
+    } else if variant.is_empty() && quality_hint == "minor" {
+        IntervalsArrayRef {
+            reference: "&MINOR_TRIAD".to_string(),
+            custom_array: None,
+        }
+    } else {
+        // Generate custom intervals array
+        let intervals_array = format!(
+            "static {}_INTERVALS: [Interval; {}] = [{}];\n\n",
+            node_name,
+            intervals.len(),
+            intervals.join(", ")
+        );
+        IntervalsArrayRef {
+            reference: format!("&{}_INTERVALS", node_name),
+            custom_array: Some(intervals_array),
+        }
+    };
     
-    (roman_numeral_code, intervals_array)
+    (roman_numeral_code, intervals_ref)
 }
 
 fn parse_roman_degree(roman: &str) -> (String, String) {
@@ -428,7 +488,7 @@ fn parse_roman_degree(roman: &str) -> (String, String) {
         _ => panic!("Unknown roman degree: {}", remainder),
     };
     
-    let degree_with_accidental = if accidental == "Accidental::Natural" {
+    let _degree_with_accidental = if accidental == "Accidental::Natural" {
         degree.to_string()
     } else {
         format!("RomanNumeral::new({}, {}).degree()", degree, accidental)
@@ -437,30 +497,8 @@ fn parse_roman_degree(roman: &str) -> (String, String) {
     (degree.to_string(), quality.to_string())
 }
 
-fn parse_chord_variant(variant: &str, quality_hint: &str, _key_type: &str) -> Vec<String> {
-    if variant.is_empty() {
-        // Base triad
-        return match quality_hint {
-            "major" => vec![
-                "Interval::PERFECT_UNISON".to_string(),
-                "Interval::MAJOR_THIRD".to_string(),
-                "Interval::PERFECT_FIFTH".to_string(),
-            ],
-            "minor" => vec![
-                "Interval::PERFECT_UNISON".to_string(),
-                "Interval::MINOR_THIRD".to_string(),
-                "Interval::PERFECT_FIFTH".to_string(),
-            ],
-            _ => vec![
-                "Interval::PERFECT_UNISON".to_string(),
-                "Interval::MAJOR_THIRD".to_string(),
-                "Interval::PERFECT_FIFTH".to_string(),
-            ],
-        };
-    }
-    
-    // Start with base triad
-    let mut intervals = match quality_hint {
+fn get_base_triad(quality_hint: &str) -> Vec<&'static str> {
+    match quality_hint {
         "major" => vec![
             "Interval::PERFECT_UNISON",
             "Interval::MAJOR_THIRD",
@@ -468,7 +506,7 @@ fn parse_chord_variant(variant: &str, quality_hint: &str, _key_type: &str) -> Ve
         ],
         "minor" => vec![
             "Interval::PERFECT_UNISON",
-            "Interval::MINOR_THIRD", 
+            "Interval::MINOR_THIRD",
             "Interval::PERFECT_FIFTH",
         ],
         _ => vec![
@@ -476,7 +514,17 @@ fn parse_chord_variant(variant: &str, quality_hint: &str, _key_type: &str) -> Ve
             "Interval::MAJOR_THIRD",
             "Interval::PERFECT_FIFTH",
         ],
-    };
+    }
+}
+
+fn parse_chord_variant(variant: &str, quality_hint: &str, _key_type: &str) -> Vec<String> {
+    if variant.is_empty() {
+        // Base triad
+        return get_base_triad(quality_hint).into_iter().map(|s| s.to_string()).collect();
+    }
+    
+    // Start with base triad
+    let mut intervals = get_base_triad(quality_hint);
     
     // Parse variant extensions
     match variant {
@@ -545,11 +593,49 @@ fn parse_chord_variant(variant: &str, quality_hint: &str, _key_type: &str) -> Ve
         },
         _ => {
             // For unknown variants, just return the base triad
-            eprintln!("Warning: Unknown chord variant: {}", variant);
+            eprintln!("Warning: Unknown chord variant '{}' for quality '{}'", variant, quality_hint);
         }
     }
     
     intervals.into_iter().map(|s| s.to_string()).collect()
+}
+
+fn validate_progression_data(nodes: &[ProgressionNode], edges: &[ProgressionEdge]) {
+    // Check for duplicate node IDs
+    let mut seen_ids = std::collections::HashSet::new();
+    for node in nodes {
+        if !seen_ids.insert(&node.id) {
+            panic!("Duplicate node ID found: {}", node.id);
+        }
+    }
+    
+    // Check that all edge references point to valid nodes
+    let node_ids: std::collections::HashSet<_> = nodes.iter().map(|n| n.id.as_str()).collect();
+    for edge in edges {
+        if !node_ids.contains(edge.from.as_str()) {
+            eprintln!("Warning: Edge references unknown node '{}'", edge.from);
+        }
+        if !node_ids.contains(edge.to.as_str()) {
+            eprintln!("Warning: Edge references unknown node '{}'", edge.to);
+        }
+    }
+    
+    // Check for valid node types
+    for node in nodes {
+        match node.node_type.as_str() {
+            "primary" | "secondary" => {},
+            _ => eprintln!("Warning: Unknown node type '{}' for node '{}'", node.node_type, node.id),
+        }
+    }
+    
+    println!("cargo:warning=Validated {} nodes and {} edges", nodes.len(), edges.len());
+}
+
+fn format_intervals_for_doc(intervals: &[String]) -> String {
+    intervals.iter()
+        .map(|i| i.replace("Interval::", "").replace("_", " ").to_lowercase())
+        .collect::<Vec<_>>()
+        .join(", ")
 }
 
 fn get_node_variants(nodes: &[ProgressionNode], id: &str) -> Vec<String> {
