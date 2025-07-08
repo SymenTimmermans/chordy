@@ -336,10 +336,10 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
                 let from_suffix = if from_variant.is_empty() { "".to_string() } else { format!("_{}", sanitize_identifier(from_variant)) };
                 let to_suffix = if to_variant.is_empty() { "".to_string() } else { format!("_{}", sanitize_identifier(to_variant)) };
                 
-                let edge_name = format!("EDGE_{}{}_TO_{}{}", 
-                    from_base, from_suffix, to_base, to_suffix);
-                let from_node_name = format!("{}{}", from_base, from_suffix);
-                let to_node_name = format!("{}{}", to_base, to_suffix);
+                let edge_name = clean_identifier(&format!("EDGE_{}{}_TO_{}{}", 
+                    from_base, from_suffix, to_base, to_suffix));
+                let from_node_name = clean_identifier(&format!("{}{}", from_base, from_suffix));
+                let to_node_name = clean_identifier(&format!("{}{}", to_base, to_suffix));
                 
                 generated.push_str(&format!("/// Progression edge: {} → {}\n", edge.from, edge.to));
                 generated.push_str(&format!(
@@ -408,7 +408,7 @@ fn generate_node_variant(node: &ProgressionNode, variant: &str) -> (String, Stri
         format!("_{}", sanitize_identifier(variant))
     };
     
-    let node_name = format!("{}{}", base_name, variant_suffix);
+    let node_name = clean_identifier(&format!("{}{}", base_name, variant_suffix));
     
     let display_name = if variant.is_empty() {
         node.id.clone()
@@ -441,6 +441,26 @@ fn sanitize_identifier(s: &str) -> String {
      .replace("b", "_FLAT_")
      .replace("/", "_SLASH_")
      .to_uppercase()
+}
+
+/// Clean up identifier names by removing successive underscores
+fn clean_identifier(s: &str) -> String {
+    // Replace multiple consecutive underscores with a single underscore
+    let mut result = String::new();
+    let mut chars = s.chars().peekable();
+    
+    while let Some(ch) = chars.next() {
+        result.push(ch);
+        
+        // If current char is underscore, skip any following underscores
+        if ch == '_' {
+            while chars.peek() == Some(&'_') {
+                chars.next();
+            }
+        }
+    }
+    
+    result
 }
 
 
