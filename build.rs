@@ -166,7 +166,7 @@ fn generate_progressions() {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     
     // Generate major progressions
-    let major_path = Path::new(&manifest_dir).join("data/progressions/major_simple.progression");
+    let major_path = Path::new(&manifest_dir).join("data/progressions/major.progression");
     let major_data = parse_progression_file(&major_path, "major");
     let major_output = Path::new(&manifest_dir).join("src/types/progression/major_data.rs");
     fs::write(&major_output, &major_data).expect("Failed to write major progression data");
