@@ -40,9 +40,8 @@ pub mod minor_data;
 
 // Re-export commonly used types
 pub use types::{
-    ProgressionNode, NodeType, ProgressionStrength, ProgressionEdge, DynamicProgressionEdge,
-    NodeRef, ProgressionOptions, ChordProgressionOptions
+    NodeType, ProgressionStrength, ProgressionEdge, ProgressionOptions, ChordProgressionOptions
 };
 pub use graph::{
-    StaticMajorGraph, StaticMinorGraph, ProgressionGraph, ProgressionGraphLike
+    ProgressionGraph, ChordRef
 };

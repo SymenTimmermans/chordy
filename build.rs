@@ -257,20 +257,31 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
         key_type, key_type
     ));
     
-    generated.push_str("use crate::types::progression::{ProgressionNode, ProgressionEdge, NodeType};\n");
-    generated.push_str("use crate::types::{RomanNumeral, RomanDegree, Accidental, Interval};\n\n");
+    generated.push_str("use crate::types::progression::{ProgressionEdge, NodeType};\n");
+    generated.push_str("use crate::types::{RomanChord, RomanNumeral, RomanDegree, Accidental, Interval, IntervalSet};\n");
+    generated.push_str("use std::collections::HashMap;\n\n");
     
-    // Generate common interval arrays to reduce duplication
+    // Generate common interval patterns as const IntervalSet instances
     generated.push_str("// Common interval patterns (reused across multiple chords)\n");
     generated.push_str("/// Standard major triad intervals: root, major third, perfect fifth\n");
-    generated.push_str("static MAJOR_TRIAD: [Interval; 3] = [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH];\n");
+    generated.push_str("const MAJOR_TRIAD_SET: IntervalSet = IntervalSet::const_from_array(\n");
+    generated.push_str("    [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH,\n");
+    generated.push_str("     Interval::NONE, Interval::NONE, Interval::NONE,\n");
+    generated.push_str("     Interval::NONE, Interval::NONE, Interval::NONE,\n");
+    generated.push_str("     Interval::NONE], 3);\n\n");
+    
     generated.push_str("/// Standard minor triad intervals: root, minor third, perfect fifth\n");
-    generated.push_str("static MINOR_TRIAD: [Interval; 3] = [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH];\n\n");
+    generated.push_str("const MINOR_TRIAD_SET: IntervalSet = IntervalSet::const_from_array(\n");
+    generated.push_str("    [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH,\n");
+    generated.push_str("     Interval::NONE, Interval::NONE, Interval::NONE,\n");
+    generated.push_str("     Interval::NONE, Interval::NONE, Interval::NONE,\n");
+    generated.push_str("     Interval::NONE], 3);\n\n");
     
     // Generate individual node variants
     let mut all_node_names = Vec::new();
     let mut all_edge_names = Vec::new();
     let mut node_map_entries = Vec::new();
+    let mut node_type_entries = Vec::new();
     
     for node in nodes {
         for variant in &node.variants {
@@ -285,9 +296,9 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
             
             let (roman_numeral_code, intervals_array_ref) = generate_chord_data(&node.roman, variant, &node_name);
             
-            // Generate custom intervals array only if not using common patterns
-            if let Some(intervals_array) = &intervals_array_ref.custom_array {
-                generated.push_str(intervals_array);
+            // Generate custom IntervalSet constant only if not using common patterns
+            if let Some(intervals_const) = &intervals_array_ref.custom_array {
+                generated.push_str(intervals_const);
             }
             
             // Generate documentation for the node
@@ -300,14 +311,16 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
                 format_intervals_for_doc(&parse_chord_variant(variant, &quality_hint, ""))
             );
             
-            // Generate the node
+            // Generate the RomanChord - need to construct IntervalSet inline for const contexts
+            let intervals_set_construction = generate_interval_set_construction(&intervals_array_ref.reference);
             generated.push_str(&doc_comment);
             generated.push_str(&format!(
-                "pub static {}: ProgressionNode = ProgressionNode {{\n    id: \"{}\",\n    node_type: {},\n    roman_numeral: {},\n    intervals: {},\n}};\n\n",
-                node_name, display_name, node_type, roman_numeral_code, intervals_array_ref.reference
+                "pub static {}: RomanChord = RomanChord {{\n    root: {},\n    intervals: {},\n}};\n\n",
+                node_name, roman_numeral_code, intervals_set_construction
             ));
             
             node_map_entries.push((display_name.clone(), node_name.clone()));
+            node_type_entries.push((node_name.clone(), node_type.to_string()));
         }
     }
     
@@ -330,7 +343,7 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
                 
                 generated.push_str(&format!("/// Progression edge: {} → {}\n", edge.from, edge.to));
                 generated.push_str(&format!(
-                    "pub static {}: ProgressionEdge = ProgressionEdge {{\n    from: &{},\n    to: &{},\n}};\n\n",
+                    "pub static {}: ProgressionEdge = ProgressionEdge {{\n    from: {},\n    to: {},\n}};\n\n",
                     edge_name, from_node_name, to_node_name
                 ));
                 
@@ -339,11 +352,11 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
         }
     }
     
-    // Generate ALL_NODES array
-    generated.push_str(&format!("/// Complete registry of all progression nodes for {} keys\n", key_type));
+    // Generate ALL_NODES array (now using RomanChord)
+    generated.push_str(&format!("/// Complete registry of all progression chords for {} keys\n", key_type));
     generated.push_str(&format!("/// \n/// Contains {} chord variants across all harmonic functions.\n", all_node_names.len()));
     generated.push_str(&format!("/// Used internally for graph traversal and chord lookup operations.\n"));
-    generated.push_str("pub static ALL_NODES: &[&ProgressionNode] = &[\n");
+    generated.push_str("pub static ALL_NODES: &[&RomanChord] = &[\n");
     for node_name in &all_node_names {
         generated.push_str(&format!("    &{},\n", node_name));
     }
@@ -359,11 +372,22 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
     }
     generated.push_str("];\n\n");
     
-    // Generate simple lookup function instead of PHF map
-    generated.push_str(&format!("/// Look up a progression node by its display name for {} keys\n", key_type));
-    generated.push_str(&format!("/// \n/// Returns the corresponding `ProgressionNode` for chord symbols like \"I\", \"V7\", \"ii9\", etc.\n"));
+    // Generate NodeType mapping
+    generated.push_str(&format!("/// NodeType mapping for all progression chords in {} keys\n", key_type));
+    generated.push_str(&format!("/// \n/// Maps each chord to its harmonic role (Primary = stable, Secondary = transitional).\n"));
+    generated.push_str("pub fn get_node_types() -> HashMap<&'static RomanChord, NodeType> {\n");
+    generated.push_str("    let mut map = HashMap::new();\n");
+    for (node_name, node_type) in &node_type_entries {
+        generated.push_str(&format!("    map.insert(&{}, {});\n", node_name, node_type));
+    }
+    generated.push_str("    map\n");
+    generated.push_str("}\n\n");
+    
+    // Generate simple lookup function for RomanChord
+    generated.push_str(&format!("/// Look up a progression chord by its display name for {} keys\n", key_type));
+    generated.push_str(&format!("/// \n/// Returns the corresponding `RomanChord` for chord symbols like \"I\", \"V7\", \"ii9\", etc.\n"));
     generated.push_str(&format!("/// Supports {} different chord variants.\n", node_map_entries.len()));
-    generated.push_str("pub fn get_node(name: &str) -> Option<&'static ProgressionNode> {\n");
+    generated.push_str("pub fn get_node(name: &str) -> Option<&'static RomanChord> {\n");
     generated.push_str("    match name {\n");
     for (display_name, node_name) in &node_map_entries {
         generated.push_str(&format!("        \"{}\" => Some(&{}),\n", display_name, node_name));
@@ -450,16 +474,11 @@ fn generate_chord_data(roman: &str, variant: &str, node_name: &str) -> (String, 
             custom_array: None,
         }
     } else {
-        // Generate custom intervals array
-        let intervals_array = format!(
-            "static {}_INTERVALS: [Interval; {}] = [{}];\n\n",
-            node_name,
-            intervals.len(),
-            intervals.join(", ")
-        );
+        // Generate custom IntervalSet constant
+        let intervals_set_const = generate_custom_interval_set(&intervals, node_name);
         IntervalsArrayRef {
-            reference: format!("&{}_INTERVALS", node_name),
-            custom_array: Some(intervals_array),
+            reference: format!("{}_INTERVALS_SET", node_name),
+            custom_array: Some(intervals_set_const),
         }
     };
     
@@ -645,4 +664,37 @@ fn get_node_variants(nodes: &[ProgressionNode], id: &str) -> Vec<String> {
         }
     }
     vec!["".to_string()]
+}
+
+fn generate_custom_interval_set(intervals: &[String], node_name: &str) -> String {
+    // Pad intervals array to 10 elements with NONE for unused slots
+    let mut padded_intervals = intervals.to_vec();
+    while padded_intervals.len() < 10 {
+        padded_intervals.push("Interval::NONE".to_string());
+    }
+    
+    format!(
+        "const {}_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(\n    [{}], {});\n\n",
+        node_name,
+        padded_intervals.join(",\n     "),
+        intervals.len()
+    )
+}
+
+fn generate_interval_set_construction(array_ref: &str) -> String {
+    // Map array references to their IntervalSet equivalents
+    match array_ref {
+        "&MAJOR_TRIAD" => "MAJOR_TRIAD_SET".to_string(),
+        "&MINOR_TRIAD" => "MINOR_TRIAD_SET".to_string(),
+        _ => {
+            // For custom arrays, we need to generate a const-compatible IntervalSet
+            // Extract the array name and create a corresponding IntervalSet constant
+            let array_name = array_ref.trim_start_matches('&');
+            if array_name.ends_with("_INTERVALS_SET") {
+                array_name.to_string()
+            } else {
+                format!("{}_SET", array_name.trim_end_matches("_INTERVALS"))
+            }
+        }
+    }
 }

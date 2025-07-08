@@ -17,11 +17,6 @@ pub trait HasIntervals {
     /// Returns a slice of intervals contained in the structure
     fn intervals(&self) -> &[Interval];
 
-    /// Optional: Provides mutable access to intervals
-    fn intervals_mut(&mut self) -> &mut Vec<Interval> {
-        unimplemented!("Mutable interval access not implemented for this type")
-    }
-
     /// Checks if the structure contains a specific interval
     fn contains_interval(&self, interval: Interval) -> bool {
         self.intervals().contains(&interval)

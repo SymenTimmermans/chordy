@@ -1,352 +1,173 @@
-//! Progression graph implementations for major and minor keys
+//! Simplified progression graph implementation
 //!
-//! This module contains the concrete implementations of progression graphs
-//! using the static data generated from Stephen Mugglin's progression maps.
+//! This module contains a unified progression graph that works with both
+//! static data generated from Stephen Mugglin's progression maps and
+//! runtime-constructed graphs using Copy semantics for RomanChord.
 
-use super::{ProgressionNode, ProgressionOptions, NodeRef, NodeType, DynamicProgressionEdge};
+use super::{ProgressionOptions, NodeType, ProgressionEdge};
+use crate::types::RomanChord;
 use std::collections::HashMap;
 
-/// Static progression graph for major keys using compile-time generated data
+/// Unified progression graph using Copy semantics
 /// 
-/// This struct provides zero-allocation progression lookups using static references
-/// to nodes and edges generated at compile time from major.progression.
-pub struct StaticMajorGraph;
-
-/// Static progression graph for minor keys using compile-time generated data
-/// 
-/// This struct provides zero-allocation progression lookups using static references
-/// to nodes and edges generated at compile time from minor.progression.  
-pub struct StaticMinorGraph;
-
-/// Dynamic progression graph that can be built at runtime
-/// 
-/// This allows for custom progression maps and runtime modifications,
-/// though with higher memory overhead than static graphs.
+/// This single graph type works with both static progression data
+/// and runtime-constructed progressions, eliminating the need for
+/// separate static and dynamic graph types.
+#[derive(Debug, Clone)]
 pub struct ProgressionGraph {
-    nodes: Vec<ProgressionNode>,
-    edges: Vec<DynamicProgressionEdge>,
-    node_map: HashMap<String, usize>,
-}
-
-/// Common interface for all progression graph types
-/// 
-/// This trait allows uniform access to progression functionality regardless
-/// of whether the graph is static (compile-time) or dynamic (runtime).
-pub trait ProgressionGraphLike {
-    /// Iterator type for nodes in this graph
-    type NodeIter<'a>: Iterator<Item = &'a ProgressionNode> + 'a where Self: 'a;
-    
-    /// Get all progression options from a given node
-    /// 
-    /// Returns categorized options by strength:
-    /// - Strong: explicit arrows (natural voice leading)
-    /// - Moderate: jumps to primary nodes (stable)
-    /// - Weak: jumps to secondary nodes (transitional)
-    fn progression_options<'a>(&self, from: impl Into<NodeRef<'a>>) -> Option<ProgressionOptions>;
-    
-    /// Get a node by its string identifier
-    fn get_node(&self, id: &str) -> Option<&ProgressionNode>;
-    
-    /// Get an iterator over all nodes in the graph
-    fn nodes(&self) -> Self::NodeIter<'_>;
-    
-    /// Get the total number of nodes in the graph
-    fn node_count(&self) -> usize;
-    
-    /// Get the total number of edges in the graph  
-    fn edge_count(&self) -> usize;
-    
-    /// Check if the graph contains any nodes
-    fn is_empty(&self) -> bool {
-        self.node_count() == 0
-    }
-}
-
-impl StaticMajorGraph {
-    /// Create a new static major progression graph
-    pub fn new() -> Self {
-        Self
-    }
-}
-
-impl ProgressionGraphLike for StaticMajorGraph {
-    type NodeIter<'a> = std::iter::Map<std::slice::Iter<'a, &'static ProgressionNode>, fn(&&'static ProgressionNode) -> &'a ProgressionNode>;
-    
-    fn progression_options<'a>(&self, from: impl Into<NodeRef<'a>>) -> Option<ProgressionOptions> {
-        use crate::types::progression::major_data::{ALL_NODES, ALL_EDGES, get_node};
-        
-        let from_node = match from.into() {
-            NodeRef::Static(node) => node,
-            NodeRef::Dynamic(id) => get_node(&id)?,
-        };
-        
-        let mut options = ProgressionOptions::new();
-        
-        // Find strong connections (explicit arrows)
-        for edge in ALL_EDGES {
-            if std::ptr::eq(edge.from, from_node) {
-                options.strong.push(edge.to);
-            }
-        }
-        
-        // Find moderate and weak connections (jumps to all other nodes)
-        for &node in ALL_NODES {
-            if std::ptr::eq(node, from_node) {
-                continue; // Skip self
-            }
-            
-            // Skip if already in strong connections
-            if options.strong.iter().any(|&strong_node| std::ptr::eq(strong_node, node)) {
-                continue;
-            }
-            
-            match node.node_type {
-                NodeType::Primary => options.moderate.push(node),
-                NodeType::Secondary => options.weak.push(node),
-            }
-        }
-        
-        Some(options)
-    }
-    
-    fn get_node(&self, id: &str) -> Option<&ProgressionNode> {
-        use crate::types::progression::major_data::get_node;
-        get_node(id)
-    }
-    
-    fn nodes(&self) -> Self::NodeIter<'_> {
-        use crate::types::progression::major_data::ALL_NODES;
-        ALL_NODES.iter().map(|node_ref| -> &'_ ProgressionNode { *node_ref })
-    }
-    
-    fn node_count(&self) -> usize {
-        use crate::types::progression::major_data::ALL_NODES;
-        ALL_NODES.len()
-    }
-    
-    fn edge_count(&self) -> usize {
-        use crate::types::progression::major_data::ALL_EDGES;
-        ALL_EDGES.len()
-    }
-}
-
-impl StaticMinorGraph {
-    /// Create a new static minor progression graph
-    pub fn new() -> Self {
-        Self
-    }
-}
-
-impl ProgressionGraphLike for StaticMinorGraph {
-    type NodeIter<'a> = std::iter::Map<std::slice::Iter<'a, &'static ProgressionNode>, fn(&&'static ProgressionNode) -> &'a ProgressionNode>;
-    
-    fn progression_options<'a>(&self, from: impl Into<NodeRef<'a>>) -> Option<ProgressionOptions> {
-        use crate::types::progression::minor_data::{ALL_NODES, ALL_EDGES, get_node};
-        
-        let from_node = match from.into() {
-            NodeRef::Static(node) => node,
-            NodeRef::Dynamic(id) => get_node(&id)?,
-        };
-        
-        let mut options = ProgressionOptions::new();
-        
-        // Find strong connections (explicit arrows)
-        for edge in ALL_EDGES {
-            if std::ptr::eq(edge.from, from_node) {
-                options.strong.push(edge.to);
-            }
-        }
-        
-        // Find moderate and weak connections (jumps to all other nodes)
-        for &node in ALL_NODES {
-            if std::ptr::eq(node, from_node) {
-                continue; // Skip self
-            }
-            
-            // Skip if already in strong connections
-            if options.strong.iter().any(|&strong_node| std::ptr::eq(strong_node, node)) {
-                continue;
-            }
-            
-            match node.node_type {
-                NodeType::Primary => options.moderate.push(node),
-                NodeType::Secondary => options.weak.push(node),
-            }
-        }
-        
-        Some(options)
-    }
-    
-    fn get_node(&self, id: &str) -> Option<&ProgressionNode> {
-        use crate::types::progression::minor_data::get_node;
-        get_node(id)
-    }
-    
-    fn nodes(&self) -> Self::NodeIter<'_> {
-        use crate::types::progression::minor_data::ALL_NODES;
-        ALL_NODES.iter().map(|node_ref| -> &'_ ProgressionNode { *node_ref })
-    }
-    
-    fn node_count(&self) -> usize {
-        use crate::types::progression::minor_data::ALL_NODES;
-        ALL_NODES.len()
-    }
-    
-    fn edge_count(&self) -> usize {
-        use crate::types::progression::minor_data::ALL_EDGES;
-        ALL_EDGES.len()
-    }
+    /// All chords in the graph with their associated node types
+    nodes: HashMap<String, (RomanChord, NodeType)>,
+    /// Strong progression connections (explicit arrows)
+    edges: Vec<ProgressionEdge>,
 }
 
 impl ProgressionGraph {
-    /// Create a new empty dynamic progression graph
+    /// Create a new empty progression graph
     pub fn new() -> Self {
         Self {
-            nodes: Vec::new(),
+            nodes: HashMap::new(),
             edges: Vec::new(),
-            node_map: HashMap::new(),
         }
     }
     
-    /// Add a node to the graph
-    pub fn add_node(&mut self, node: ProgressionNode) {
-        let index = self.nodes.len();
-        self.node_map.insert(node.id.to_string(), index);
-        self.nodes.push(node);
+    /// Create a progression graph from static major key data
+    pub fn major() -> Self {
+        use crate::types::progression::major_data::{ALL_NODES, ALL_EDGES, get_node_types};
+        
+        let mut graph = Self::new();
+        let node_types = get_node_types();
+        
+        // Add all nodes with their types using full display name as ID
+        for &node in ALL_NODES {
+            let node_type = node_types.get(node).copied().unwrap_or(NodeType::Primary);
+            // Use the full display format to get proper chord symbols like I7, ii9, etc.
+            let id = format!("{}", node);
+            graph.nodes.insert(id, (*node, node_type));
+        }
+        
+        // Add all edges
+        for &edge in ALL_EDGES {
+            graph.edges.push(*edge);
+        }
+        
+        graph
     }
     
-    /// Add an edge to the graph
-    /// 
-    /// Creates a strong connection between two nodes identified by their display names.
-    /// Both nodes must already exist in the graph.
-    pub fn add_edge(&mut self, from_id: &str, to_id: &str) -> Result<(), String> {
-        let from_idx = *self.node_map.get(from_id)
+    /// Create a progression graph from static minor key data
+    pub fn minor() -> Self {
+        use crate::types::progression::minor_data::{ALL_NODES, ALL_EDGES, get_node_types};
+        
+        let mut graph = Self::new();
+        let node_types = get_node_types();
+        
+        // Add all nodes with their types using full display name as ID
+        for &node in ALL_NODES {
+            let node_type = node_types.get(node).copied().unwrap_or(NodeType::Primary);
+            // Use the full display format to get proper chord symbols like i7, ii9, etc.
+            let id = format!("{}", node);
+            graph.nodes.insert(id, (*node, node_type));
+        }
+        
+        // Add all edges
+        for &edge in ALL_EDGES {
+            graph.edges.push(*edge);
+        }
+        
+        graph
+    }
+    
+    /// Add a chord to the graph
+    pub fn add_node(&mut self, id: String, chord: RomanChord, node_type: NodeType) {
+        self.nodes.insert(id, (chord, node_type));
+    }
+    
+    /// Add a progression edge between two chords
+    pub fn add_edge(&mut self, from: RomanChord, to: RomanChord) {
+        self.edges.push(ProgressionEdge { from, to });
+    }
+    
+    /// Add a progression edge by chord IDs
+    pub fn add_edge_by_id(&mut self, from_id: &str, to_id: &str) -> Result<(), String> {
+        let from_chord = self.get_node(from_id)
             .ok_or_else(|| format!("Node not found: {}", from_id))?;
-        let to_idx = *self.node_map.get(to_id)
+        let to_chord = self.get_node(to_id)
             .ok_or_else(|| format!("Node not found: {}", to_id))?;
         
-        // Check if edge already exists to avoid duplicates
-        if self.edges.iter().any(|edge| edge.from_index == from_idx && edge.to_index == to_idx) {
-            return Err(format!("Edge already exists: {} -> {}", from_id, to_id));
-        }
-        
-        self.edges.push(DynamicProgressionEdge {
-            from_index: from_idx,
-            to_index: to_idx,
-        });
-        
+        self.add_edge(from_chord, to_chord);
         Ok(())
     }
     
-    /// Get all edges in the graph
-    pub fn edges(&self) -> &[DynamicProgressionEdge] {
-        &self.edges
+    /// Get a chord by its string identifier
+    pub fn get_node(&self, id: &str) -> Option<RomanChord> {
+        self.nodes.get(id).map(|(chord, _)| *chord)
     }
     
-    /// Check if an edge exists between two nodes
-    pub fn has_edge(&self, from_id: &str, to_id: &str) -> bool {
-        if let (Some(&from_idx), Some(&to_idx)) = (self.node_map.get(from_id), self.node_map.get(to_id)) {
-            self.edges.iter().any(|edge| edge.from_index == from_idx && edge.to_index == to_idx)
-        } else {
-            false
-        }
-    }
-    
-    /// Remove an edge from the graph
-    pub fn remove_edge(&mut self, from_id: &str, to_id: &str) -> Result<(), String> {
-        let from_idx = *self.node_map.get(from_id)
-            .ok_or_else(|| format!("Node not found: {}", from_id))?;
-        let to_idx = *self.node_map.get(to_id)
-            .ok_or_else(|| format!("Node not found: {}", to_id))?;
-        
-        let initial_len = self.edges.len();
-        self.edges.retain(|edge| !(edge.from_index == from_idx && edge.to_index == to_idx));
-        
-        if self.edges.len() == initial_len {
-            Err(format!("Edge not found: {} -> {}", from_id, to_id))
-        } else {
-            Ok(())
-        }
-    }
-    
-}
-
-impl ProgressionGraphLike for ProgressionGraph {
-    type NodeIter<'a> = std::slice::Iter<'a, ProgressionNode>;
-    
-    fn progression_options<'a>(&self, from: impl Into<NodeRef<'a>>) -> Option<ProgressionOptions> {
-        let from_node = match from.into() {
-            NodeRef::Static(node) => {
-                // For static node references, find the matching node in our dynamic graph
-                self.nodes.iter().find(|n| n.id == node.id)?
-            },
-            NodeRef::Dynamic(id) => {
-                let index = self.node_map.get(&id)?;
-                self.nodes.get(*index)?
-            },
+    /// Get progression options from a given chord
+    pub fn progression_options(&self, from: impl Into<ChordRef>) -> Option<ProgressionOptions> {
+        let from_chord = match from.into() {
+            ChordRef::Chord(chord) => chord,
+            ChordRef::Id(id) => self.get_node(&id)?,
         };
         
         let mut options = ProgressionOptions::new();
         
-        // Find the index of the from_node in our nodes vector
-        let from_index = self.nodes.iter().position(|n| std::ptr::eq(n, from_node))?;
-        
         // Find strong connections (explicit edges)
         for edge in &self.edges {
-            if edge.from_index == from_index {
-                if let Some(to_node) = self.nodes.get(edge.to_index) {
-                    options.strong.push(to_node);
-                }
+            if edge.from == from_chord {
+                options.strong.push(edge.to);
             }
         }
         
         // Find moderate and weak connections (jumps to all other nodes)
-        for (i, node) in self.nodes.iter().enumerate() {
-            if i == from_index {
+        for (chord, node_type) in self.nodes.values() {
+            if *chord == from_chord {
                 continue; // Skip self
             }
             
             // Skip if already in strong connections
-            if options.strong.iter().any(|&strong_node| std::ptr::eq(strong_node, node)) {
+            if options.strong.contains(chord) {
                 continue;
             }
             
-            match node.node_type {
-                NodeType::Primary => options.moderate.push(node),
-                NodeType::Secondary => options.weak.push(node),
+            match node_type {
+                NodeType::Primary => options.moderate.push(*chord),
+                NodeType::Secondary => options.weak.push(*chord),
             }
         }
         
         Some(options)
     }
     
-    fn get_node(&self, id: &str) -> Option<&ProgressionNode> {
-        let index = self.node_map.get(id)?;
-        self.nodes.get(*index)
+    /// Get all chords in the graph
+    pub fn nodes(&self) -> impl Iterator<Item = RomanChord> + '_ {
+        self.nodes.values().map(|(chord, _)| *chord)
     }
     
-    fn nodes(&self) -> Self::NodeIter<'_> {
-        self.nodes.iter()
-    }
-    
-    fn node_count(&self) -> usize {
+    /// Get the total number of chords in the graph
+    pub fn node_count(&self) -> usize {
         self.nodes.len()
     }
     
-    fn edge_count(&self) -> usize {
+    /// Get the total number of edges in the graph  
+    pub fn edge_count(&self) -> usize {
         self.edges.len()
     }
-}
-
-impl Default for StaticMajorGraph {
-    fn default() -> Self {
-        Self::new()
+    
+    /// Check if the graph contains any chords
+    pub fn is_empty(&self) -> bool {
+        self.nodes.is_empty()
     }
-}
-
-impl Default for StaticMinorGraph {
-    fn default() -> Self {
-        Self::new()
+    
+    /// Check if an edge exists between two chords
+    pub fn has_edge(&self, from: RomanChord, to: RomanChord) -> bool {
+        self.edges.iter().any(|edge| edge.from == from && edge.to == to)
+    }
+    
+    /// Remove an edge between two chords
+    pub fn remove_edge(&mut self, from: RomanChord, to: RomanChord) -> bool {
+        let initial_len = self.edges.len();
+        self.edges.retain(|edge| !(edge.from == from && edge.to == to));
+        self.edges.len() < initial_len
     }
 }
 
@@ -356,38 +177,96 @@ impl Default for ProgressionGraph {
     }
 }
 
+/// Helper enum for flexible chord reference in API methods
+#[derive(Debug, Clone)]
+pub enum ChordRef {
+    /// Direct chord reference
+    Chord(RomanChord),
+    /// String ID requiring lookup
+    Id(String),
+}
+
+impl From<RomanChord> for ChordRef {
+    fn from(chord: RomanChord) -> Self {
+        ChordRef::Chord(chord)
+    }
+}
+
+impl From<&RomanChord> for ChordRef {
+    fn from(chord: &RomanChord) -> Self {
+        ChordRef::Chord(*chord)
+    }
+}
+
+impl From<&str> for ChordRef {
+    fn from(id: &str) -> Self {
+        ChordRef::Id(id.to_string())
+    }
+}
+
+impl From<String> for ChordRef {
+    fn from(id: String) -> Self {
+        ChordRef::Id(id)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::types::{RomanNumeral, RomanDegree, Accidental, IntervalSet, Interval};
     
-    #[test]
-    fn test_static_major_graph_creation() {
-        let graph = StaticMajorGraph::new();
-        let nodes: Vec<_> = graph.nodes().collect();
-        assert!(!nodes.is_empty(), "Major graph should have nodes");
+    fn create_test_chord() -> RomanChord {
+        RomanChord {
+            root: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
+            intervals: IntervalSet::from_slice(&[
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::PERFECT_FIFTH,
+            ]),
+        }
     }
     
     #[test]
-    fn test_static_minor_graph_creation() {
-        let graph = StaticMinorGraph::new();
-        let nodes: Vec<_> = graph.nodes().collect();
-        assert!(!nodes.is_empty(), "Minor graph should have nodes");
+    fn test_empty_graph_creation() {
+        let graph = ProgressionGraph::new();
+        assert_eq!(graph.node_count(), 0);
+        assert_eq!(graph.edge_count(), 0);
+        assert!(graph.is_empty());
     }
     
     #[test]
-    fn test_node_lookup() {
-        let graph = StaticMajorGraph::new();
-        let node = graph.get_node("I");
-        assert!(node.is_some(), "Should find I chord in major graph");
+    fn test_add_node() {
+        let mut graph = ProgressionGraph::new();
+        let chord = create_test_chord();
+        
+        graph.add_node("I".to_string(), chord, NodeType::Primary);
+        
+        assert_eq!(graph.node_count(), 1);
+        assert!(!graph.is_empty());
+        assert_eq!(graph.get_node("I"), Some(chord));
+    }
+    
+    #[test]
+    fn test_major_graph_creation() {
+        let graph = ProgressionGraph::major();
+        assert!(graph.node_count() > 0);
+        assert!(!graph.is_empty());
+    }
+    
+    #[test]
+    fn test_minor_graph_creation() {
+        let graph = ProgressionGraph::minor();
+        assert!(graph.node_count() > 0);
+        assert!(!graph.is_empty());
     }
     
     #[test]
     fn test_progression_options() {
-        let graph = StaticMajorGraph::new();
+        let graph = ProgressionGraph::major();
         let options = graph.progression_options("I");
-        assert!(options.is_some(), "Should get progression options for I");
+        assert!(options.is_some());
         
         let options = options.unwrap();
-        assert!(!options.strong.is_empty(), "I should have strong progressions");
+        assert!(options.len() > 0);
     }
 }

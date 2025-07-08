@@ -28,8 +28,8 @@ fn test_progression_options_include_variants() {
     
     // Check that we get chords with various intervals (extensions)
     let has_seventh_chords = options.strong.iter()
-        .any(|chord| chord.intervals.contains(&Interval::MINOR_SEVENTH) || 
-                     chord.intervals.contains(&Interval::MAJOR_SEVENTH));
+        .any(|chord| chord.intervals.contains(Interval::MINOR_SEVENTH) || 
+                     chord.intervals.contains(Interval::MAJOR_SEVENTH));
     assert!(has_seventh_chords, "Should include seventh chords in progressions");
 }
 
@@ -63,7 +63,7 @@ fn test_progression_options_from_chord() {
     
     // Look for C major chord in the strong options
     let has_c_major = v7_options.strong.iter().any(|chord| {
-        chord.root == note!("C") && chord.intervals.contains(&Interval::MAJOR_THIRD)
+        chord.root == note!("C") && chord.intervals.contains(Interval::MAJOR_THIRD)
     });
     assert!(has_c_major, "V7 should have strong progression to I (C major)");
 }

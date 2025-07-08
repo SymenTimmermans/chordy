@@ -1,7 +1,7 @@
 use crate::traits::HasRoot;
 
 use super::{NoteName, scale::ScaleDegree, Chord, RomanNumeral, HarmonicFunction, Scale, Accidental, Letter};
-use super::progression::{ChordProgressionOptions, StaticMajorGraph, StaticMinorGraph, ProgressionGraphLike};
+use super::progression::{ChordProgressionOptions, ProgressionGraph};
 
 /// The mode of a key (Major, Minor, etc.)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -247,32 +247,32 @@ impl Key {
         // Find the progression node for this chord
         let node = self.find_node_for_chord(chord)?;
         
-        // Get progression options using the node
-        let node_options = match self {
-            Key::Major(_) => StaticMajorGraph.progression_options(node.id),
-            Key::Minor(_) => StaticMinorGraph.progression_options(node.id),
-        }?;
+        // Get the appropriate progression graph
+        let graph = match self {
+            Key::Major(_) => ProgressionGraph::major(),
+            Key::Minor(_) => ProgressionGraph::minor(),
+        };
         
-        // Convert ProgressionNodes to Chords in this key context
+        // Get progression options using the node directly
+        let node_options = graph.progression_options(node)?;
+        
+        // Convert RomanChords to Chords in this key context
         let mut chord_options = ChordProgressionOptions::new();
         
         // Convert strong options
-        for &node in &node_options.strong {
-            let roman_chord = node.to_roman_chord();
+        for roman_chord in &node_options.strong {
             let chord = roman_chord.in_key(self);
             chord_options.strong.push(chord);
         }
         
         // Convert moderate options
-        for &node in &node_options.moderate {
-            let roman_chord = node.to_roman_chord();
+        for roman_chord in &node_options.moderate {
             let chord = roman_chord.in_key(self);
             chord_options.moderate.push(chord);
         }
         
         // Convert weak options
-        for &node in &node_options.weak {
-            let roman_chord = node.to_roman_chord();
+        for roman_chord in &node_options.weak {
             let chord = roman_chord.in_key(self);
             chord_options.weak.push(chord);
         }
@@ -280,61 +280,44 @@ impl Key {
         Some(chord_options)
     }
 
-    /// Internal helper to find a node by ID
-    fn find_node_by_id(&self, id: &str) -> Option<&'static crate::types::progression::ProgressionNode> {
+    /// Internal helper to get the progression graph for this key
+    fn get_progression_graph(&self) -> ProgressionGraph {
         match self {
-            Key::Major(_) => {
-                use crate::types::progression::major_data::get_node;
-                get_node(id)
-            }
-            Key::Minor(_) => {
-                use crate::types::progression::minor_data::get_node;
-                get_node(id)
-            }
-        }
-    }
-
-    /// Internal helper to get all nodes
-    fn all_nodes(&self) -> &'static [&'static crate::types::progression::ProgressionNode] {
-        match self {
-            Key::Major(_) => {
-                use crate::types::progression::major_data::ALL_NODES;
-                ALL_NODES
-            }
-            Key::Minor(_) => {
-                use crate::types::progression::minor_data::ALL_NODES;
-                ALL_NODES
-            }
+            Key::Major(_) => ProgressionGraph::major(),
+            Key::Minor(_) => ProgressionGraph::minor(),
         }
     }
 
     /// Internal helper to find the progression node that best matches a given chord
-    fn find_node_for_chord(&self, chord: &Chord) -> Option<&'static crate::types::progression::ProgressionNode> {
+    fn find_node_for_chord(&self, chord: &Chord) -> Option<crate::types::RomanChord> {
         // Convert chord to roman chord in this key context
         let roman_chord = chord.to_roman(self)?;
         
+        // Get the progression graph for this key
+        let graph = self.get_progression_graph();
+        
         // Search for matching progression node
-        let nodes = self.all_nodes();
+        let nodes: Vec<_> = graph.nodes().collect();
         
         // First try to find exact match with intervals
-        for &node in nodes {
-            if node.roman_numeral == roman_chord.root() {
+        for node in &nodes {
+            if node.root == roman_chord.root() {
                 // Check if intervals match closely
                 let node_intervals: std::collections::HashSet<_> = node.intervals.iter().collect();
-                let chord_intervals: std::collections::HashSet<_> = roman_chord.intervals().iter().collect();
+                let chord_intervals: std::collections::HashSet<_> = roman_chord.intervals().iter().copied().collect();
                 
                 // Exact match
                 if node_intervals == chord_intervals {
-                    return Some(node);
+                    return Some(*node);
                 }
             }
         }
         
         // Fallback to roman numeral match only (base triad)
-        for &node in nodes {
-            if node.roman_numeral == roman_chord.root() && node.intervals.len() == 3 {
+        for node in &nodes {
+            if node.root == roman_chord.root() && node.intervals.len() == 3 {
                 // Found base triad match
-                return Some(node);
+                return Some(*node);
             }
         }
         

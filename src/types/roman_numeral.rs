@@ -1,5 +1,5 @@
 use std::{fmt::Display, str::FromStr};
-use super::{Interval, Key, Chord, Accidental, ChordQuality};
+use super::{Interval, IntervalSet, Key, Chord, Accidental, ChordQuality};
 use crate::{error::ParseError, traits::{HasIntervals, HasRoot}};
 
 /// Roman degree representation (I-VII), analogous to Letter enum
@@ -239,17 +239,25 @@ impl FromStr for RomanNumeral {
 ///
 /// This struct represents a chord in the context of a key, defined by its roman numeral root and
 /// the intervals that make up the chord.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct RomanChord {
     /// The roman numeral root of the chord
     pub root: RomanNumeral,
     /// The intervals from the root that define the chord
-    pub intervals: Vec<Interval>,
+    pub intervals: IntervalSet,
 }
 
 impl RomanChord {
     /// Create a new roman chord from root and intervals
     pub fn new(root: RomanNumeral, intervals: Vec<Interval>) -> Self {
+        RomanChord { 
+            root, 
+            intervals: IntervalSet::from_slice(&intervals)
+        }
+    }
+    
+    /// Create a new roman chord from root and interval set
+    pub fn from_interval_set(root: RomanNumeral, intervals: IntervalSet) -> Self {
         RomanChord { root, intervals }
     }
     
@@ -287,7 +295,7 @@ impl RomanChord {
 
     /// Get the intervals
     pub fn intervals(&self) -> &[Interval] {
-        &self.intervals
+        self.intervals.as_slice()
     }
 
     /// Create a major roman chord
@@ -370,14 +378,14 @@ impl RomanChord {
         let base_root = c.root();
         let interval_from_base = self.root.to_interval();
         let actual_root = base_root + interval_from_base;
-        Chord::new(actual_root, self.intervals.clone())
+        Chord::new(actual_root, self.intervals.iter().collect())
     }
     
     /// Convert this roman chord to a ChordName using the new naming system
     pub fn to_chord_name(&self) -> super::chord::ChordName {
         use super::chord::{ChordRoot, ChordAnalyzer};
         let chord_root = ChordRoot::Roman(self.root);
-        ChordAnalyzer::analyze_with_root(chord_root, &self.intervals)
+        ChordAnalyzer::analyze_with_root(chord_root, self.intervals.as_slice())
     }
 }
 
@@ -430,10 +438,6 @@ impl From<u8> for RomanNumeral {
 
 impl HasIntervals for RomanChord {
     fn intervals(&self) -> &[Interval] {
-        &self.intervals
-    }
-
-    fn intervals_mut(&mut self) -> &mut Vec<Interval> {
-        &mut self.intervals
+        self.intervals.as_slice()
     }
 }

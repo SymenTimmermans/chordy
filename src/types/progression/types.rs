@@ -3,43 +3,7 @@
 //! This module contains the fundamental types used to represent Stephen Mugglin's
 //! chord progression graph, including nodes, edges, and connection strength.
 
-use crate::types::{RomanChord, RomanNumeral, Interval, Chord};
-
-/// A node in the progression graph representing a chord or chord family
-/// 
-/// Each node represents a specific chord variant (e.g., "ii7", "V9") with
-/// a fixed roman numeral representation and harmonic function.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ProgressionNode {
-    /// Unique identifier and display name for this node (e.g., "ii7", "V9") 
-    pub id: &'static str,
-    /// Whether this is a primary (stable) or secondary (transitional) node
-    pub node_type: NodeType,
-    /// The roman numeral root of this chord
-    pub roman_numeral: RomanNumeral,
-    /// The intervals that define this chord variant
-    pub intervals: &'static [Interval],
-}
-
-impl ProgressionNode {
-    /// Convert this progression node to a RomanChord
-    pub fn to_roman_chord(&self) -> RomanChord {
-        RomanChord::new(self.roman_numeral, self.intervals.to_vec())
-    }
-    
-    /// Get the display name for this node (same as id)
-    pub fn display_name(&self) -> &'static str {
-        self.id
-    }
-    
-    /// Get the base harmonic function without extensions (derived from roman numeral)
-    /// For example: "ii7" -> "ii", "V9" -> "V", "bVII" -> "bVII"
-    pub fn base_function(&self) -> String {
-        // For now, just return the id since it matches the roman numeral format
-        // This could be enhanced to parse extensions if needed
-        self.id.to_string()
-    }
-}
+use crate::types::{RomanChord, Chord};
 
 /// Classification of chord nodes in the progression graph
 /// 
@@ -79,74 +43,37 @@ pub enum ProgressionStrength {
 /// 
 /// Only explicit arrows (strong connections) are stored as edges.
 /// Moderate and weak connections are computed dynamically based on node types.
-#[derive(Debug)]
+/// 
+/// Uses Copy semantics for efficient storage and manipulation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ProgressionEdge {
-    /// Source node of the progression
-    pub from: &'static ProgressionNode,
-    /// Destination node of the progression  
-    pub to: &'static ProgressionNode,
+    /// Source chord of the progression
+    pub from: RomanChord,
+    /// Destination chord of the progression  
+    pub to: RomanChord,
 }
 
-/// A dynamic edge for runtime-constructed progression graphs
-/// 
-/// Uses indices to reference nodes within a dynamic graph, allowing
-/// for owned data structures while maintaining the same logical relationships.
-#[derive(Debug, Clone)]
-pub struct DynamicProgressionEdge {
-    /// Index of the source node in the dynamic graph's node vector
-    pub from_index: usize,
-    /// Index of the destination node in the dynamic graph's node vector  
-    pub to_index: usize,
-}
-
-/// Reference to a progression node that can be either static or dynamic
-/// 
-/// This allows the API to accept both compile-time static references (for performance)
-/// and runtime string lookups (for convenience), with automatic conversion.
-#[derive(Debug, Clone)]
-pub enum NodeRef<'a> {
-    /// Direct reference to a static node - zero-cost lookup
-    Static(&'a ProgressionNode),
-    /// String identifier requiring runtime lookup
-    Dynamic(String),
-}
-
-impl<'a> From<&'a ProgressionNode> for NodeRef<'a> {
-    fn from(node: &'a ProgressionNode) -> Self {
-        NodeRef::Static(node)
-    }
-}
-
-impl<'a> From<&str> for NodeRef<'a> {
-    fn from(id: &str) -> Self {
-        NodeRef::Dynamic(id.to_string())
-    }
-}
-
-impl<'a> From<String> for NodeRef<'a> {
-    fn from(id: String) -> Self {
-        NodeRef::Dynamic(id)
-    }
-}
 
 /// Available progression options from a given chord
 /// 
 /// Categorizes all possible next chords by their harmonic relationship strength,
 /// allowing users to make informed choices about progression direction.
+/// 
+/// Uses owned RomanChords for simplicity since they implement Copy.
 #[derive(Debug, Clone)]
-pub struct ProgressionOptions<'a> {
+pub struct ProgressionOptions {
     /// Strong progressions: follow explicit arrows (natural voice leading)
     /// These represent the most conventional and smooth harmonic motion
-    pub strong: Vec<&'a ProgressionNode>,
+    pub strong: Vec<RomanChord>,
     /// Moderate progressions: jump to primary nodes (stable but less directed)
     /// These provide harmonic stability without specific voice leading constraints  
-    pub moderate: Vec<&'a ProgressionNode>,
+    pub moderate: Vec<RomanChord>,
     /// Weak progressions: jump to secondary nodes (creates tension)
     /// These introduce chromaticism and require eventual resolution to primary areas
-    pub weak: Vec<&'a ProgressionNode>,
+    pub weak: Vec<RomanChord>,
 }
 
-impl<'a> ProgressionOptions<'a> {
+impl ProgressionOptions {
     /// Create new empty progression options
     pub fn new() -> Self {
         Self {
@@ -157,7 +84,7 @@ impl<'a> ProgressionOptions<'a> {
     }
     
     /// Get all progression options regardless of strength
-    pub fn all(&'a self) -> impl Iterator<Item = (&'a ProgressionNode, ProgressionStrength)> + 'a {
+    pub fn all(&self) -> impl Iterator<Item = (RomanChord, ProgressionStrength)> + '_ {
         self.strong.iter().map(|&n| (n, ProgressionStrength::Strong))
             .chain(self.moderate.iter().map(|&n| (n, ProgressionStrength::Moderate)))
             .chain(self.weak.iter().map(|&n| (n, ProgressionStrength::Weak)))
@@ -174,7 +101,7 @@ impl<'a> ProgressionOptions<'a> {
     }
 }
 
-impl<'a> Default for ProgressionOptions<'a> {
+impl Default for ProgressionOptions {
     fn default() -> Self {
         Self::new()
     }
