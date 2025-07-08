@@ -267,6 +267,6 @@ mod tests {
         assert!(options.is_some());
         
         let options = options.unwrap();
-        assert!(options.len() > 0);
+        assert!(!options.is_empty());
     }
 }

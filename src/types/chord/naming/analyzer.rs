@@ -2,6 +2,7 @@
 //!
 //! This module contains the core analysis engine that examines a set of intervals
 //! and determines the appropriate chord name components (quality, extensions, alterations, etc.).
+#![allow(dead_code)]
 
 use crate::types::{ChordQuality, Interval, NoteName};
 use super::types::*;

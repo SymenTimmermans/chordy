@@ -32,8 +32,6 @@ fn test_minor_graph_basic_functionality() {
 
 #[test]
 fn test_progression_options_basic() {
-    let graph = ProgressionGraph::major();
-    
     // Get progression options using the simplified API
     // We can't easily use string IDs due to the debug format, so let's test via Key integration
     let c_major = Key::Major(NoteName::new(Letter::C, Accidental::Natural));
@@ -44,7 +42,7 @@ fn test_progression_options_basic() {
     
     let options = options.unwrap();
     // I chord should have some progression options
-    assert!(options.len() > 0);
+    assert!(!options.is_empty());
 }
 
 #[test]
@@ -58,7 +56,7 @@ fn test_key_integration_with_new_architecture() {
     
     let options = progression_options.unwrap();
     // Should have some progression options
-    assert!(options.len() > 0);
+    assert!(!options.is_empty());
 }
 
 #[test]
@@ -71,7 +69,7 @@ fn test_roman_chord_based_node_iteration() {
     
     // Each node should be a RomanChord with a root and intervals
     for node in nodes {
-        assert!(node.intervals.len() > 0);
+        assert!(!node.intervals.is_empty());
         // Root should be a valid RomanNumeral (this tests the new structure)
     }
 }

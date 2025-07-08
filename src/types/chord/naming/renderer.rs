@@ -24,6 +24,7 @@ pub enum NamingConvention {
     /// Jazz/pop convention (7, maj7, 13, etc.)
     Jazz,
     /// Classical convention (more explicit notation)
+    #[allow(dead_code)]
     Classical,
     /// Lead sheet style (simplified for readability)
     LeadSheet,
@@ -47,6 +48,7 @@ impl ChordRenderer {
     }
     
     /// Create an ASCII renderer for plain text
+    #[allow(dead_code)]
     pub fn ascii() -> Self {
         Self::new(ChordFormat::Ascii, NamingConvention::Jazz)
     }

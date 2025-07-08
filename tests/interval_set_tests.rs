@@ -7,7 +7,7 @@ use chordy::types::{IntervalSet, Interval, Chord, RomanChord, RomanNumeral, Roma
 
 #[test]
 fn test_interval_set_creation() {
-    let mut intervals: IntervalSet = IntervalSet::new();
+    let intervals: IntervalSet = IntervalSet::new();
     assert_eq!(intervals.len(), 0);
     assert!(intervals.is_empty());
 }
