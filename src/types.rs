@@ -23,5 +23,14 @@ pub use key::Key;
 mod interval;
 pub use interval::*;
 
+mod interval_set;
+pub use interval_set::IntervalSet;
+
 mod roman_numeral;
 pub use roman_numeral::{RomanDegree, RomanNumeral, RomanChord};
+
+pub mod progression;
+pub use progression::{
+    NodeType, ProgressionStrength, ProgressionEdge,
+    ProgressionOptions, ProgressionGraph, ChordRef
+};

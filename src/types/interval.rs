@@ -36,6 +36,10 @@ impl Interval {
     pub const DIMINISHED_UNISON: Self = Self { fifths: -7, octaves: 0};
     pub const PERFECT_UNISON: Self = Self { fifths: 0, octaves: 0};
     pub const AUGMENTED_UNISON: Self = Self { fifths: 7, octaves: 0};
+    
+    /// Represents an unused interval slot in fixed-size arrays.
+    /// Has the same value as PERFECT_UNISON but clearer semantic intent.
+    pub const NONE: Self = Self { fifths: 0, octaves: 0};
 
     pub const DIMINISHED_SECOND: Self = Self { fifths: -12, octaves: 0};
     pub const MINOR_SECOND: Self = Self { fifths: -5, octaves: 0};

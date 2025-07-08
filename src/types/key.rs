@@ -1,6 +1,7 @@
 use crate::traits::HasRoot;
 
 use super::{NoteName, scale::ScaleDegree, Chord, RomanNumeral, HarmonicFunction, Scale, Accidental, Letter};
+use super::progression::{ChordProgressionOptions, ProgressionGraph};
 
 /// The mode of a key (Major, Minor, etc.)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -128,25 +129,29 @@ impl Key {
     pub fn expected_accidental(&self, letter: Letter) -> Option<Accidental> {
         let num_accidentals = self.accidentals();
         
-        if num_accidentals > 0 {
-            // Sharp keys: F#, C#, G#, D#, A#, E#, B#
-            let sharp_order = [Letter::F, Letter::C, Letter::G, Letter::D, Letter::A, Letter::E, Letter::B];
-            if (0..num_accidentals as usize).any(|i| sharp_order.get(i) == Some(&letter)) {
-                Some(Accidental::Sharp)
-            } else {
+        match num_accidentals.cmp(&0) {
+            std::cmp::Ordering::Greater => {
+                // Sharp keys: F#, C#, G#, D#, A#, E#, B#
+                let sharp_order = [Letter::F, Letter::C, Letter::G, Letter::D, Letter::A, Letter::E, Letter::B];
+                if (0..num_accidentals as usize).any(|i| sharp_order.get(i) == Some(&letter)) {
+                    Some(Accidental::Sharp)
+                } else {
+                    None
+                }
+            }
+            std::cmp::Ordering::Less => {
+                // Flat keys: Bb, Eb, Ab, Db, Gb, Cb, Fb
+                let flat_order = [Letter::B, Letter::E, Letter::A, Letter::D, Letter::G, Letter::C, Letter::F];
+                if (0..(-num_accidentals) as usize).any(|i| flat_order.get(i) == Some(&letter)) {
+                    Some(Accidental::Flat)
+                } else {
+                    None
+                }
+            }
+            std::cmp::Ordering::Equal => {
+                // C major/A minor - no accidentals
                 None
             }
-        } else if num_accidentals < 0 {
-            // Flat keys: Bb, Eb, Ab, Db, Gb, Cb, Fb
-            let flat_order = [Letter::B, Letter::E, Letter::A, Letter::D, Letter::G, Letter::C, Letter::F];
-            if (0..(-num_accidentals) as usize).any(|i| flat_order.get(i) == Some(&letter)) {
-                Some(Accidental::Flat)
-            } else {
-                None
-            }
-        } else {
-            // C major/A minor - no accidentals
-            None
         }
     }
 
@@ -202,26 +207,133 @@ impl Key {
         let num_accidentals = self.accidentals();
         let mut result = Vec::new();
         
-        if num_accidentals > 0 {
-            // Sharp keys
-            let sharp_order = [Letter::F, Letter::C, Letter::G, Letter::D, Letter::A, Letter::E, Letter::B];
-            for i in 0..(num_accidentals as usize) {
-                if let Some(&letter) = sharp_order.get(i) {
-                    result.push((letter, Accidental::Sharp));
+        match num_accidentals.cmp(&0) {
+            std::cmp::Ordering::Greater => {
+                // Sharp keys
+                let sharp_order = [Letter::F, Letter::C, Letter::G, Letter::D, Letter::A, Letter::E, Letter::B];
+                for i in 0..(num_accidentals as usize) {
+                    if let Some(&letter) = sharp_order.get(i) {
+                        result.push((letter, Accidental::Sharp));
+                    }
                 }
             }
-        } else if num_accidentals < 0 {
-            // Flat keys
-            let flat_order = [Letter::B, Letter::E, Letter::A, Letter::D, Letter::G, Letter::C, Letter::F];
-            for i in 0..((-num_accidentals) as usize) {
-                if let Some(&letter) = flat_order.get(i) {
-                    result.push((letter, Accidental::Flat));
+            std::cmp::Ordering::Less => {
+                // Flat keys
+                let flat_order = [Letter::B, Letter::E, Letter::A, Letter::D, Letter::G, Letter::C, Letter::F];
+                for i in 0..((-num_accidentals) as usize) {
+                    if let Some(&letter) = flat_order.get(i) {
+                        result.push((letter, Accidental::Flat));
+                    }
                 }
+            }
+            std::cmp::Ordering::Equal => {
+                // No accidentals for C major/A minor
             }
         }
         
         result
     }
+
+    /// Get chord progression options from a given chord in this key
+    /// 
+    /// Returns categorized progression options as actual Chord objects
+    /// based on Stephen Mugglin's progression map:
+    /// - Strong: explicit arrows showing natural voice leading
+    /// - Moderate: jumps to primary nodes (stable but less directed)
+    /// - Weak: jumps to secondary nodes (creates tension, needs resolution)
+    /// 
+    /// # Examples
+    /// 
+    /// ```rust
+    /// use chordy::{Key, Chord, note};
+    /// 
+    /// let c_major = Key::Major(note!("C"));
+    /// let c_chord = Chord::major(note!("C"));
+    /// 
+    /// let options = c_major.progression_options(&c_chord).unwrap();
+    /// assert!(!options.strong.is_empty());
+    /// ```
+    pub fn progression_options(&self, chord: &Chord) -> Option<ChordProgressionOptions> {
+        // Find the progression node for this chord
+        let node = self.find_node_for_chord(chord)?;
+        
+        // Get the appropriate progression graph
+        let graph = match self {
+            Key::Major(_) => ProgressionGraph::major(),
+            Key::Minor(_) => ProgressionGraph::minor(),
+        };
+        
+        // Get progression options using the node directly
+        let node_options = graph.progression_options(node)?;
+        
+        // Convert RomanChords to Chords in this key context
+        let mut chord_options = ChordProgressionOptions::new();
+        
+        // Convert strong options
+        for roman_chord in &node_options.strong {
+            let chord = roman_chord.in_key(self);
+            chord_options.strong.push(chord);
+        }
+        
+        // Convert moderate options
+        for roman_chord in &node_options.moderate {
+            let chord = roman_chord.in_key(self);
+            chord_options.moderate.push(chord);
+        }
+        
+        // Convert weak options
+        for roman_chord in &node_options.weak {
+            let chord = roman_chord.in_key(self);
+            chord_options.weak.push(chord);
+        }
+        
+        Some(chord_options)
+    }
+
+    /// Internal helper to get the progression graph for this key
+    fn get_progression_graph(&self) -> ProgressionGraph {
+        match self {
+            Key::Major(_) => ProgressionGraph::major(),
+            Key::Minor(_) => ProgressionGraph::minor(),
+        }
+    }
+
+    /// Internal helper to find the progression node that best matches a given chord
+    fn find_node_for_chord(&self, chord: &Chord) -> Option<crate::types::RomanChord> {
+        // Convert chord to roman chord in this key context
+        let roman_chord = chord.to_roman(self)?;
+        
+        // Get the progression graph for this key
+        let graph = self.get_progression_graph();
+        
+        // Search for matching progression node
+        let nodes: Vec<_> = graph.nodes().collect();
+        
+        // First try to find exact match with intervals
+        for node in &nodes {
+            if node.root == roman_chord.root() {
+                // Check if intervals match closely
+                let node_intervals: std::collections::HashSet<_> = node.intervals.iter().collect();
+                let chord_intervals: std::collections::HashSet<_> = roman_chord.intervals().iter().copied().collect();
+                
+                // Exact match
+                if node_intervals == chord_intervals {
+                    return Some(*node);
+                }
+            }
+        }
+        
+        // Fallback to roman numeral match only (base triad)
+        for node in &nodes {
+            if node.root == roman_chord.root() && node.intervals.len() == 3 {
+                // Found base triad match
+                return Some(*node);
+            }
+        }
+        
+        None
+    }
+
 }
 
 impl std::fmt::Display for Key {

@@ -2,6 +2,7 @@
 //!
 //! This module contains the core analysis engine that examines a set of intervals
 //! and determines the appropriate chord name components (quality, extensions, alterations, etc.).
+#![allow(dead_code)]
 
 use crate::types::{ChordQuality, Interval, NoteName};
 use super::types::*;
@@ -356,10 +357,8 @@ impl ChordAnalyzer {
         
         // Missing 11th in 13th chords: Special case for jazz notation clarity
         // When a 13th is present but 11th is omitted, it's explicitly notated
-        if chord_name.extensions.contains(&Extension::Thirteenth) {
-            if !interval_checker.has_any_eleventh() {
-                chord_omissions.push(Omission::Eleventh);
-            }
+        if chord_name.extensions.contains(&Extension::Thirteenth) && !interval_checker.has_any_eleventh() {
+            chord_omissions.push(Omission::Eleventh);
         }
         
         // Missing third in power chords: Only when it's clearly a power chord

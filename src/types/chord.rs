@@ -1,6 +1,6 @@
 use std::{fmt::Display, str::FromStr};
 
-use super::{scale::ScaleDegree, Interval, NoteName};
+use super::{scale::ScaleDegree, Interval, IntervalSet, NoteName};
 use crate::{
     error::ParseError, note, traits::{HasIntervals, HasRoot, Invertible}
 };
@@ -12,7 +12,7 @@ pub mod naming;
 pub use naming::*;
 
 /// A chord represented by a root note and intervals from that root
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Chord {
     /// The root note of the chord
     pub root: NoteName,
@@ -20,12 +20,20 @@ pub struct Chord {
     ///
     /// Intervals are typically in ascending order, starting from the root, which is included as a
     /// PERFECT_UNISON.
-    pub intervals: Vec<Interval>,
+    pub intervals: IntervalSet,
 }
 
 impl Chord {
     /// Create a new chord from root and intervals
     pub fn new(root: NoteName, intervals: Vec<Interval>) -> Self {
+        Chord { 
+            root, 
+            intervals: IntervalSet::from_slice(&intervals)
+        }
+    }
+    
+    /// Create a new chord from root and interval set
+    pub fn from_interval_set(root: NoteName, intervals: IntervalSet) -> Self {
         Chord { root, intervals }
     }
 
@@ -294,7 +302,7 @@ impl Chord {
 
     /// Returns true if the intervals contain the major third
     pub fn is_major(&self) -> bool {
-        self.intervals.contains(&Interval::MAJOR_THIRD)
+        self.intervals.contains(Interval::MAJOR_THIRD)
     }
 
 
@@ -338,8 +346,7 @@ impl Chord {
         let interval_from_key = key.root().interval_to(self.root);
         
         let roman_numeral: RomanNumeral = interval_from_key.into();
-        println!("Converting chord {} to roman numeral: {} via interval: {}", self, roman_numeral, interval_from_key);
-        Some(super::RomanChord::new(roman_numeral, self.intervals.clone()))
+        Some(super::RomanChord::new(roman_numeral, self.intervals.iter().collect()))
     }
 
     /// Analyze this chord in the given key, returning both roman numeral and harmonic function
@@ -404,7 +411,7 @@ impl Chord {
     /// assert_eq!(format!("{}", chord_name), "G7");
     /// ```
     pub fn to_chord_name(&self) -> ChordName {
-        ChordAnalyzer::analyze(self.root, &self.intervals)
+        ChordAnalyzer::analyze(self.root, self.intervals.as_slice())
     }
 
     // Fluent interface methods for method chaining
@@ -421,7 +428,7 @@ impl Chord {
     /// // Creates a C7 chord
     /// ```
     pub fn with_interval(mut self, interval: Interval) -> Self {
-        if !self.intervals.contains(&interval) {
+        if !self.intervals.contains(interval) {
             self.intervals.push(interval);
             self.intervals.sort();
         }
@@ -439,9 +446,14 @@ impl Chord {
     ///     .without_interval(Interval::PERFECT_FIFTH);
     /// // Creates a C chord without the fifth (C power chord)
     /// ```
-    pub fn without_interval(mut self, interval: Interval) -> Self {
-        self.intervals.retain(|&i| i != interval);
-        self
+    pub fn without_interval(self, interval: Interval) -> Self {
+        let mut new_intervals = IntervalSet::new();
+        for i in self.intervals.iter() {
+            if i != interval {
+                new_intervals.push(i);
+            }
+        }
+        Self::from_interval_set(self.root, new_intervals)
     }
 
     /// Transpose this chord (fluent interface)
@@ -515,7 +527,7 @@ impl Chord {
         let mut pitches = Vec::new();
         let mut last_midi = None;
         
-        for &interval in &self.intervals {
+        for interval in self.intervals.iter() {
             let note = self.root + interval;
             let mut pitch_octave = octave + interval.octaves();
             
@@ -557,26 +569,29 @@ impl HasRoot for Chord {
 
 impl HasIntervals for Chord {
     fn intervals(&self) -> &[Interval] {
-        &self.intervals
-    }
-
-    fn intervals_mut(&mut self) -> &mut Vec<Interval> {
-        &mut self.intervals
+        self.intervals.as_slice()
     }
 }
 
 impl Invertible for Chord {
     fn inverted(&self, inversion: u8) -> Self {
-        let mut intervals = self.intervals.clone();
-        // Rotate intervals based on inversion
-        intervals.rotate_left(inversion as usize % self.intervals.len());
-        // Adjust octaves for proper inversion
-        if inversion > 0 {
-            if let Some(last) = intervals.last_mut() {
-                *last = *last - Interval::OCTAVE;
-            }
+        if inversion == 0 || self.intervals.is_empty() {
+            return *self;
         }
-        Chord::new(self.root, intervals)
+        
+        // Collect intervals into a vector for rotation
+        let mut intervals_vec: Vec<Interval> = self.intervals.iter().collect();
+        
+        // Rotate intervals based on inversion
+        let rotation = (inversion as usize) % intervals_vec.len();
+        intervals_vec.rotate_left(rotation);
+        
+        // Adjust octaves for proper inversion
+        if let Some(last) = intervals_vec.last_mut() {
+            *last = *last - Interval::OCTAVE;
+        }
+        
+        Chord::new(self.root, intervals_vec)
     }
 }
 

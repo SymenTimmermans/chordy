@@ -1,0 +1,47 @@
+# Stephen Mugglin's Minor Key Progression Map
+# Format: ID | type | roman | variants
+# Note: Minor keys have different harmonic language than major
+
+# Primary nodes (blue - diatonic in minor, stable harmonic centers)
+i     | primary   | i   | ,7,9,m7,m9
+ii    | primary   | ii  | b5,m7b5,b5+7
+III   | primary   | III | 7,9,maj7
+iv    | primary   | iv  | 7,9,m7
+v     | primary   | v   | ,7,m7
+V     | primary   | V   | 7,9,7+b9
+VI    | primary   | VI  | 7,9,maj7
+VII   | primary   | VII | 7,9
+
+# Secondary nodes (green - chromatic/borrowed, create tension)
+bII   | secondary | bII | 7
+bVI   | secondary | bVI | 7,9
+V/III | secondary | VII | 7
+V/iv  | secondary | I   | 7
+V/V   | secondary | II  | 7
+V/VI  | secondary | III | 7
+
+# Explicit arrows (strong connections - natural voice leading in minor)
+i     -> iv
+i     -> V
+i     -> VI
+i     -> III
+ii    -> V
+ii    -> vii
+III   -> VI
+III   -> iv
+iv    -> i
+iv    -> ii
+iv    -> V
+iv    -> VII
+v     -> i
+V     -> i
+V     -> VI
+VI    -> ii
+VI    -> iv
+VII   -> III
+bII   -> V
+bVI   -> bVII
+V/III -> III
+V/iv  -> iv
+V/V   -> V
+V/VI  -> VI

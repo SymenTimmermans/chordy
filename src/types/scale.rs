@@ -1,5 +1,5 @@
 use crate::traits::{ChordLike, HasIntervals, HasRoot};
-use super::{chord::HarmonicFunction, Accidental, Chord, Interval, NoteName, Key};
+use super::{chord::HarmonicFunction, Accidental, Chord, Interval, IntervalSet, NoteName, Key};
 
 pub mod definition;
 pub use definition::ScaleDefinition;
@@ -22,7 +22,7 @@ pub struct Scale {
     /// Human-readable name of the scale
     pub name: String,
     /// Intervals that define the scale
-    pub intervals: Vec<Interval>,
+    pub intervals: IntervalSet<12>,
     /// For modes, the degree offset in parent scale
     pub degree_offset: Option<u8>,
     /// Optional name of parent scale for modes
@@ -58,7 +58,7 @@ impl Scale {
         Scale {
             tonic,
             name: definition.name.to_string(),
-            intervals: definition.intervals.to_vec(),
+            intervals: IntervalSet::from_slice(definition.intervals),
             degree_offset: definition.degree_offset,
             mode_of: definition.mode_of.map(|s| s.to_string()),
             bitmask: definition.bitmask,
@@ -133,12 +133,12 @@ impl Scale {
         degree_offset: Option<u8>,
         mode_of: Option<String>,
     ) -> Self {
-        let intervals = intervals.into();
+        let intervals_vec = intervals.into();
         Scale {
             tonic,
             name: name.into(),
-            bitmask: ScaleBitmask::from_intervals(&intervals),
-            intervals,
+            bitmask: ScaleBitmask::from_intervals(&intervals_vec),
+            intervals: IntervalSet::from_slice(&intervals_vec),
             degree_offset,
             mode_of,
         }
@@ -288,7 +288,7 @@ impl Scale {
     /// assert_eq!(tonic_chord, Chord::major(note!("C")));
     /// ```
     pub fn chord_at_degree(&self, degree: u8) -> Chord {
-        if degree < 1 || degree > 7 {
+        if !(1..=7).contains(&degree) {
             panic!("Scale degree must be in range 1-7, got {}", degree);
         }
         
@@ -373,7 +373,7 @@ impl Scale {
     /// ```
     pub fn key(&self) -> Key {
         // Check if the scale contains a major or minor third
-        if self.intervals.contains(&Interval::MAJOR_THIRD) {
+        if self.intervals.contains(Interval::MAJOR_THIRD) {
             Key::Major(self.tonic)
         } else {
             // Default to minor for scales with minor third or no third
@@ -385,14 +385,14 @@ impl Scale {
     pub fn relative(&self) -> Option<Scale> {
         if *self == scales::IONIAN {
             // to get the new tonic, transpose the tonic to the 6th interval
-            let new_tonic = self.tonic + self.intervals[5];
+            let new_tonic = self.tonic + self.intervals.as_slice()[5];
 
             // If the scale is Ionian, return the relative minor (Aeolian)
             let relative_minor = Scale::from_definition(new_tonic, scales::AEOLIAN);
             Some(relative_minor)
         } else if self.name == "Aeolian" {
             // to get the new tonic, transpose the tonic to the 3rd interval
-            let new_tonic = self.tonic + self.intervals[5];
+            let new_tonic = self.tonic + self.intervals.as_slice()[5];
 
             // If the scale is Aeolian, return the relative major (Ionian)
             let relative_major = Scale::from_definition(new_tonic, scales::IONIAN);
@@ -418,7 +418,7 @@ impl Scale {
     /// Determine if a given note belongs to the scale
     pub fn contains(&self, note: &NoteName) -> bool {
         let interval: Interval = self.tonic - *note;
-        self.intervals.contains(&interval)
+        self.intervals.contains(interval)
     }
 
     /// Find the closest scale tone to a given note
@@ -456,8 +456,8 @@ impl Scale {
         let mut extended = Vec::new();
         
         for octave in 0..octaves {
-            for &interval in &self.intervals {
-                let extended_interval = interval + Interval::new(0, octave as i8);
+            for interval in self.intervals.iter() {
+                let extended_interval: Interval = interval + Interval::new(0, octave as i8);
                 extended.push(extended_interval);
             }
         }
@@ -519,14 +519,14 @@ impl Scale {
     pub fn join(&self, other: &Scale) -> Scale {
         let tonic_difference = other.tonic - self.tonic;
 
-        let mut intervals: Vec<Interval> = self.intervals.clone();
+        let mut intervals: Vec<Interval> = self.intervals.iter().collect();
 
         // add each of the other intervals, adjusted by the tonic difference
         intervals.extend(
             other
                 .intervals
                 .iter()
-                .map(|&i| i + tonic_difference),
+                .map(|i| i + tonic_difference),
         );
 
         intervals.sort();
@@ -537,7 +537,7 @@ impl Scale {
         Scale {
             tonic: self.tonic,
             name: format!("{} + {} @ {}", self.name, other.name, tonic_difference),
-            intervals,
+            intervals: IntervalSet::from_slice(&intervals),
             degree_offset: None,
             mode_of: None,
             bitmask,
@@ -553,7 +553,7 @@ impl HasRoot for Scale {
 
 impl HasIntervals for Scale {
     fn intervals(&self) -> &[Interval] {
-        &self.intervals
+        self.intervals.as_slice()
     }
 }
 
@@ -563,19 +563,19 @@ impl Deref for Scale {
     type Target = [Interval];
 
     fn deref(&self) -> &Self::Target {
-        &self.intervals
+        self.intervals.as_slice()
     }
 }
 
 impl PartialEq<ScaleDefinition> for Scale {
     fn eq(&self, other: &ScaleDefinition) -> bool {
-        self.intervals == other.intervals
+        self.intervals.as_slice() == other.intervals
     }
 }
 
 impl PartialEq<ScaleDefinition> for &Scale {
     fn eq(&self, other: &ScaleDefinition) -> bool {
-        self.intervals == other.intervals
+        self.intervals.as_slice() == other.intervals
     }
 }
 

@@ -13,8 +13,10 @@
 
 // Core Types
 pub use crate::types::{
-    Accidental, Chord, ChordQuality, HarmonicFunction, Interval, Key, 
-    Letter, NoteName, Pitch, RomanChord, RomanDegree, RomanNumeral, Scale, ScaleDefinition, ScaleDegree
+    Accidental, Chord, ChordQuality, HarmonicFunction, Interval, IntervalSet, Key, 
+    Letter, NoteName, Pitch, RomanChord, RomanDegree, RomanNumeral, Scale, ScaleDefinition, ScaleDegree,
+    // Progression types
+    ProgressionOptions, ProgressionGraph
 };
 
 // All Musical Traits
