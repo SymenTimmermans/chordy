@@ -129,25 +129,29 @@ impl Key {
     pub fn expected_accidental(&self, letter: Letter) -> Option<Accidental> {
         let num_accidentals = self.accidentals();
         
-        if num_accidentals > 0 {
-            // Sharp keys: F#, C#, G#, D#, A#, E#, B#
-            let sharp_order = [Letter::F, Letter::C, Letter::G, Letter::D, Letter::A, Letter::E, Letter::B];
-            if (0..num_accidentals as usize).any(|i| sharp_order.get(i) == Some(&letter)) {
-                Some(Accidental::Sharp)
-            } else {
+        match num_accidentals.cmp(&0) {
+            std::cmp::Ordering::Greater => {
+                // Sharp keys: F#, C#, G#, D#, A#, E#, B#
+                let sharp_order = [Letter::F, Letter::C, Letter::G, Letter::D, Letter::A, Letter::E, Letter::B];
+                if (0..num_accidentals as usize).any(|i| sharp_order.get(i) == Some(&letter)) {
+                    Some(Accidental::Sharp)
+                } else {
+                    None
+                }
+            }
+            std::cmp::Ordering::Less => {
+                // Flat keys: Bb, Eb, Ab, Db, Gb, Cb, Fb
+                let flat_order = [Letter::B, Letter::E, Letter::A, Letter::D, Letter::G, Letter::C, Letter::F];
+                if (0..(-num_accidentals) as usize).any(|i| flat_order.get(i) == Some(&letter)) {
+                    Some(Accidental::Flat)
+                } else {
+                    None
+                }
+            }
+            std::cmp::Ordering::Equal => {
+                // C major/A minor - no accidentals
                 None
             }
-        } else if num_accidentals < 0 {
-            // Flat keys: Bb, Eb, Ab, Db, Gb, Cb, Fb
-            let flat_order = [Letter::B, Letter::E, Letter::A, Letter::D, Letter::G, Letter::C, Letter::F];
-            if (0..(-num_accidentals) as usize).any(|i| flat_order.get(i) == Some(&letter)) {
-                Some(Accidental::Flat)
-            } else {
-                None
-            }
-        } else {
-            // C major/A minor - no accidentals
-            None
         }
     }
 
@@ -203,21 +207,27 @@ impl Key {
         let num_accidentals = self.accidentals();
         let mut result = Vec::new();
         
-        if num_accidentals > 0 {
-            // Sharp keys
-            let sharp_order = [Letter::F, Letter::C, Letter::G, Letter::D, Letter::A, Letter::E, Letter::B];
-            for i in 0..(num_accidentals as usize) {
-                if let Some(&letter) = sharp_order.get(i) {
-                    result.push((letter, Accidental::Sharp));
+        match num_accidentals.cmp(&0) {
+            std::cmp::Ordering::Greater => {
+                // Sharp keys
+                let sharp_order = [Letter::F, Letter::C, Letter::G, Letter::D, Letter::A, Letter::E, Letter::B];
+                for i in 0..(num_accidentals as usize) {
+                    if let Some(&letter) = sharp_order.get(i) {
+                        result.push((letter, Accidental::Sharp));
+                    }
                 }
             }
-        } else if num_accidentals < 0 {
-            // Flat keys
-            let flat_order = [Letter::B, Letter::E, Letter::A, Letter::D, Letter::G, Letter::C, Letter::F];
-            for i in 0..((-num_accidentals) as usize) {
-                if let Some(&letter) = flat_order.get(i) {
-                    result.push((letter, Accidental::Flat));
+            std::cmp::Ordering::Less => {
+                // Flat keys
+                let flat_order = [Letter::B, Letter::E, Letter::A, Letter::D, Letter::G, Letter::C, Letter::F];
+                for i in 0..((-num_accidentals) as usize) {
+                    if let Some(&letter) = flat_order.get(i) {
+                        result.push((letter, Accidental::Flat));
+                    }
                 }
+            }
+            std::cmp::Ordering::Equal => {
+                // No accidentals for C major/A minor
             }
         }
         
