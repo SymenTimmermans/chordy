@@ -303,7 +303,7 @@ impl From<u8> for ScaleDegree {
     /// # Panics
     /// Panics if the number is not in the range 1-7
     fn from(step: u8) -> Self {
-        if step < 1 || step > 7 {
+        if !(1..=7).contains(&step) {
             panic!("Scale degree step must be in range 1-7, got {}", step);
         }
         ScaleDegree::new(step, None)

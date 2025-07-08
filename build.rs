@@ -285,7 +285,7 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
     
     for node in nodes {
         for variant in &node.variants {
-            let (node_name, display_name) = generate_node_variant(&node, variant);
+            let (node_name, display_name) = generate_node_variant(node, variant);
             all_node_names.push(node_name.clone());
             
             let node_type = match node.node_type.as_str() {
@@ -355,7 +355,7 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
     // Generate ALL_NODES array (now using RomanChord)
     generated.push_str(&format!("/// Complete registry of all progression chords for {} keys\n", key_type));
     generated.push_str(&format!("/// \n/// Contains {} chord variants across all harmonic functions.\n", all_node_names.len()));
-    generated.push_str(&format!("/// Used internally for graph traversal and chord lookup operations.\n"));
+    generated.push_str(&"/// Used internally for graph traversal and chord lookup operations.\n".to_string());
     generated.push_str("pub static ALL_NODES: &[&RomanChord] = &[\n");
     for node_name in &all_node_names {
         generated.push_str(&format!("    &{},\n", node_name));
@@ -365,7 +365,7 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
     // Generate ALL_EDGES array
     generated.push_str(&format!("/// Complete registry of all progression edges for {} keys\n", key_type));
     generated.push_str(&format!("/// \n/// Contains {} harmonic connections between chord variants.\n", all_edge_names.len()));
-    generated.push_str(&format!("/// Each edge represents a musically valid progression with proper voice leading.\n"));
+    generated.push_str(&"/// Each edge represents a musically valid progression with proper voice leading.\n".to_string());
     generated.push_str("pub static ALL_EDGES: &[&ProgressionEdge] = &[\n");
     for edge_name in &all_edge_names {
         generated.push_str(&format!("    &{},\n", edge_name));
@@ -374,7 +374,7 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
     
     // Generate NodeType mapping
     generated.push_str(&format!("/// NodeType mapping for all progression chords in {} keys\n", key_type));
-    generated.push_str(&format!("/// \n/// Maps each chord to its harmonic role (Primary = stable, Secondary = transitional).\n"));
+    generated.push_str(&"/// \n/// Maps each chord to its harmonic role (Primary = stable, Secondary = transitional).\n".to_string());
     generated.push_str("pub fn get_node_types() -> HashMap<&'static RomanChord, NodeType> {\n");
     generated.push_str("    let mut map = HashMap::new();\n");
     for (node_name, node_type) in &node_type_entries {
@@ -385,7 +385,7 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
     
     // Generate simple lookup function for RomanChord
     generated.push_str(&format!("/// Look up a progression chord by its display name for {} keys\n", key_type));
-    generated.push_str(&format!("/// \n/// Returns the corresponding `RomanChord` for chord symbols like \"I\", \"V7\", \"ii9\", etc.\n"));
+    generated.push_str(&"/// \n/// Returns the corresponding `RomanChord` for chord symbols like \"I\", \"V7\", \"ii9\", etc.\n".to_string());
     generated.push_str(&format!("/// Supports {} different chord variants.\n", node_map_entries.len()));
     generated.push_str("pub fn get_node(name: &str) -> Option<&'static RomanChord> {\n");
     generated.push_str("    match name {\n");

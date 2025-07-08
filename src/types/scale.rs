@@ -288,7 +288,7 @@ impl Scale {
     /// assert_eq!(tonic_chord, Chord::major(note!("C")));
     /// ```
     pub fn chord_at_degree(&self, degree: u8) -> Chord {
-        if degree < 1 || degree > 7 {
+        if !(1..=7).contains(&degree) {
             panic!("Scale degree must be in range 1-7, got {}", degree);
         }
         

@@ -356,10 +356,8 @@ impl ChordAnalyzer {
         
         // Missing 11th in 13th chords: Special case for jazz notation clarity
         // When a 13th is present but 11th is omitted, it's explicitly notated
-        if chord_name.extensions.contains(&Extension::Thirteenth) {
-            if !interval_checker.has_any_eleventh() {
-                chord_omissions.push(Omission::Eleventh);
-            }
+        if chord_name.extensions.contains(&Extension::Thirteenth) && !interval_checker.has_any_eleventh() {
+            chord_omissions.push(Omission::Eleventh);
         }
         
         // Missing third in power chords: Only when it's clearly a power chord
