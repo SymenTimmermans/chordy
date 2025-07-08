@@ -72,17 +72,6 @@ impl<const N: usize> IntervalSet<N> {
         set
     }
     
-    /// Create an IntervalSet from an iterator
-    ///
-    /// # Panics
-    /// Panics if the iterator yields more than N intervals
-    pub fn from_iter(iter: impl IntoIterator<Item = Interval>) -> Self {
-        let mut set = Self::new();
-        for interval in iter {
-            set.push(interval);
-        }
-        set
-    }
     
     /// Get the number of intervals in the set
     pub const fn len(&self) -> usize {
@@ -201,7 +190,11 @@ impl<const N: usize> fmt::Display for IntervalSet<N> {
 
 impl<const N: usize> FromIterator<Interval> for IntervalSet<N> {
     fn from_iter<T: IntoIterator<Item = Interval>>(iter: T) -> Self {
-        Self::from_iter(iter)
+        let mut set = Self::new();
+        for interval in iter {
+            set.push(interval);
+        }
+        set
     }
 }
 
