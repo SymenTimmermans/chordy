@@ -25,6 +25,7 @@ const MINOR_TRIAD_SET: IntervalSet = IntervalSet::const_from_array(
 pub static MINOR_I: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
     intervals: MINOR_TRIAD_SET,
+    bass: None,
 };
 
 const MINOR_I_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -44,6 +45,7 @@ const MINOR_I_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static MINOR_I_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
     intervals: MINOR_I_7_INTERVALS_SET,
+    bass: None,
 };
 
 const MINOR_I_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -63,6 +65,7 @@ const MINOR_I_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static MINOR_I_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
     intervals: MINOR_I_9_INTERVALS_SET,
+    bass: None,
 };
 
 const MINOR_I_M7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -82,6 +85,7 @@ const MINOR_I_M7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static MINOR_I_M7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
     intervals: MINOR_I_M7_INTERVALS_SET,
+    bass: None,
 };
 
 const MINOR_I_M9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -101,6 +105,7 @@ const MINOR_I_M9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static MINOR_I_M9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
     intervals: MINOR_I_M9_INTERVALS_SET,
+    bass: None,
 };
 
 /// ii chord - stable harmonic center (primary node)
@@ -108,6 +113,7 @@ pub static MINOR_I_M9: RomanChord = RomanChord {
 pub static MINOR_II: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
     intervals: MINOR_TRIAD_SET,
+    bass: None,
 };
 
 const MINOR_II_FLAT_5_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -127,6 +133,7 @@ const MINOR_II_FLAT_5_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array
 pub static MINOR_II_FLAT_5: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
     intervals: MINOR_II_FLAT_5_INTERVALS_SET,
+    bass: None,
 };
 
 const MINOR_II_M7_FLAT_5_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -146,6 +153,7 @@ const MINOR_II_M7_FLAT_5_INTERVALS_SET: IntervalSet = IntervalSet::const_from_ar
 pub static MINOR_II_M7_FLAT_5: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
     intervals: MINOR_II_M7_FLAT_5_INTERVALS_SET,
+    bass: None,
 };
 
 const MINOR_II_FLAT_5_PLUS_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -165,6 +173,7 @@ const MINOR_II_FLAT_5_PLUS_7_INTERVALS_SET: IntervalSet = IntervalSet::const_fro
 pub static MINOR_II_FLAT_5_PLUS_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
     intervals: MINOR_II_FLAT_5_PLUS_7_INTERVALS_SET,
+    bass: None,
 };
 
 /// III chord - stable harmonic center (primary node)
@@ -172,6 +181,7 @@ pub static MINOR_II_FLAT_5_PLUS_7: RomanChord = RomanChord {
 pub static III: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::III, Accidental::Natural),
     intervals: MAJOR_TRIAD_SET,
+    bass: None,
 };
 
 const III_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -191,6 +201,7 @@ const III_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static III_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::III, Accidental::Natural),
     intervals: III_7_INTERVALS_SET,
+    bass: None,
 };
 
 const III_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -210,6 +221,7 @@ const III_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static III_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::III, Accidental::Natural),
     intervals: III_9_INTERVALS_SET,
+    bass: None,
 };
 
 const III_MAJ7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -229,6 +241,7 @@ const III_MAJ7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static III_MAJ7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::III, Accidental::Natural),
     intervals: III_MAJ7_INTERVALS_SET,
+    bass: None,
 };
 
 /// iv chord - stable harmonic center (primary node)
@@ -236,6 +249,7 @@ pub static III_MAJ7: RomanChord = RomanChord {
 pub static MINOR_IV: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
     intervals: MINOR_TRIAD_SET,
+    bass: None,
 };
 
 const MINOR_IV_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -255,6 +269,7 @@ const MINOR_IV_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static MINOR_IV_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
     intervals: MINOR_IV_7_INTERVALS_SET,
+    bass: None,
 };
 
 const MINOR_IV_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -274,6 +289,7 @@ const MINOR_IV_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static MINOR_IV_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
     intervals: MINOR_IV_9_INTERVALS_SET,
+    bass: None,
 };
 
 const MINOR_IV_M7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -293,6 +309,7 @@ const MINOR_IV_M7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static MINOR_IV_M7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
     intervals: MINOR_IV_M7_INTERVALS_SET,
+    bass: None,
 };
 
 /// v chord - stable harmonic center (primary node)
@@ -300,6 +317,7 @@ pub static MINOR_IV_M7: RomanChord = RomanChord {
 pub static MINOR_V: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
     intervals: MINOR_TRIAD_SET,
+    bass: None,
 };
 
 const MINOR_V_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -319,6 +337,7 @@ const MINOR_V_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static MINOR_V_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
     intervals: MINOR_V_7_INTERVALS_SET,
+    bass: None,
 };
 
 const MINOR_V_M7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -338,6 +357,7 @@ const MINOR_V_M7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static MINOR_V_M7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
     intervals: MINOR_V_M7_INTERVALS_SET,
+    bass: None,
 };
 
 /// V chord - stable harmonic center (primary node)
@@ -345,6 +365,7 @@ pub static MINOR_V_M7: RomanChord = RomanChord {
 pub static V: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
     intervals: MAJOR_TRIAD_SET,
+    bass: None,
 };
 
 const V_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -364,6 +385,7 @@ const V_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static V_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
     intervals: V_7_INTERVALS_SET,
+    bass: None,
 };
 
 const V_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -383,6 +405,7 @@ const V_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static V_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
     intervals: V_9_INTERVALS_SET,
+    bass: None,
 };
 
 const V_7_PLUS_FLAT_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -402,6 +425,7 @@ const V_7_PLUS_FLAT_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array
 pub static V_7_PLUS_FLAT_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
     intervals: V_7_PLUS_FLAT_9_INTERVALS_SET,
+    bass: None,
 };
 
 /// VI chord - stable harmonic center (primary node)
@@ -409,6 +433,7 @@ pub static V_7_PLUS_FLAT_9: RomanChord = RomanChord {
 pub static VI: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
     intervals: MAJOR_TRIAD_SET,
+    bass: None,
 };
 
 const VI_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -428,6 +453,7 @@ const VI_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static VI_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
     intervals: VI_7_INTERVALS_SET,
+    bass: None,
 };
 
 const VI_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -447,6 +473,7 @@ const VI_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static VI_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
     intervals: VI_9_INTERVALS_SET,
+    bass: None,
 };
 
 const VI_MAJ7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -466,6 +493,7 @@ const VI_MAJ7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static VI_MAJ7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
     intervals: VI_MAJ7_INTERVALS_SET,
+    bass: None,
 };
 
 /// VII chord - stable harmonic center (primary node)
@@ -473,6 +501,7 @@ pub static VI_MAJ7: RomanChord = RomanChord {
 pub static VII: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VII, Accidental::Natural),
     intervals: MAJOR_TRIAD_SET,
+    bass: None,
 };
 
 const VII_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -492,6 +521,7 @@ const VII_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static VII_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VII, Accidental::Natural),
     intervals: VII_7_INTERVALS_SET,
+    bass: None,
 };
 
 const VII_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -511,6 +541,7 @@ const VII_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
 pub static VII_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VII, Accidental::Natural),
     intervals: VII_9_INTERVALS_SET,
+    bass: None,
 };
 
 const MINOR_FLAT_II_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -530,6 +561,7 @@ const MINOR_FLAT_II_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array
 pub static MINOR_FLAT_II_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
     intervals: MINOR_FLAT_II_7_INTERVALS_SET,
+    bass: None,
 };
 
 const MINOR_FLAT_VI_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -549,6 +581,7 @@ const MINOR_FLAT_VI_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array
 pub static MINOR_FLAT_VI_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
     intervals: MINOR_FLAT_VI_7_INTERVALS_SET,
+    bass: None,
 };
 
 const MINOR_FLAT_VI_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
@@ -568,6 +601,7 @@ const MINOR_FLAT_VI_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array
 pub static MINOR_FLAT_VI_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
     intervals: MINOR_FLAT_VI_9_INTERVALS_SET,
+    bass: None,
 };
 
 /// Progression edge: i → iv

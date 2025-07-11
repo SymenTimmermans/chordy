@@ -11,6 +11,15 @@ pub use quality::ChordQuality;
 pub mod naming;
 pub use naming::*;
 
+/// Type of bass note in a chord
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum BassType {
+    /// Classical inversion (1 = first, 2 = second, etc.)
+    Inversion(u8),
+    /// Slash chord with arbitrary bass note
+    Slash,
+}
+
 /// A chord represented by a root note and intervals from that root
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Chord {
@@ -21,6 +30,8 @@ pub struct Chord {
     /// Intervals are typically in ascending order, starting from the root, which is included as a
     /// PERFECT_UNISON.
     pub intervals: IntervalSet,
+    /// The bass note for inversions and slash chords
+    pub bass: Option<(NoteName, BassType)>,
 }
 
 impl Chord {
@@ -28,13 +39,14 @@ impl Chord {
     pub fn new(root: NoteName, intervals: Vec<Interval>) -> Self {
         Chord { 
             root, 
-            intervals: IntervalSet::from_slice(&intervals)
+            intervals: IntervalSet::from_slice(&intervals),
+            bass: None,
         }
     }
     
     /// Create a new chord from root and interval set
     pub fn from_interval_set(root: NoteName, intervals: IntervalSet) -> Self {
-        Chord { root, intervals }
+        Chord { root, intervals, bass: None }
     }
 
     /// Create a chord from a list of notes
@@ -346,7 +358,17 @@ impl Chord {
         let interval_from_key = key.root().interval_to(self.root);
         
         let roman_numeral: RomanNumeral = interval_from_key.into();
-        Some(super::RomanChord::new(roman_numeral, self.intervals.iter().collect()))
+        let mut roman_chord = super::RomanChord::new(roman_numeral, self.intervals.iter().collect());
+        
+        // Preserve bass information if present
+        if let Some((bass_note, bass_type)) = self.bass {
+            // Convert bass note to roman numeral relative to the key
+            let bass_interval = key.root().interval_to(bass_note);
+            let bass_roman: RomanNumeral = bass_interval.into();
+            roman_chord.bass = Some((bass_roman, bass_type));
+        }
+        
+        Some(roman_chord)
     }
 
     /// Analyze this chord in the given key, returning both roman numeral and harmonic function
@@ -411,7 +433,167 @@ impl Chord {
     /// assert_eq!(format!("{}", chord_name), "G7");
     /// ```
     pub fn to_chord_name(&self) -> ChordName {
-        ChordAnalyzer::analyze(self.root, self.intervals.as_slice())
+        let mut chord_name = ChordAnalyzer::analyze(self.root, self.intervals.as_slice());
+        
+        // Add bass note if present
+        if let Some((bass_note, _)) = self.bass {
+            chord_name = chord_name.with_bass(ChordRoot::Note(bass_note));
+        }
+        
+        chord_name
+    }
+
+    /// Get the bass note of this chord
+    ///
+    /// Returns the bass note if present, otherwise returns the root note.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let c_major = Chord::major(note!("C"));
+    /// assert_eq!(c_major.bass_note(), note!("C"));
+    ///
+    /// let c_first_inversion = c_major.with_inversion(1);
+    /// assert_eq!(c_first_inversion.bass_note(), note!("E"));
+    /// ```
+    pub fn bass_note(&self) -> NoteName {
+        match self.bass {
+            Some((bass, _)) => bass,
+            None => self.root,
+        }
+    }
+
+    /// Check if this chord is inverted
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let c_major = Chord::major(note!("C"));
+    /// assert!(!c_major.is_inverted());
+    ///
+    /// let c_first_inversion = c_major.with_inversion(1);
+    /// assert!(c_first_inversion.is_inverted());
+    /// ```
+    pub fn is_inverted(&self) -> bool {
+        matches!(self.bass, Some((_, BassType::Inversion(_))))
+    }
+
+    /// Check if this chord is a slash chord
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let c_major = Chord::major(note!("C"));
+    /// assert!(!c_major.is_slash_chord());
+    ///
+    /// let c_slash_g = c_major.with_slash_bass(note!("G"));
+    /// assert!(c_slash_g.is_slash_chord());
+    /// ```
+    pub fn is_slash_chord(&self) -> bool {
+        matches!(self.bass, Some((_, BassType::Slash)))
+    }
+
+    /// Get the inversion number if this is an inverted chord
+    ///
+    /// Returns the inversion number (1, 2, 3, etc.) if this is an inverted chord,
+    /// otherwise returns None.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let c_major = Chord::major(note!("C"));
+    /// assert_eq!(c_major.inversion_number(), None);
+    ///
+    /// let c_first_inversion = c_major.with_inversion(1);
+    /// assert_eq!(c_first_inversion.inversion_number(), Some(1));
+    /// ```
+    pub fn inversion_number(&self) -> Option<u8> {
+        match self.bass {
+            Some((_, BassType::Inversion(n))) => Some(n),
+            _ => None,
+        }
+    }
+
+    /// Create a chord with the specified inversion
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let c_major = Chord::major(note!("C"));
+    /// let c_first_inversion = c_major.with_inversion(1);
+    /// assert!(c_first_inversion.is_inverted());
+    /// assert_eq!(c_first_inversion.bass_note(), note!("E"));
+    /// ```
+    pub fn with_inversion(mut self, inversion: u8) -> Self {
+        if inversion == 0 {
+            self.bass = None;
+            return self;
+        }
+
+        // Find the note for this inversion
+        let sorted_intervals: Vec<Interval> = self.intervals.iter().collect();
+        if let Some(&interval) = sorted_intervals.get(inversion as usize) {
+            let bass_note = self.root + interval;
+            self.bass = Some((bass_note, BassType::Inversion(inversion)));
+        }
+        self
+    }
+
+    /// Create a chord with the specified slash bass note
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let c_major = Chord::major(note!("C"));
+    /// let c_slash_g = c_major.with_slash_bass(note!("G"));
+    /// assert!(c_slash_g.is_slash_chord());
+    /// assert_eq!(c_slash_g.bass_note(), note!("G"));
+    /// ```
+    pub fn with_slash_bass(mut self, bass: NoteName) -> Self {
+        self.bass = Some((bass, BassType::Slash));
+        self
+    }
+
+    /// Create a chord in first inversion
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let c_major = Chord::major(note!("C"));
+    /// let c_first_inversion = c_major.in_first_inversion();
+    /// assert_eq!(c_first_inversion.bass_note(), note!("E"));
+    /// ```
+    pub fn in_first_inversion(self) -> Self {
+        self.with_inversion(1)
+    }
+
+    /// Create a chord in second inversion
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let c_major = Chord::major(note!("C"));
+    /// let c_second_inversion = c_major.in_second_inversion();
+    /// assert_eq!(c_second_inversion.bass_note(), note!("G"));
+    /// ```
+    pub fn in_second_inversion(self) -> Self {
+        self.with_inversion(2)
     }
 
     // Fluent interface methods for method chaining
@@ -575,23 +757,7 @@ impl HasIntervals for Chord {
 
 impl Invertible for Chord {
     fn inverted(&self, inversion: u8) -> Self {
-        if inversion == 0 || self.intervals.is_empty() {
-            return *self;
-        }
-        
-        // Collect intervals into a vector for rotation
-        let mut intervals_vec: Vec<Interval> = self.intervals.iter().collect();
-        
-        // Rotate intervals based on inversion
-        let rotation = (inversion as usize) % intervals_vec.len();
-        intervals_vec.rotate_left(rotation);
-        
-        // Adjust octaves for proper inversion
-        if let Some(last) = intervals_vec.last_mut() {
-            *last = *last - Interval::OCTAVE;
-        }
-        
-        Chord::new(self.root, intervals_vec)
+        self.with_inversion(inversion)
     }
 }
 

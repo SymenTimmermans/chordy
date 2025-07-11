@@ -64,6 +64,7 @@ fn test_roman_chord_with_interval_set() {
             Interval::MAJOR_THIRD, 
             Interval::PERFECT_FIFTH
         ]),
+        bass: None,
     };
     
     assert_eq!(i_major.intervals.len(), 3);
@@ -79,6 +80,7 @@ fn test_roman_chord_copy_semantics() {
             Interval::MAJOR_THIRD, 
             Interval::PERFECT_FIFTH
         ]),
+        bass: None,
     };
     
     let copy1 = i_major;

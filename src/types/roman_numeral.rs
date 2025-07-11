@@ -245,6 +245,8 @@ pub struct RomanChord {
     pub root: RomanNumeral,
     /// The intervals from the root that define the chord
     pub intervals: IntervalSet,
+    /// The bass note for inversions and slash chords
+    pub bass: Option<(RomanNumeral, super::chord::BassType)>,
 }
 
 impl RomanChord {
@@ -252,13 +254,14 @@ impl RomanChord {
     pub fn new(root: RomanNumeral, intervals: Vec<Interval>) -> Self {
         RomanChord { 
             root, 
-            intervals: IntervalSet::from_slice(&intervals)
+            intervals: IntervalSet::from_slice(&intervals),
+            bass: None,
         }
     }
     
     /// Create a new roman chord from root and interval set
     pub fn from_interval_set(root: RomanNumeral, intervals: IntervalSet) -> Self {
-        RomanChord { root, intervals }
+        RomanChord { root, intervals, bass: None }
     }
     
     /// Create a simple roman chord with basic quality (triad intervals)
@@ -378,14 +381,183 @@ impl RomanChord {
         let base_root = c.root();
         let interval_from_base = self.root.to_interval();
         let actual_root = base_root + interval_from_base;
-        Chord::new(actual_root, self.intervals.iter().collect())
+        let mut chord = Chord::new(actual_root, self.intervals.iter().collect());
+        
+        // Handle bass note if present
+        if let Some((bass_roman, bass_type)) = self.bass {
+            let bass_interval = bass_roman.to_interval();
+            let actual_bass = base_root + bass_interval;
+            chord.bass = Some((actual_bass, bass_type));
+        }
+        
+        chord
     }
     
     /// Convert this roman chord to a ChordName using the new naming system
     pub fn to_chord_name(&self) -> super::chord::ChordName {
         use super::chord::{ChordRoot, ChordAnalyzer};
         let chord_root = ChordRoot::Roman(self.root);
-        ChordAnalyzer::analyze_with_root(chord_root, self.intervals.as_slice())
+        let mut chord_name = ChordAnalyzer::analyze_with_root(chord_root, self.intervals.as_slice());
+        
+        // Add bass note if present
+        if let Some((bass_roman, _)) = self.bass {
+            chord_name = chord_name.with_bass(ChordRoot::Roman(bass_roman));
+        }
+        
+        chord_name
+    }
+
+    /// Get the bass note of this roman chord
+    ///
+    /// Returns the bass note if present, otherwise returns the root note.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{RomanChord, RomanNumeral};
+    ///
+    /// let i_major = RomanChord::major(RomanNumeral::I());
+    /// assert_eq!(i_major.bass_note(), RomanNumeral::I());
+    ///
+    /// let i_first_inversion = i_major.with_inversion(1);
+    /// assert_eq!(i_first_inversion.bass_note(), RomanNumeral::III());
+    /// ```
+    pub fn bass_note(&self) -> RomanNumeral {
+        match self.bass {
+            Some((bass, _)) => bass,
+            None => self.root,
+        }
+    }
+
+    /// Check if this roman chord is inverted
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{RomanChord, RomanNumeral};
+    ///
+    /// let i_major = RomanChord::major(RomanNumeral::I());
+    /// assert!(!i_major.is_inverted());
+    ///
+    /// let i_first_inversion = i_major.with_inversion(1);
+    /// assert!(i_first_inversion.is_inverted());
+    /// ```
+    pub fn is_inverted(&self) -> bool {
+        matches!(self.bass, Some((_, super::chord::BassType::Inversion(_))))
+    }
+
+    /// Check if this roman chord is a slash chord
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{RomanChord, RomanNumeral};
+    ///
+    /// let i_major = RomanChord::major(RomanNumeral::I());
+    /// assert!(!i_major.is_slash_chord());
+    ///
+    /// let i_slash_v = i_major.with_slash_bass(RomanNumeral::V());
+    /// assert!(i_slash_v.is_slash_chord());
+    /// ```
+    pub fn is_slash_chord(&self) -> bool {
+        matches!(self.bass, Some((_, super::chord::BassType::Slash)))
+    }
+
+    /// Get the inversion number if this is an inverted roman chord
+    ///
+    /// Returns the inversion number (1, 2, 3, etc.) if this is an inverted chord,
+    /// otherwise returns None.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{RomanChord, RomanNumeral};
+    ///
+    /// let i_major = RomanChord::major(RomanNumeral::I());
+    /// assert_eq!(i_major.inversion_number(), None);
+    ///
+    /// let i_first_inversion = i_major.with_inversion(1);
+    /// assert_eq!(i_first_inversion.inversion_number(), Some(1));
+    /// ```
+    pub fn inversion_number(&self) -> Option<u8> {
+        match self.bass {
+            Some((_, super::chord::BassType::Inversion(n))) => Some(n),
+            _ => None,
+        }
+    }
+
+    /// Create a roman chord with the specified inversion
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{RomanChord, RomanNumeral};
+    ///
+    /// let i_major = RomanChord::major(RomanNumeral::I());
+    /// let i_first_inversion = i_major.with_inversion(1);
+    /// assert!(i_first_inversion.is_inverted());
+    /// assert_eq!(i_first_inversion.bass_note(), RomanNumeral::III());
+    /// ```
+    pub fn with_inversion(mut self, inversion: u8) -> Self {
+        if inversion == 0 {
+            self.bass = None;
+            return self;
+        }
+
+        // Find the note for this inversion
+        let sorted_intervals: Vec<Interval> = self.intervals.iter().collect();
+        if let Some(&interval) = sorted_intervals.get(inversion as usize) {
+            let bass_roman = RomanNumeral::from(interval);
+            self.bass = Some((bass_roman, super::chord::BassType::Inversion(inversion)));
+        }
+        self
+    }
+
+    /// Create a roman chord with the specified slash bass note
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{RomanChord, RomanNumeral};
+    ///
+    /// let i_major = RomanChord::major(RomanNumeral::I());
+    /// let i_slash_v = i_major.with_slash_bass(RomanNumeral::V());
+    /// assert!(i_slash_v.is_slash_chord());
+    /// assert_eq!(i_slash_v.bass_note(), RomanNumeral::V());
+    /// ```
+    pub fn with_slash_bass(mut self, bass: RomanNumeral) -> Self {
+        self.bass = Some((bass, super::chord::BassType::Slash));
+        self
+    }
+
+    /// Create a roman chord in first inversion
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{RomanChord, RomanNumeral};
+    ///
+    /// let i_major = RomanChord::major(RomanNumeral::I());
+    /// let i_first_inversion = i_major.in_first_inversion();
+    /// assert_eq!(i_first_inversion.bass_note(), RomanNumeral::III());
+    /// ```
+    pub fn in_first_inversion(self) -> Self {
+        self.with_inversion(1)
+    }
+
+    /// Create a roman chord in second inversion
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{RomanChord, RomanNumeral};
+    ///
+    /// let i_major = RomanChord::major(RomanNumeral::I());
+    /// let i_second_inversion = i_major.in_second_inversion();
+    /// assert_eq!(i_second_inversion.bass_note(), RomanNumeral::V());
+    /// ```
+    pub fn in_second_inversion(self) -> Self {
+        self.with_inversion(2)
     }
 }
 
@@ -439,5 +611,11 @@ impl From<u8> for RomanNumeral {
 impl HasIntervals for RomanChord {
     fn intervals(&self) -> &[Interval] {
         self.intervals.as_slice()
+    }
+}
+
+impl crate::traits::Invertible for RomanChord {
+    fn inverted(&self, inversion: u8) -> Self {
+        self.with_inversion(inversion)
     }
 }

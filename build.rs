@@ -166,7 +166,7 @@ fn generate_progressions() {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     
     // Generate major progressions
-    let major_path = Path::new(&manifest_dir).join("data/progressions/major.progression");
+    let major_path = Path::new(&manifest_dir).join("data/progressions/major_simple.progression");
     let major_data = parse_progression_file(&major_path, "major");
     let major_output = Path::new(&manifest_dir).join("src/types/progression/major_data.rs");
     fs::write(&major_output, &major_data).expect("Failed to write major progression data");
@@ -315,7 +315,7 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
             let intervals_set_construction = generate_interval_set_construction(&intervals_array_ref.reference);
             generated.push_str(&doc_comment);
             generated.push_str(&format!(
-                "pub static {}: RomanChord = RomanChord {{\n    root: {},\n    intervals: {},\n}};\n\n",
+                "pub static {}: RomanChord = RomanChord {{\n    root: {},\n    intervals: {},\n    bass: None,\n}};\n\n",
                 node_name, roman_numeral_code, intervals_set_construction
             ));
             

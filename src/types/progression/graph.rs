@@ -223,6 +223,7 @@ mod tests {
                 Interval::MAJOR_THIRD,
                 Interval::PERFECT_FIFTH,
             ]),
+            bass: None,
         }
     }
     
