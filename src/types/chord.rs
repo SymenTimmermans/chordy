@@ -12,15 +12,75 @@ pub mod naming;
 pub use naming::*;
 
 /// Type of bass note in a chord
+/// 
+/// Distinguishes between classical inversions (where the bass note is a chord tone) 
+/// and slash chords (where the bass note can be any note).
+/// 
+/// # Examples
+/// 
+/// ```rust
+/// use chordy::{Chord, note, BassType};
+/// 
+/// let c_major = Chord::major(note!("C"));
+/// 
+/// // Classical inversion - bass note is the third (E)
+/// let inversion = c_major.with_inversion(1);
+/// if let Some((bass, bass_type)) = inversion.bass {
+///     assert_eq!(bass, note!("E"));
+///     assert!(matches!(bass_type, BassType::Inversion(1)));
+/// }
+/// 
+/// // Slash chord - bass note can be any note
+/// let slash_chord = c_major.with_slash_bass(note!("F"));
+/// if let Some((bass, bass_type)) = slash_chord.bass {
+///     assert_eq!(bass, note!("F"));
+///     assert!(matches!(bass_type, BassType::Slash));
+/// }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum BassType {
-    /// Classical inversion (1 = first, 2 = second, etc.)
+    /// Classical inversion where the bass note is a chord tone
+    /// 
+    /// The number indicates the inversion: 1 = first inversion, 2 = second inversion, etc.
+    /// In classical theory, this corresponds to which chord tone is in the bass:
+    /// - 1st inversion: third in bass (e.g., C/E)
+    /// - 2nd inversion: fifth in bass (e.g., C/G)  
+    /// - 3rd inversion: seventh in bass (e.g., C7/Bb)
     Inversion(u8),
     /// Slash chord with arbitrary bass note
+    /// 
+    /// The bass note may or may not be a chord tone. This is common in modern 
+    /// popular music and jazz for creating specific harmonic colors or bass lines.
+    /// Examples: C/F, G/B, Am/C
     Slash,
 }
 
 /// A chord represented by a root note and intervals from that root
+/// 
+/// The Chord struct supports both root position chords and chords with different bass notes
+/// (inversions and slash chords). The bass field distinguishes between classical inversions
+/// and arbitrary slash chords.
+/// 
+/// # Examples
+/// 
+/// ```rust
+/// use chordy::{Chord, note, BassType};
+/// 
+/// // Root position chord
+/// let c_major = Chord::major(note!("C"));
+/// assert_eq!(c_major.bass_note(), note!("C"));
+/// assert!(!c_major.is_inverted());
+/// 
+/// // First inversion - third in bass
+/// let first_inversion = c_major.with_inversion(1);
+/// assert_eq!(first_inversion.bass_note(), note!("E"));
+/// assert!(first_inversion.is_inverted());
+/// 
+/// // Slash chord - arbitrary bass note
+/// let slash_chord = c_major.with_slash_bass(note!("F"));
+/// assert_eq!(slash_chord.bass_note(), note!("F"));
+/// assert!(slash_chord.is_slash_chord());
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Chord {
     /// The root note of the chord
@@ -31,6 +91,11 @@ pub struct Chord {
     /// PERFECT_UNISON.
     pub intervals: IntervalSet,
     /// The bass note for inversions and slash chords
+    /// 
+    /// When `None`, the chord is in root position (bass note is the root).
+    /// When `Some((note, bass_type))`, the chord has a different bass note:
+    /// - `BassType::Inversion(n)`: Classical inversion with chord tone in bass
+    /// - `BassType::Slash`: Slash chord with arbitrary bass note
     pub bass: Option<(NoteName, BassType)>,
 }
 

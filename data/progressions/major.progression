@@ -1,37 +1,117 @@
 # Stephen Mugglin's Major Key Progression Map
-# Format: ID | type | roman | variants
+# Format: ID | type | variants
 # Strength derived from graph structure:
 # - Strong: explicit arrows (natural voice leading)
 # - Moderate: jumps to primary nodes (stable)  
 # - Weak: jumps to secondary nodes (transitional)
 
 # Primary nodes (blue - diatonic, stable harmonic centers)
-I     | primary   | I   | 6,maj7,maj9,add9,sus2,sus4
-ii    | primary   | ii  | m7,m9
-iii   | primary   | iii | m7
-IV    | primary   | IV  | 6,maj7
-iv    | primary   | iv  | m6
-V     | primary   | V   | 7,9,11,13,sus4
-vi    | primary   | vi  | m7,m9
+I     | p | ,6,maj7,maj9,add9,sus2,sus4
+I/5   | p |
+I/3   | p |
+ii    | p | ,m7,m9
+iii   | p | ,m7
+IV    | p | ,6,maj7
+IV/1  | p |
+iv    | p | ,m6
+V     | p | ,7,9,11,13,sus4
+V/1   | p |
+vi    | p | ,m7,m9
 
 # Secondary nodes (green - chromatic/borrowed chords, create tension)
-bIII  | secondary | bIII| 7,9
-bVI   | secondary | bVI | 7,9
-bVII  | secondary | bVII| 9
-V/V   | secondary | II  | 7
-V/ii  | secondary | VI  | 7
-V/vi  | secondary | III | 7
+VI        | s | 7,9,b9
+sIdim7    | s |
+sIVm7b5   | s |
+II        | s | 7,9,b9
+VIm7b5/b3 | s |
+sIIdim7   | s |
+VII       | s | 7,9,b9
+v         | s | 7
+I7        | s | 9,b9
+IIIm7b5   | s |
+Im6       | s |
+V/2       | s |
+bVII      | s | 9
+bVII9     | s |
+bVI       | s |
+bII7      | s |
+IVm7      | s |
+bVI7      | s |
+Idim/b3   | s |
+III       | s | 7,9,b9
+VIIm7b5   | s |
+sVdim7    | s |
 
 # Explicit arrows only (strong connections - natural voice leading)
 # These represent the drawn arrows on Mugglin's map
+I       -> IV/1
+I7      -> IV
+I/3     -> IV
+I/3     -> ii
+I/5     -> V
+Idim/b3 -> ii
+Im6     -> V/2
+Im6     -> II
+
+sIdim7 -> ii
+
+bII7 -> I
+
 ii    -> V
-V     -> I
-IV    -> I
 ii    -> iii
-V     -> iii
-V     -> vi
-iii   -> vi
-iii   -> IV
-vi    -> IV
-vi    -> ii
-IV    -> ii
+ii    -> I/3
+ii    -> I/5
+ii    -> IVm7
+ii    -> bII7
+
+II -> V
+
+sIIdim7 -> iii
+
+iii -> I
+iii -> IV
+iii -> vi
+
+III -> vi
+
+IIIm7b5 -> VI
+IIIm7b5 -> IV
+
+IV -> I
+IV -> V
+IV -> I/5
+IV -> ii
+IV -> I/3
+
+sIVm7b5 -> VII
+sIVm7b5 -> V
+sIVm7b5 -> I/5
+
+V -> iii
+V -> vi
+V -> I
+V/1 -> I
+V/2 -> II
+
+v -> I
+
+sVdim7 -> vi
+
+bVI -> bVII
+bVI7 -> I/5
+
+
+vi -> ii
+vi -> IV
+
+VI -> ii
+
+VIm7b5/b3 -> II
+
+bVII -> I
+bVII9 -> I/5
+
+VII -> iii
+
+VIIm7b5 -> III
+

@@ -3,6 +3,7 @@
 
 use crate::types::progression::{ProgressionEdge, NodeType};
 use crate::types::{RomanChord, RomanNumeral, RomanDegree, Accidental, Interval, IntervalSet};
+use crate::types::chord::BassType;
 use std::collections::HashMap;
 
 // Common interval patterns (reused across multiple chords)
@@ -20,7 +21,7 @@ const MINOR_TRIAD_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE, Interval::NONE, Interval::NONE,
      Interval::NONE], 3);
 
-/// i chord - stable harmonic center (primary node)
+/// i chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth
 pub static MINOR_I: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
@@ -40,7 +41,7 @@ const MINOR_I_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 4);
 
-/// i7 chord - stable harmonic center (primary node)
+/// i7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh
 pub static MINOR_I_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
@@ -60,7 +61,7 @@ const MINOR_I_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 5);
 
-/// i9 chord - stable harmonic center (primary node)
+/// i9 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh, major ninth
 pub static MINOR_I_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
@@ -80,7 +81,7 @@ const MINOR_I_M7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 4);
 
-/// im7 chord - stable harmonic center (primary node)
+/// im7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh
 pub static MINOR_I_M7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
@@ -100,7 +101,7 @@ const MINOR_I_M9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 5);
 
-/// im9 chord - stable harmonic center (primary node)
+/// im9 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh, major ninth
 pub static MINOR_I_M9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
@@ -108,7 +109,7 @@ pub static MINOR_I_M9: RomanChord = RomanChord {
     bass: None,
 };
 
-/// ii chord - stable harmonic center (primary node)
+/// ii chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth
 pub static MINOR_II: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
@@ -128,7 +129,7 @@ const MINOR_II_FLAT_5_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array
      Interval::NONE,
      Interval::NONE], 3);
 
-/// iib5 chord - stable harmonic center (primary node)
+/// iib5 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, diminished fifth
 pub static MINOR_II_FLAT_5: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
@@ -148,7 +149,7 @@ const MINOR_II_M7_FLAT_5_INTERVALS_SET: IntervalSet = IntervalSet::const_from_ar
      Interval::NONE,
      Interval::NONE], 4);
 
-/// iim7b5 chord - stable harmonic center (primary node)
+/// iim7b5 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, diminished fifth, minor seventh
 pub static MINOR_II_M7_FLAT_5: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
@@ -168,7 +169,7 @@ const MINOR_II_FLAT_5_PLUS_7_INTERVALS_SET: IntervalSet = IntervalSet::const_fro
      Interval::NONE,
      Interval::NONE], 4);
 
-/// iib5+7 chord - stable harmonic center (primary node)
+/// iib5+7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, diminished fifth, minor seventh
 pub static MINOR_II_FLAT_5_PLUS_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
@@ -176,7 +177,7 @@ pub static MINOR_II_FLAT_5_PLUS_7: RomanChord = RomanChord {
     bass: None,
 };
 
-/// III chord - stable harmonic center (primary node)
+/// III chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth
 pub static III: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::III, Accidental::Natural),
@@ -196,7 +197,7 @@ const III_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 4);
 
-/// III7 chord - stable harmonic center (primary node)
+/// III7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh
 pub static III_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::III, Accidental::Natural),
@@ -216,7 +217,7 @@ const III_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 5);
 
-/// III9 chord - stable harmonic center (primary node)
+/// III9 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh, major ninth
 pub static III_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::III, Accidental::Natural),
@@ -236,7 +237,7 @@ const III_MAJ7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 4);
 
-/// IIImaj7 chord - stable harmonic center (primary node)
+/// IIImaj7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth, major seventh
 pub static III_MAJ7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::III, Accidental::Natural),
@@ -244,7 +245,7 @@ pub static III_MAJ7: RomanChord = RomanChord {
     bass: None,
 };
 
-/// iv chord - stable harmonic center (primary node)
+/// iv chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth
 pub static MINOR_IV: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
@@ -264,7 +265,7 @@ const MINOR_IV_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 4);
 
-/// iv7 chord - stable harmonic center (primary node)
+/// iv7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh
 pub static MINOR_IV_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
@@ -284,7 +285,7 @@ const MINOR_IV_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 5);
 
-/// iv9 chord - stable harmonic center (primary node)
+/// iv9 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh, major ninth
 pub static MINOR_IV_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
@@ -304,7 +305,7 @@ const MINOR_IV_M7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 4);
 
-/// ivm7 chord - stable harmonic center (primary node)
+/// ivm7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh
 pub static MINOR_IV_M7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
@@ -312,7 +313,7 @@ pub static MINOR_IV_M7: RomanChord = RomanChord {
     bass: None,
 };
 
-/// v chord - stable harmonic center (primary node)
+/// v chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth
 pub static MINOR_V: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
@@ -332,7 +333,7 @@ const MINOR_V_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 4);
 
-/// v7 chord - stable harmonic center (primary node)
+/// v7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh
 pub static MINOR_V_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
@@ -352,7 +353,7 @@ const MINOR_V_M7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 4);
 
-/// vm7 chord - stable harmonic center (primary node)
+/// vm7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh
 pub static MINOR_V_M7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
@@ -360,7 +361,7 @@ pub static MINOR_V_M7: RomanChord = RomanChord {
     bass: None,
 };
 
-/// V chord - stable harmonic center (primary node)
+/// V chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth
 pub static V: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
@@ -380,7 +381,7 @@ const V_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 4);
 
-/// V7 chord - stable harmonic center (primary node)
+/// V7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh
 pub static V_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
@@ -400,7 +401,7 @@ const V_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 5);
 
-/// V9 chord - stable harmonic center (primary node)
+/// V9 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh, major ninth
 pub static V_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
@@ -420,7 +421,7 @@ const V_7_PLUS_FLAT_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array
      Interval::NONE,
      Interval::NONE], 5);
 
-/// V7+b9 chord - stable harmonic center (primary node)
+/// V7+b9 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh, minor ninth
 pub static V_7_PLUS_FLAT_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
@@ -428,7 +429,7 @@ pub static V_7_PLUS_FLAT_9: RomanChord = RomanChord {
     bass: None,
 };
 
-/// VI chord - stable harmonic center (primary node)
+/// VI chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth
 pub static VI: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
@@ -448,7 +449,7 @@ const VI_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 4);
 
-/// VI7 chord - stable harmonic center (primary node)
+/// VI7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh
 pub static VI_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
@@ -468,7 +469,7 @@ const VI_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 5);
 
-/// VI9 chord - stable harmonic center (primary node)
+/// VI9 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh, major ninth
 pub static VI_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
@@ -488,7 +489,7 @@ const VI_MAJ7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 4);
 
-/// VImaj7 chord - stable harmonic center (primary node)
+/// VImaj7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth, major seventh
 pub static VI_MAJ7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
@@ -496,7 +497,7 @@ pub static VI_MAJ7: RomanChord = RomanChord {
     bass: None,
 };
 
-/// VII chord - stable harmonic center (primary node)
+/// VII chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth
 pub static VII: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VII, Accidental::Natural),
@@ -516,7 +517,7 @@ const VII_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 4);
 
-/// VII7 chord - stable harmonic center (primary node)
+/// VII7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh
 pub static VII_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VII, Accidental::Natural),
@@ -536,7 +537,7 @@ const VII_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
      Interval::NONE,
      Interval::NONE], 5);
 
-/// VII9 chord - stable harmonic center (primary node)
+/// VII9 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh, major ninth
 pub static VII_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VII, Accidental::Natural),
@@ -546,7 +547,7 @@ pub static VII_9: RomanChord = RomanChord {
 
 const MINOR_FLAT_II_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
     [Interval::PERFECT_UNISON,
-     Interval::MAJOR_THIRD,
+     Interval::MINOR_THIRD,
      Interval::PERFECT_FIFTH,
      Interval::MINOR_SEVENTH,
      Interval::NONE,
@@ -556,8 +557,8 @@ const MINOR_FLAT_II_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array
      Interval::NONE,
      Interval::NONE], 4);
 
-/// bII7 chord - creates tension, seeks resolution (secondary node)
-/// Intervals: perfect unison, major third, perfect fifth, minor seventh
+/// bII7 chord - creates tension, seeks resolution (s node)
+/// Intervals: perfect unison, minor third, perfect fifth, minor seventh
 pub static MINOR_FLAT_II_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
     intervals: MINOR_FLAT_II_7_INTERVALS_SET,
@@ -566,7 +567,7 @@ pub static MINOR_FLAT_II_7: RomanChord = RomanChord {
 
 const MINOR_FLAT_VI_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
     [Interval::PERFECT_UNISON,
-     Interval::MAJOR_THIRD,
+     Interval::MINOR_THIRD,
      Interval::PERFECT_FIFTH,
      Interval::MINOR_SEVENTH,
      Interval::NONE,
@@ -576,8 +577,8 @@ const MINOR_FLAT_VI_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array
      Interval::NONE,
      Interval::NONE], 4);
 
-/// bVI7 chord - creates tension, seeks resolution (secondary node)
-/// Intervals: perfect unison, major third, perfect fifth, minor seventh
+/// bVI7 chord - creates tension, seeks resolution (s node)
+/// Intervals: perfect unison, minor third, perfect fifth, minor seventh
 pub static MINOR_FLAT_VI_7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
     intervals: MINOR_FLAT_VI_7_INTERVALS_SET,
@@ -586,7 +587,7 @@ pub static MINOR_FLAT_VI_7: RomanChord = RomanChord {
 
 const MINOR_FLAT_VI_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
     [Interval::PERFECT_UNISON,
-     Interval::MAJOR_THIRD,
+     Interval::MINOR_THIRD,
      Interval::PERFECT_FIFTH,
      Interval::MINOR_SEVENTH,
      Interval::MAJOR_NINTH,
@@ -596,8 +597,8 @@ const MINOR_FLAT_VI_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array
      Interval::NONE,
      Interval::NONE], 5);
 
-/// bVI9 chord - creates tension, seeks resolution (secondary node)
-/// Intervals: perfect unison, major third, perfect fifth, minor seventh, major ninth
+/// bVI9 chord - creates tension, seeks resolution (s node)
+/// Intervals: perfect unison, minor third, perfect fifth, minor seventh, major ninth
 pub static MINOR_FLAT_VI_9: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VI, Accidental::Natural),
     intervals: MINOR_FLAT_VI_9_INTERVALS_SET,

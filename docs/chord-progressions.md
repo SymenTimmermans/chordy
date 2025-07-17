@@ -111,11 +111,24 @@ use chordy::{Key, note, Interval};
 
 let key = Key::Major(note!("Bb"));
 
-// ii-V-I with jazz extensions
+// ii-V-I with jazz extensions and smooth voice leading
 let jazz_progression = vec![
     key.progression_node("ii9").unwrap(),      // Cm9
     key.progression_node("V7+b9").unwrap(),    // F7♭9 (altered dominant)
     key.progression_node("Imaj9").unwrap(),    // B♭maj9
+];
+
+// Convert to concrete chords and add inversions for voice leading
+let concrete_jazz = vec![
+    Chord::new(note!("C"), vec![Interval::PERFECT_UNISON, Interval::MINOR_THIRD, 
+                                Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, 
+                                Interval::MAJOR_NINTH]),
+    Chord::new(note!("F"), vec![Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, 
+                                Interval::PERFECT_FIFTH, Interval::MINOR_SEVENTH, 
+                                Interval::MINOR_NINTH]).with_inversion(1), // F7♭9/A
+    Chord::new(note!("Bb"), vec![Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, 
+                                 Interval::PERFECT_FIFTH, Interval::MAJOR_SEVENTH, 
+                                 Interval::MAJOR_NINTH]),
 ];
 
 // Analyze the altered dominant
@@ -147,6 +160,156 @@ let modal_progression = vec![
 for chord in modal_progression {
     println!("{} - Type: {:?}", chord.display_name, chord.node_type);
 }
+```
+
+## Chord Inversions in Progressions
+
+Chord inversions play a crucial role in smooth voice leading and can dramatically improve the flow of chord progressions. Chordy supports both classical inversions and slash chords.
+
+### Basic Inversions
+
+```rust
+use chordy::{Chord, note};
+
+let c_major = Chord::major(note!("C"));
+
+// Root position: C-E-G
+let root_position = c_major; // C
+
+// First inversion: E-G-C (bass note is the third)
+let first_inversion = c_major.with_inversion(1); // C/E
+
+// Second inversion: G-C-E (bass note is the fifth)
+let second_inversion = c_major.with_inversion(2); // C/G
+
+// Check the bass note and inversion type
+assert_eq!(first_inversion.bass_note(), note!("E"));
+assert!(first_inversion.is_inverted());
+assert_eq!(first_inversion.inversion_number(), Some(1));
+```
+
+### Slash Chords vs Inversions
+
+While both use the same display format (C/E), they represent different concepts:
+
+```rust
+use chordy::{Chord, note, BassType};
+
+let c_major = Chord::major(note!("C"));
+
+// Classical inversion - bass note is a chord tone
+let inversion = c_major.with_inversion(1); // C/E (E is the third)
+
+// Slash chord - bass note can be any note
+let slash_chord = c_major.with_slash_bass(note!("F")); // C/F (F is not a chord tone)
+
+// Check the difference
+assert!(inversion.is_inverted());
+assert!(!inversion.is_slash_chord());
+
+assert!(!slash_chord.is_inverted());
+assert!(slash_chord.is_slash_chord());
+```
+
+### Voice Leading with Inversions
+
+Use inversions to create smooth bass lines in progressions:
+
+```rust
+use chordy::{Key, Chord, note};
+
+let key = Key::Major(note!("C"));
+
+// Progression with smooth bass line: C - C - F - G
+let smooth_progression = vec![
+    Chord::major(note!("C")),                    // C (bass: C)
+    Chord::minor(note!("A")).with_inversion(1),  // Am/C (bass: C)
+    Chord::major(note!("F")),                    // F (bass: F)
+    Chord::major(note!("G")).with_inversion(2),  // G/D (bass: D)
+];
+
+// Bass line: C - C - F - D (stepwise motion)
+for chord in &smooth_progression {
+    println!("{}: bass = {}", chord, chord.bass_note());
+}
+```
+
+### Roman Numeral Analysis with Inversions
+
+```rust
+use chordy::{Key, RomanChord, roman};
+
+let key = Key::Major(note!("C"));
+
+// Create roman chord inversions
+let i_chord = RomanChord::major(roman!("I"));
+let i_first_inversion = i_chord.with_inversion(1); // I/III
+
+// Convert to concrete chords
+let concrete_inversion = i_first_inversion.in_key(&key);
+assert_eq!(concrete_inversion.bass_note(), note!("E"));
+
+// Analysis preserves inversion information
+let analyzed = concrete_inversion.to_roman(&key).unwrap();
+assert!(analyzed.is_inverted());
+```
+
+### Jazz Progressions with Inversions
+
+```rust
+use chordy::{Key, Chord, note};
+
+let key = Key::Major(note!("F"));
+
+// ii-V-I with inversions for smooth voice leading
+let jazz_progression = vec![
+    // Gm7 (ii7)
+    Chord::minor_7th(note!("G")),
+    // C7/E (V7/3 - first inversion for smooth bass)
+    Chord::dominant_7th(note!("C")).with_inversion(1),
+    // Fmaj7 (Imaj7)
+    Chord::major_7th(note!("F")),
+];
+
+// Bass line: G - E - F (smoother than G - C - F)
+for chord in &jazz_progression {
+    println!("{}: bass = {}", chord, chord.bass_note());
+}
+```
+
+### Slash Chords in Modern Progressions
+
+```rust
+use chordy::{Chord, note};
+
+// Modern pop progression with slash chords
+let modern_progression = vec![
+    Chord::major(note!("C")),                    // C
+    Chord::major(note!("G")).with_slash_bass(note!("B")), // G/B
+    Chord::minor(note!("A")),                    // Am
+    Chord::major(note!("F")),                    // F
+];
+
+// Creates a descending bass line: C - B - A - F
+for chord in &modern_progression {
+    println!("{}: bass = {}", chord, chord.bass_note());
+}
+```
+
+### Inversion Convenience Methods
+
+```rust
+use chordy::{Chord, note};
+
+let c_major = Chord::major(note!("C"));
+
+// Convenience methods for common inversions
+let first_inv = c_major.in_first_inversion();   // C/E
+let second_inv = c_major.in_second_inversion(); // C/G
+
+// Works with any chord type
+let dm7 = Chord::minor_7th(note!("D"));
+let dm7_third_inv = dm7.with_inversion(3); // Dm7/C (minor 7th in bass)
 ```
 
 ## Advanced Analysis

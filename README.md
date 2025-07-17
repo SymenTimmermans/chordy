@@ -29,6 +29,7 @@ assert_ne!(c_sharp, d_flat); // Different note names
 
 - **Correct Enharmonic Handling**: Distinguish between enharmonically equivalent notes (C♯/D♭)
 - **Intelligent Transposition**: Transpose with proper music theory rules, not just semitone math
+- **Chord Inversions and Slash Chords**: Full support for chord inversions (C/E) and slash chords (C/G)
 - **Chord Progression Analysis**: Built-in progression maps with jazz harmony support
 - **Roman Numeral Analysis**: Complete system for harmonic analysis and chord functions
 - **Chord Identification**: Advanced chord naming with proper jazz conventions
@@ -85,7 +86,7 @@ assert_eq!(e_sharp.name.accidental(), Accidental::Sharp);
 ### Scales and Chords
 
 ```rust
-use chordy::{NoteName, Letter, Accidental, Scale, Key, scales, traits::ChordLike};
+use chordy::{NoteName, Letter, Accidental, Scale, Key, scales, traits::ChordLike, Chord, note};
 
 // Create a C major scale
 let c = NoteName::new(Letter::C, Accidental::Natural);
@@ -98,18 +99,26 @@ let notes = c_major.notes();
 // Generate a diatonic chord
 let c_major_triad = c_major.chord_at_degree(1);
 // [C, E, G]
+
+// Create chord inversions
+let c_major = Chord::major(note!("C"));
+let first_inversion = c_major.with_inversion(1);  // C/E
+let second_inversion = c_major.with_inversion(2); // C/G
+
+// Create slash chords
+let c_slash_f = c_major.with_slash_bass(note!("F")); // C/F
 ```
 
 ### Chord Progressions
 
 ```rust
-use chordy::{Key, NoteName, Letter, Accidental};
+use chordy::{Key, NoteName, Letter, Accidental, Chord, note};
 
 // Create a key for progression analysis
 let c_major = Key::Major(NoteName::new(Letter::C, Accidental::Natural));
 
 // Create a chord for analysis  
-let tonic_chord = chordy::Chord::major(chordy::note!("C"));
+let tonic_chord = Chord::major(note!("C"));
 
 // Get progression options from a chord
 let options = c_major.progression_options(&tonic_chord).unwrap();
@@ -118,6 +127,14 @@ let options = c_major.progression_options(&tonic_chord).unwrap();
 println!("Strong progressions: {:?}", options.strong.len());
 println!("Moderate progressions: {:?}", options.moderate.len());
 println!("Weak progressions: {:?}", options.weak.len());
+
+// Use inversions in progressions for smoother voice leading
+let progression = vec![
+    Chord::major(note!("C")),                    // C major
+    Chord::major(note!("A")).with_inversion(1),  // Am/C (first inversion)
+    Chord::major(note!("F")),                    // F major
+    Chord::major(note!("G")).with_inversion(2),  // G/D (second inversion)
+];
 ```
 
 **📖 [Complete Chord Progression Guide](docs/chord-progressions.md)** - Comprehensive documentation with examples for building progressions, jazz harmony, modal progressions, and harmonic analysis.
@@ -137,6 +154,7 @@ The API is stabilizing with ongoing work on advanced analysis tools and output f
     - [x] Deriving basic triads from scales
     - [x] Chord identification and naming system
     - [x] Roman numeral analysis
+    - [x] Chord inversions and slash chords
     - [ ] Deriving extended chords from scales
     - [ ] Deriving chords from multiple scales
     - [ ] Piano chord voicings based on hand ergonomics

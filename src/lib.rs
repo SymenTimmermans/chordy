@@ -15,18 +15,23 @@
 //! let notes = chord.notes(); // From ChordLike
 //! let triads = scale.triads(); // From ChordLike 
 //! let transposed = chord.transposed(Interval::MAJOR_THIRD); // From Transposable
+//!
+//! // Create chord inversions and slash chords
+//! let first_inversion = chord.with_inversion(1);  // C/E
+//! let slash_chord = chord.with_slash_bass(note!("F")); // C/F
 //! ```
 //!
 //! ## Core Concepts
 //! - All musical types implement relevant traits (chords are `Transposable`, scales are `ChordLike`)
 //! - Traits are automatically in scope when using `prelude::*`
 //! - Macros provide compile-time safety for note creation
+//! - Chord inversions and slash chords are supported via `BassType` enum
 //!
 //! # Macros
 //!
 //! The `pitch!` and `note!` macros provide compile-time pitch and note creation:
 //! ```
-//! use chordy::{pitch, note};
+//! use chordy::{pitch, note, Chord, BassType};
 //!
 //! // Creates a Pitch at compile time (validated during compilation)
 //! let my_pitch = pitch!("C#4");
@@ -41,6 +46,16 @@
 //! assert_eq!(double_flat.to_string(), "B𝄫");
 //! let double_sharp = note!("F##");
 //! assert_eq!(double_sharp.to_string(), "F𝄪");
+//!
+//! // Create chord inversions and slash chords
+//! let c_major = Chord::major(note!("C"));
+//! let first_inversion = c_major.with_inversion(1);  // C/E
+//! let slash_chord = c_major.with_slash_bass(note!("G")); // C/G
+//! 
+//! // Check chord bass types
+//! assert_eq!(first_inversion.bass_note(), note!("E"));
+//! assert!(first_inversion.is_inverted());
+//! assert!(!first_inversion.is_slash_chord());
 //!
 //! // The following would fail to compile:
 //! // let invalid_pitch = pitch!("H4");
