@@ -167,6 +167,90 @@ macro_rules! roman {
     }};
 }
 
+/// Makes it easy to create a `Key` at compile time.
+///
+/// # Examples
+///
+/// ```rust
+/// use chordy::{Key, note};
+/// 
+/// let c_major = chordy::key!("C");
+/// let a_minor = chordy::key!("Am");
+/// let f_sharp_major = chordy::key!("F#");
+/// let b_flat_minor = chordy::key!("Bbm");
+///
+/// assert_eq!(c_major, Key::Major(note!("C")));
+/// assert_eq!(a_minor, Key::Minor(note!("A")));
+/// assert_eq!(f_sharp_major, Key::Major(note!("F#")));
+/// assert_eq!(b_flat_minor, Key::Minor(note!("Bb")));
+/// ```
+#[macro_export]
+macro_rules! key {
+    ($s:literal) => {{
+        // Only do compile-time validation in non-test contexts
+        #[cfg(not(test))]
+        const _VALIDATE: () = {
+            if !$crate::is_valid_key($s) {
+                panic!(concat!(
+                    "Invalid key string '", $s, "'. ",
+                    "Must be a note name optionally followed by 'm' for minor (e.g., 'C', 'Am', 'F#', 'Bbm')"
+                ));
+            }
+        };
+        
+        // Parse at runtime
+        if $s.ends_with('m') {
+            let note_str = &$s[..$s.len() - 1];
+            $crate::Key::Minor(note_str.parse::<$crate::NoteName>().unwrap())
+        } else {
+            $crate::Key::Major($s.parse::<$crate::NoteName>().unwrap())
+        }
+    }};
+}
+
+/// Helper function for key validation
+#[doc(hidden)]
+pub const fn is_valid_key(s: &str) -> bool {
+    let bytes = s.as_bytes();
+    if bytes.is_empty() {
+        return false;
+    }
+    
+    // Check if it ends with 'm' for minor
+    let is_minor = bytes[bytes.len() - 1] == b'm';
+    let note_end = if is_minor { bytes.len() - 1 } else { bytes.len() };
+    
+    // Validate the note part
+    if note_end == 0 {
+        return false;
+    }
+    
+    // Validate first character is a valid note letter
+    let valid_letter = matches!(
+        bytes[0] as char,
+        'C' | 'c' | 'D' | 'd' | 'E' | 'e' | 'F' | 'f' | 'G' | 'g' | 'A' | 'a' | 'B' | 'b'
+    );
+    
+    if !valid_letter {
+        return false;
+    }
+    
+    // If there's more than just the letter (and not the 'm'), validate accidentals
+    if note_end > 1 {
+        let mut i = 1;
+        while i < note_end {
+            match bytes[i] as char {
+                'b' | '#' | 'n' | '♭' | '♯' | '♮' | '𝄫' | '𝄪' => {
+                    i += 1;
+                }
+                _ => return false,
+            }
+        }
+    }
+    
+    true
+}
+
 /// Helper function for roman numeral validation
 #[doc(hidden)]
 pub const fn is_valid_roman(s: &str) -> bool {

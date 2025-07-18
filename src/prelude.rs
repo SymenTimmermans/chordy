@@ -34,5 +34,5 @@ pub use std::fmt::{Debug, Display};
 pub use std::str::FromStr;
 
 // Macros
-pub use crate::{note, pitch, roman};
+pub use crate::{note, pitch, roman, key};
 
