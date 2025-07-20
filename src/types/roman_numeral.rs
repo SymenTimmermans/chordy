@@ -3,7 +3,7 @@ use super::{Interval, IntervalSet, Key, Chord, Accidental, ChordQuality};
 use crate::{error::ParseError, traits::{HasIntervals, HasRoot}};
 
 /// Roman degree representation (I-VII), analogous to Letter enum
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum RomanDegree {
     /// First degree
     I,
@@ -77,7 +77,7 @@ impl RomanDegree {
 }
 
 /// Roman numeral representation with degree and accidental, analogous to NoteName
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RomanNumeral {
     /// The roman degree (I-VII)
     pub degree: RomanDegree,

@@ -172,7 +172,7 @@ fn generate_progressions() {
     fs::write(&major_output, &major_data).expect("Failed to write major progression data");
     
     // Generate minor progressions  
-    let minor_path = Path::new(&manifest_dir).join("data/progressions/minor_simple.progression");
+    let minor_path = Path::new(&manifest_dir).join("data/progressions/minor.progression");
     let minor_data = parse_progression_file(&minor_path, "minor");
     let minor_output = Path::new(&manifest_dir).join("src/types/progression/minor_data.rs");
     fs::write(&minor_output, &minor_data).expect("Failed to write minor progression data");
@@ -279,7 +279,6 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
     // Generate individual node variants
     let mut all_node_names = Vec::new();
     let mut all_edge_names = Vec::new();
-    let mut node_map_entries = Vec::new();
     let mut node_type_entries = Vec::new();
     
     for node in nodes {
@@ -324,7 +323,6 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
                 node_name, roman_numeral_code, intervals_set_construction, bass_field
             ));
             
-            node_map_entries.push((display_name.clone(), node_name.clone()));
             node_type_entries.push((node_name.clone(), node_type.to_string()));
         }
     }
@@ -388,18 +386,6 @@ fn generate_progression_code(nodes: &[ProgressionNode], edges: &[ProgressionEdge
     generated.push_str("    map\n");
     generated.push_str("}\n\n");
     
-    // Generate simple lookup function for RomanChord
-    generated.push_str(&format!("/// Look up a progression chord by its display name for {} keys\n", key_type));
-    generated.push_str("/// \n/// Returns the corresponding `RomanChord` for chord symbols like \"I\", \"V7\", \"ii9\", etc.\n");
-    generated.push_str(&format!("/// Supports {} different chord variants.\n", node_map_entries.len()));
-    generated.push_str("pub fn get_node(name: &str) -> Option<&'static RomanChord> {\n");
-    generated.push_str("    match name {\n");
-    for (display_name, node_name) in &node_map_entries {
-        generated.push_str(&format!("        \"{}\" => Some(&{}),\n", display_name, node_name));
-    }
-    generated.push_str("        _ => None,\n");
-    generated.push_str("    }\n");
-    generated.push_str("}\n");
     
     generated
 }
@@ -526,6 +512,7 @@ fn parse_roman_degree(roman: &str) -> (String, String, Option<String>) {
             "6" => "RomanNumeral::new(RomanDegree::VI, Accidental::Natural)",
             "7" => "RomanNumeral::new(RomanDegree::VII, Accidental::Natural)",
             "b3" => "RomanNumeral::new(RomanDegree::III, Accidental::Flat)",
+            "b6" => "RomanNumeral::new(RomanDegree::VI, Accidental::Flat)",
             _ => panic!("Unknown bass degree: {}", bass),
         };
         (base, Some(bass_degree_code.to_string()))
@@ -551,7 +538,9 @@ fn parse_roman_degree(roman: &str) -> (String, String, Option<String>) {
         .replace("m7", "")
         .replace("m9", "")
         .replace("7", "")
-        .replace("9", "");
+        .replace("9", "")
+        .replace("o", "")
+        .replace("aug", "");
     
     // Determine quality from case, content, and suffixes in the ID
     let quality = determine_chord_quality(roman);
@@ -597,19 +586,6 @@ fn determine_chord_quality(roman_id: &str) -> String {
     }
 }
 
-/// Makes an interval set major by replacing minor third with major third
-fn make_intervals_major(intervals: &mut Vec<&'static str>) {
-    if let Some(pos) = intervals.iter().position(|&x| x == "Interval::MINOR_THIRD") {
-        intervals[pos] = "Interval::MAJOR_THIRD";
-    }
-}
-
-/// Makes an interval set minor by replacing major third with minor third
-fn make_intervals_minor(intervals: &mut Vec<&'static str>) {
-    if let Some(pos) = intervals.iter().position(|&x| x == "Interval::MAJOR_THIRD") {
-        intervals[pos] = "Interval::MINOR_THIRD";
-    }
-}
 
 fn get_base_triad(quality_hint: &str) -> Vec<&'static str> {
     match quality_hint {
@@ -759,6 +735,14 @@ fn parse_chord_variant(variant: &str, quality_hint: &str, roman_id: &str) -> Vec
         "b9" => {
             // b9 extension: add minor ninth (usually on dominant chords)
             intervals.push("Interval::MINOR_NINTH");
+        },
+        "b11" => {
+            // b9 extension: add minor eleventh (usually on dominant chords)
+            intervals.push("Interval::MINOR_ELEVENTH");
+        },
+        "b13" => {
+            // b9 extension: add minor thirteenth (usually on dominant chords)
+            intervals.push("Interval::MINOR_THIRTEENTH");
         },
         "sus2" => {
             // Suspended second: replace third with major second

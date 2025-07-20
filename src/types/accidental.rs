@@ -5,7 +5,7 @@ use crate::types::chord::naming::ChordFormat;
 
 /// Accidentals that modify the pitch of a note,
 /// with numeric backing representing semitone shifts.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(i8)]
 #[allow(missing_docs)]
 pub enum Accidental {

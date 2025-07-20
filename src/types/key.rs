@@ -306,28 +306,59 @@ impl Key {
         // Get the progression graph for this key
         let graph = self.get_progression_graph();
         
-        // Search for matching progression node
-        let nodes: Vec<_> = graph.nodes().collect();
+        // Collect all nodes and sort them to ensure deterministic behavior
+        let mut nodes: Vec<_> = graph.nodes().collect();
+        nodes.sort_by_key(|node| (node.root, node.intervals.len()));
         
-        // First try to find exact match with intervals
+        // First try to find exact match with intervals AND bass
         for node in &nodes {
-            if node.root == roman_chord.root() {
-                // Check if intervals match closely
+            if node.root == roman_chord.root() && node.bass == roman_chord.bass {
+                // Check if intervals match exactly
                 let node_intervals: std::collections::HashSet<_> = node.intervals.iter().collect();
                 let chord_intervals: std::collections::HashSet<_> = roman_chord.intervals().iter().copied().collect();
                 
-                // Exact match
+                // Exact match (root, bass, and intervals all match)
                 if node_intervals == chord_intervals {
                     return Some(*node);
                 }
             }
         }
         
-        // Fallback to roman numeral match only (base triad)
+        // Strict matching: bass structure must match exactly
         for node in &nodes {
-            if node.root == roman_chord.root() && node.intervals.len() == 3 {
-                // Found base triad match
+            if node.root == roman_chord.root() &&
+               node.intervals.len() == roman_chord.intervals().len() &&
+               node.bass == roman_chord.bass {
+                // Check if intervals match exactly
+                let node_intervals: std::collections::HashSet<_> = node.intervals.iter().collect();
+                let chord_intervals: std::collections::HashSet<_> = roman_chord.intervals().iter().copied().collect();
+                
+                if node_intervals == chord_intervals {
+                    return Some(*node);
+                }
+            }
+        }
+        
+        // If no exact match, find nodes with matching root, intervals, and bass structure
+        for node in &nodes {
+            if node.root == roman_chord.root() &&
+               node.intervals.len() == roman_chord.intervals().len() &&
+               node.bass.is_some() == roman_chord.bass.is_some() {
                 return Some(*node);
+            }
+        }
+        
+        // Final fallback: match root and ensure bass compatibility
+        for node in &nodes {
+            if node.root == roman_chord.root() {
+                // If chord has no bass, only match nodes with no bass
+                if roman_chord.bass.is_none() && node.bass.is_none() {
+                    return Some(*node);
+                }
+                // If chord has bass, match any node with same root (less strict)
+                if roman_chord.bass.is_some() {
+                    return Some(*node);
+                }
             }
         }
         

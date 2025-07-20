@@ -3,45 +3,122 @@
 # Note: Minor keys have different harmonic language than major
 
 # Primary nodes (blue - diatonic in minor, stable harmonic centers)
-i     | p | ,7,9,m7,m9
-ii    | p | b5,m7b5,b5+7
-III   | p | 7,9,maj7
-iv    | p | 7,9,m7
-v     | p | ,7,m7
-V     | p | 7,9,7+b9
-VI    | p | 7,9,maj7
-VII   | p | 7,9
+iidim    | p |
+viidim/2 | p |
+V        | p | ,7,b9,b13,sus4
+bIIIaug  | p |
+i/b3     | p |
+bVI      | p | ,6,maj7
+iv/b6    | p | ,m6,m7
+iv       | p | ,m6,m7,m9
+bII/4    | p |
+i/5      | p |
+i        | p | ,sus2,sus4
+iv/1     | p |
+V/1      | p |
 
 # Secondary nodes (green - chromatic/borrowed, create tension)
-bII   | s | 7
-bVI   | s | 7,9
-V/III | s | 7
-V/iv  | s | 7
-V/V   | s | 7
-V/VI  | s | 7
+iidim7   | s |
+V7       | s | ,b9
+iiidim7  | s |
+Vdim7    | s |
+Vm7b5    | s |
+I        | s | ,7,b9
+vim7b5   | s |
+II       | s | ,7,b9
+sivdim7  | s |
+# bVI    | s |
+bVII     | s | ,9
+bIII     | s | ,7,9,b9
+bviim7b5 | s |
+ivm7     | s |
+bVI7     | s |
 
 # Explicit arrows (strong connections - natural voice leading in minor)
-i     -> iv
-i     -> V
-i     -> VI
-i     -> III
-ii    -> V
-ii    -> vii
-III   -> VI
-III   -> iv
-iv    -> i
-iv    -> ii
-iv    -> V
-iv    -> VII
-v     -> i
-V     -> i
-V     -> VI
-VI    -> ii
-VI    -> iv
-VII   -> III
-bII   -> V
-bVI   -> bVII
-V/III -> III
-V/iv  -> iv
-V/V   -> V
-V/VI  -> VI
+iidim    -> viidim/2
+iidim    -> V
+iidim    -> bIIIaug
+iidim    -> i/b3
+viidim/2 -> iidim
+viidim/2 -> V
+viidim/2 -> bIIIaug
+viidim/2 -> i/b3
+V        -> bIIIaug
+V        -> i/b3
+V        -> bVI
+V        -> iv/b6
+bIIIaug  -> i/b3
+bIIIaug  -> i
+bIIIaug  -> iv
+bIIIaug  -> bII/4
+bIIIaug  -> bVI
+bIIIaug  -> iv/b6
+i/b3     -> bIIIaug
+i/b3     -> i
+i/b3     -> iv
+i/b3     -> bII/4
+i/b3     -> bVI
+i/b3     -> iv/b6
+bVI      -> iv/b6
+bVI      -> iv
+bVI      -> bII/4
+bVI      -> iidim
+bVI      -> viidim/2
+iv/b6    -> bVI
+iv/b6    -> iv
+iv/b6    -> bII/4
+iv/b6    -> iidim
+iv/b6    -> viidim/2
+iv       -> bII/4
+iv       -> i
+iv       -> V
+iv       -> i/5
+iv       -> iidim
+iv       -> viidim/2
+iv       -> i/b3
+bII/4    -> iv
+bII/4    -> i
+bII/4    -> V
+bII/4    -> i/5
+bII/4    -> iidim
+bII/4    -> viidim/2
+bII/4    -> i/b3
+i/b3     -> iidim
+i/b3     -> viidim/2
+iidim    -> i/5
+viidim/2 -> i/5
+V        -> i
+i        -> V/1
+i        -> iv/1
+V/1      -> i
+V/1      -> iv/1
+iv/1     -> i
+iv/1     -> V/1
+
+iidim7   -> bIIIaug
+iidim7   -> i/b3
+V7       -> bIIIaug
+V7       -> i/b3
+iiidim7  -> iv
+iiidim7  -> bII/4
+Vdim7    -> I
+Vm7b5    -> I
+I        -> iv
+I        -> bII/4
+vim7b5   -> II
+II       -> V
+sivdim7  -> V
+bVI      -> bVII
+bVII     -> i
+Vm7b5    -> bVI
+Vm7b5    -> iv/b6
+Vdim7    -> bVI
+Vdim7    -> iv/b6
+bIII     -> bVI
+bIII     -> iv/b6
+bviim7b5 -> bIII
+iidim    -> ivm7
+viidim/2 -> ivm7
+ivm7     -> i
+bVI7     -> i/5
+sivdim7  -> i/5

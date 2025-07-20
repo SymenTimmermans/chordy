@@ -119,7 +119,18 @@ impl ProgressionGraph {
         }
         
         // Find moderate and weak connections (jumps to all other nodes)
-        for (chord, node_type) in self.nodes.values() {
+        // Collect and sort nodes for deterministic iteration
+        let mut node_entries: Vec<_> = self.nodes.values().collect();
+        node_entries.sort_by_key(|(chord, _)| {
+            (
+                chord.root,
+                chord.bass.map(|(bass, bass_type)| (bass, format!("{:?}", bass_type))),
+                chord.intervals.len(),
+                format!("{:?}", chord.intervals.as_slice())
+            )
+        });
+        
+        for (chord, node_type) in node_entries {
             if *chord == from_chord {
                 continue; // Skip self
             }
@@ -134,6 +145,20 @@ impl ProgressionGraph {
                 NodeType::Secondary => options.weak.push(*chord),
             }
         }
+        
+        // Sort all lists for deterministic ordering
+        // Use a comprehensive sort key including bass information
+        let sort_key = |chord: &RomanChord| {
+            (
+                chord.root,
+                chord.bass.map(|(bass, bass_type)| (bass, format!("{:?}", bass_type))),
+                chord.intervals.len(),
+                format!("{:?}", chord.intervals.as_slice())
+            )
+        };
+        options.strong.sort_by_key(sort_key);
+        options.moderate.sort_by_key(sort_key);
+        options.weak.sort_by_key(sort_key);
         
         Some(options)
     }
