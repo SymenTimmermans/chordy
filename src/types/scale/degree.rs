@@ -293,6 +293,11 @@ impl ScaleDegree {
                 Interval::PERFECT_FIFTH => Interval::DOUBLY_AUGMENTED_FIFTH,
                 _ => base_interval,
             },
+            Some(Accidental::Extreme(_)) => {
+                // For extreme accidentals, return the base interval
+                // This is a fallback for theoretical cases beyond double sharp/flat
+                base_interval
+            },
         }
     }
 }

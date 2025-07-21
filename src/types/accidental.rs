@@ -5,15 +5,28 @@ use crate::types::chord::naming::ChordFormat;
 
 /// Accidentals that modify the pitch of a note,
 /// with numeric backing representing semitone shifts.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[repr(i8)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[allow(missing_docs)]
 pub enum Accidental {
-    DoubleFlat = -2,
-    Flat = -1,
-    Natural = 0,
-    Sharp = 1,
-    DoubleSharp = 2,
+    DoubleFlat,
+    Flat,
+    Natural,
+    Sharp,
+    DoubleSharp,
+    /// Extreme accidentals beyond the standard range (triple sharps, etc.)
+    Extreme(i8),
+}
+
+impl PartialOrd for Accidental {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Accidental {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.semitone_offset().cmp(&other.semitone_offset())
+    }
 }
 
 impl Accidental {
@@ -30,7 +43,14 @@ impl Accidental {
 
     /// Returns the semitone offset for this accidental
     pub fn semitone_offset(&self) -> i8 {
-        *self as i8
+        match self {
+            Accidental::DoubleFlat => -2,
+            Accidental::Flat => -1,
+            Accidental::Natural => 0,
+            Accidental::Sharp => 1,
+            Accidental::DoubleSharp => 2,
+            Accidental::Extreme(level) => *level,
+        }
     }
 
     /// Pitch naming penalty for this accidental.
@@ -39,30 +59,42 @@ impl Accidental {
             Accidental::Natural => 0,
             Accidental::Sharp | Accidental::Flat => 1,
             Accidental::DoubleSharp | Accidental::DoubleFlat => 3,
+            Accidental::Extreme(level) => 3 + level.abs() as i32,
         }
     }
 
     /// Returns true if the accidental is a sharp variant (sharp or double sharp)
     pub fn is_sharp(self) -> bool {
-        matches!(self, Accidental::Sharp | Accidental::DoubleSharp)
+        matches!(self, Accidental::Sharp | Accidental::DoubleSharp) || 
+        matches!(self, Accidental::Extreme(n) if n > 0)
     }
 
     /// Returns true if the accidental is a flat variant (flat or double flat)
     pub fn is_flat(self) -> bool {
-        matches!(self, Accidental::Flat | Accidental::DoubleFlat)
+        matches!(self, Accidental::Flat | Accidental::DoubleFlat) ||
+        matches!(self, Accidental::Extreme(n) if n < 0)
     }
 
     /// Returns the string representation of the accidental for use as a component in another
     /// string. This means that only non-natural accidentals get written out, as natural is
     /// the default state.
-    pub fn component_str(&self) -> &'static str {
+    pub fn component_str(&self) -> String {
         use crate::symbols::*;
         match self {
-            Accidental::Flat => FLAT,
-            Accidental::Sharp => SHARP,
-            Accidental::Natural => "",
-            Accidental::DoubleFlat => DOUBLE_FLAT,
-            Accidental::DoubleSharp => DOUBLE_SHARP,
+            Accidental::Flat => FLAT.to_string(),
+            Accidental::Sharp => SHARP.to_string(),
+            Accidental::Natural => "".to_string(),
+            Accidental::DoubleFlat => DOUBLE_FLAT.to_string(),
+            Accidental::DoubleSharp => DOUBLE_SHARP.to_string(),
+            Accidental::Extreme(level) => {
+                if *level > 0 {
+                    SHARP.repeat(*level as usize)
+                } else if *level < 0 {
+                    FLAT.repeat(level.abs() as usize)
+                } else {
+                    "".to_string()
+                }
+            }
         }
     }
 
@@ -75,36 +107,66 @@ impl Accidental {
             Accidental::Natural => None,
             Accidental::DoubleFlat => Some(Accidental::DoubleFlat),
             Accidental::DoubleSharp => Some(Accidental::DoubleSharp),
+            Accidental::Extreme(0) => None, // Extreme with level 0 is natural
+            Accidental::Extreme(_) => Some(*self),
         }
     }
 
     /// Returns the string representation of the accidental for a specific output format.
     /// This includes natural accidentals, unlike component_str.
-    pub fn render_for_format(&self, format: ChordFormat) -> &'static str {
+    pub fn render_for_format(&self, format: ChordFormat) -> String {
         match (self, format) {
-            (Accidental::Flat, ChordFormat::Unicode) => "♭",
-            (Accidental::Flat, ChordFormat::Ascii) => "b",
-            (Accidental::Flat, ChordFormat::Html) => "&flat;",
-            (Accidental::Sharp, ChordFormat::Unicode) => "♯",
-            (Accidental::Sharp, ChordFormat::Ascii) => "#",
-            (Accidental::Sharp, ChordFormat::Html) => "&sharp;",
-            (Accidental::Natural, ChordFormat::Unicode) => "♮",
-            (Accidental::Natural, ChordFormat::Ascii) => "♮",
-            (Accidental::Natural, ChordFormat::Html) => "&natural;",
-            (Accidental::DoubleFlat, ChordFormat::Unicode) => "𝄫",
-            (Accidental::DoubleFlat, ChordFormat::Ascii) => "bb",
-            (Accidental::DoubleFlat, ChordFormat::Html) => "&#119083;", // 𝄫 Unicode entity
-            (Accidental::DoubleSharp, ChordFormat::Unicode) => "𝄪",
-            (Accidental::DoubleSharp, ChordFormat::Ascii) => "##",
-            (Accidental::DoubleSharp, ChordFormat::Html) => "&#119082;", // 𝄪 Unicode entity
+            (Accidental::Flat, ChordFormat::Unicode) => "♭".to_string(),
+            (Accidental::Flat, ChordFormat::Ascii) => "b".to_string(),
+            (Accidental::Flat, ChordFormat::Html) => "&flat;".to_string(),
+            (Accidental::Sharp, ChordFormat::Unicode) => "♯".to_string(),
+            (Accidental::Sharp, ChordFormat::Ascii) => "#".to_string(),
+            (Accidental::Sharp, ChordFormat::Html) => "&sharp;".to_string(),
+            (Accidental::Natural, ChordFormat::Unicode) => "♮".to_string(),
+            (Accidental::Natural, ChordFormat::Ascii) => "♮".to_string(),
+            (Accidental::Natural, ChordFormat::Html) => "&natural;".to_string(),
+            (Accidental::DoubleFlat, ChordFormat::Unicode) => "𝄫".to_string(),
+            (Accidental::DoubleFlat, ChordFormat::Ascii) => "bb".to_string(),
+            (Accidental::DoubleFlat, ChordFormat::Html) => "&#119083;".to_string(), // 𝄫 Unicode entity
+            (Accidental::DoubleSharp, ChordFormat::Unicode) => "𝄪".to_string(),
+            (Accidental::DoubleSharp, ChordFormat::Ascii) => "##".to_string(),
+            (Accidental::DoubleSharp, ChordFormat::Html) => "&#119082;".to_string(), // 𝄪 Unicode entity
+            (Accidental::Extreme(level), ChordFormat::Unicode) => {
+                if *level > 0 {
+                    "♯".repeat(*level as usize)
+                } else if *level < 0 {
+                    "♭".repeat(level.abs() as usize)
+                } else {
+                    "♮".to_string()
+                }
+            },
+            (Accidental::Extreme(level), ChordFormat::Ascii) => {
+                if *level > 0 {
+                    "#".repeat(*level as usize)
+                } else if *level < 0 {
+                    "b".repeat(level.abs() as usize)
+                } else {
+                    "♮".to_string()
+                }
+            },
+            (Accidental::Extreme(level), ChordFormat::Html) => {
+                if *level > 0 {
+                    "&sharp;".repeat(*level as usize)
+                } else if *level < 0 {
+                    "&flat;".repeat(level.abs() as usize)
+                } else {
+                    "&natural;".to_string()
+                }
+            },
         }
     }
 
     /// Returns the string representation of the accidental for use as a component in 
     /// another string for a specific output format. Natural accidentals return empty string.
-    pub fn component_str_for_format(&self, format: ChordFormat) -> &'static str {
+    pub fn component_str_for_format(&self, format: ChordFormat) -> String {
         match self {
-            Accidental::Natural => "",
+            Accidental::Natural => "".to_string(),
+            Accidental::Extreme(0) => "".to_string(),
             _ => self.render_for_format(format),
         }
     }
@@ -120,6 +182,15 @@ impl fmt::Display for Accidental {
             Accidental::Natural => write!(f, "{}", NATURAL),
             Accidental::DoubleFlat => write!(f, "{}", DOUBLE_FLAT),
             Accidental::DoubleSharp => write!(f, "{}", DOUBLE_SHARP),
+            Accidental::Extreme(level) => {
+                if *level > 0 {
+                    write!(f, "{}", SHARP.repeat(*level as usize))
+                } else if *level < 0 {
+                    write!(f, "{}", FLAT.repeat(level.abs() as usize))
+                } else {
+                    write!(f, "{}", NATURAL)
+                }
+            }
         }
     }
 }
