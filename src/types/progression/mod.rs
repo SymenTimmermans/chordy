@@ -36,6 +36,7 @@ pub mod graph;
 // Generated static data modules
 pub mod major_data;
 pub mod minor_data;
+pub mod chord_progressions;
 
 
 // Re-export commonly used types
@@ -44,4 +45,8 @@ pub use types::{
 };
 pub use graph::{
     ProgressionGraph, ChordRef
+};
+pub use chord_progressions::{
+    select_progression_tier, TIER_1_PROGRESSIONS, TIER_2_PROGRESSIONS, 
+    TIER_3_PROGRESSIONS, TIER_4_PROGRESSIONS, PROGRESSION_METADATA
 };

@@ -70,6 +70,9 @@ fn main() {
     
     // Generate progressions
     generate_progressions();
+    
+    // Generate chord progression database
+    generate_chord_progressions();
 }
 
 fn generate_scales() {
@@ -857,4 +860,204 @@ fn generate_interval_set_construction(array_ref: &str) -> String {
             }
         }
     }
+}
+
+fn generate_chord_progressions() {
+    let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let csv_path = Path::new(&manifest_dir).join("data/chord_progressions.csv");
+    
+    let file = File::open(&csv_path).expect("Failed to open chord_progressions.csv");
+    let reader = BufReader::new(file);
+    
+    let mut generated = String::new();
+    
+    generated.push_str("//! Curated chord progression database generated from chord_progressions.csv\n");
+    generated.push_str("//! Do not edit manually.\n\n");
+    generated.push_str("use crate::types::{RomanChord, RomanNumeral, RomanDegree, Accidental, Interval, IntervalSet};\n");
+    generated.push_str("use crate::types::chord::BassType;\n\n");
+    
+    // Generate standard chord constants that we'll reference
+    generated.push_str("// Standard chord constants (major triads)\n");
+    generated.push_str("static I_CHORD: RomanChord = RomanChord {\n");
+    generated.push_str("    root: RomanNumeral::new(RomanDegree::I, Accidental::Natural),\n");
+    generated.push_str("    intervals: IntervalSet::const_from_array(\n");
+    generated.push_str("        [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH,\n");
+    generated.push_str("         Interval::NONE, Interval::NONE, Interval::NONE,\n");
+    generated.push_str("         Interval::NONE, Interval::NONE, Interval::NONE,\n");
+    generated.push_str("         Interval::NONE], 3),\n");
+    generated.push_str("    bass: None,\n");
+    generated.push_str("};\n\n");
+    
+    // Generate other basic chords
+    let basic_chords = [
+        ("II", "RomanDegree::II", "major"),
+        ("III", "RomanDegree::III", "major"), 
+        ("IV", "RomanDegree::IV", "major"),
+        ("V", "RomanDegree::V", "major"),
+        ("VI", "RomanDegree::VI", "major"),
+        ("VII", "RomanDegree::VII", "major"),
+        ("ii", "RomanDegree::II", "minor"),
+        ("iii", "RomanDegree::III", "minor"),
+        ("vi", "RomanDegree::VI", "minor"),
+        ("bII", "RomanDegree::II", "major_flat"),
+        ("bIII", "RomanDegree::III", "major_flat"),
+        ("bV", "RomanDegree::V", "major_flat"),
+        ("bVI", "RomanDegree::VI", "major_flat"),
+        ("bVII", "RomanDegree::VII", "major_flat"),
+        ("iv", "RomanDegree::IV", "minor"),
+    ];
+    
+    for (name, degree, quality) in &basic_chords {
+        let (intervals, accidental) = match *quality {
+            "major" => ("MAJOR_THIRD, Interval::PERFECT_FIFTH", "Accidental::Natural"),
+            "minor" => ("MINOR_THIRD, Interval::PERFECT_FIFTH", "Accidental::Natural"),
+            "major_flat" => ("MAJOR_THIRD, Interval::PERFECT_FIFTH", "Accidental::Flat"),
+            _ => ("MAJOR_THIRD, Interval::PERFECT_FIFTH", "Accidental::Natural"),
+        };
+        
+        generated.push_str(&format!("static {}_CHORD: RomanChord = RomanChord {{\n", name));
+        generated.push_str(&format!("    root: RomanNumeral::new({}, {}),\n", degree, accidental));
+        generated.push_str("    intervals: IntervalSet::const_from_array(\n");
+        generated.push_str(&format!("        [Interval::PERFECT_UNISON, Interval::{},\n", intervals));
+        generated.push_str("         Interval::NONE, Interval::NONE, Interval::NONE,\n");
+        generated.push_str("         Interval::NONE, Interval::NONE, Interval::NONE,\n");
+        generated.push_str("         Interval::NONE], 3),\n");
+        generated.push_str("    bass: None,\n");
+        generated.push_str("};\n\n");
+    }
+    
+    let mut tier_1_progressions = Vec::new();
+    let mut tier_2_progressions = Vec::new();
+    let mut tier_3_progressions = Vec::new(); 
+    let mut tier_4_progressions = Vec::new();
+    let mut all_progressions = Vec::new();
+    
+    let mut progression_counter = 0;
+    
+    for line in reader.lines() {
+        let line = line.expect("Failed to read line");
+        let line = line.trim();
+        
+        // Skip comments and empty lines
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        
+        // Parse CSV with proper quote handling: "name",tier,"roman_progression","description"
+        let parts = parse_csv_line(line);
+        if parts.len() < 4 {
+            eprintln!("Warning: Malformed line: '{}' - got {} parts", line, parts.len());
+            continue;
+        }
+        
+        let name = parts[0].trim_matches('"');
+        let tier: u8 = parts[1].parse().expect("Invalid tier number");
+        let roman_progression = parts[2].trim_matches('"');
+        let description = parts[3].trim_matches('"');
+        
+        // Parse roman numeral sequence
+        let chords: Vec<&str> = roman_progression.split(',').map(|s| s.trim()).collect();
+        if chords.len() != 4 {
+            eprintln!("Warning: Progression '{}' doesn't have exactly 4 chords", name);
+            continue;
+        }
+        
+        let progression_name = format!("PROGRESSION_{}", progression_counter);
+        progression_counter += 1;
+        
+        // Generate progression constant
+        generated.push_str(&format!("/// {}: {}\n", name, description));
+        generated.push_str(&format!("/// Chords: {}\n", roman_progression));
+        generated.push_str(&format!("static {}: [&'static RomanChord; 4] = [\n", progression_name));
+        
+        for chord in &chords {
+            let chord_ref = format!("&{}_CHORD", chord);
+            generated.push_str(&format!("    {},\n", chord_ref));
+        }
+        
+        generated.push_str("];\n\n");
+        
+        // Add to appropriate tier
+        match tier {
+            1 => tier_1_progressions.push(progression_name.clone()),
+            2 => tier_2_progressions.push(progression_name.clone()),
+            3 => tier_3_progressions.push(progression_name.clone()),
+            4 => tier_4_progressions.push(progression_name.clone()),
+            _ => eprintln!("Warning: Invalid tier {} for progression '{}'", tier, name),
+        }
+        
+        all_progressions.push((progression_name, name.to_string(), description.to_string()));
+    }
+    
+    // Generate tier arrays
+    generate_tier_array(&mut generated, "TIER_1_PROGRESSIONS", &tier_1_progressions, "Pop Standards (0.0-0.25)");
+    generate_tier_array(&mut generated, "TIER_2_PROGRESSIONS", &tier_2_progressions, "Jazz Fundamentals (0.25-0.5)");
+    generate_tier_array(&mut generated, "TIER_3_PROGRESSIONS", &tier_3_progressions, "Sophisticated Jazz (0.5-0.75)");  
+    generate_tier_array(&mut generated, "TIER_4_PROGRESSIONS", &tier_4_progressions, "Modern/Experimental (0.75-1.0)");
+    
+    // Generate master tier selection function
+    generated.push_str("/// Select progression tier based on complexity value (0.0-1.0)\n");
+    generated.push_str("pub fn select_progression_tier(complexity: f32) -> &'static [&'static [&'static RomanChord; 4]] {\n");
+    generated.push_str("    match complexity {\n");
+    generated.push_str("        x if x < 0.25 => TIER_1_PROGRESSIONS,\n");
+    generated.push_str("        x if x < 0.5 => TIER_2_PROGRESSIONS,\n");
+    generated.push_str("        x if x < 0.75 => TIER_3_PROGRESSIONS,\n");
+    generated.push_str("        _ => TIER_4_PROGRESSIONS,\n");
+    generated.push_str("    }\n");
+    generated.push_str("}\n\n");
+    
+    // Generate metadata
+    generated.push_str("/// Progression metadata for descriptions and names\n");
+    generated.push_str("pub static PROGRESSION_METADATA: &[(usize, &str, &str)] = &[\n");
+    for (i, (_, name, description)) in all_progressions.iter().enumerate() {
+        generated.push_str(&format!("    ({}, \"{}\", \"{}\"),\n", i, name, description));
+    }
+    generated.push_str("];\n");
+    
+    let output_path = Path::new(&manifest_dir).join("src/types/progression/chord_progressions.rs");
+    fs::write(&output_path, &generated).expect("Failed to write chord progressions module");
+    
+    println!("cargo:warning=Generated {} chord progressions across 4 complexity tiers", all_progressions.len());
+}
+
+fn generate_tier_array(generated: &mut String, tier_name: &str, progressions: &[String], description: &str) {
+    generated.push_str(&format!("/// {} - {} progressions\n", description, progressions.len()));
+    generated.push_str(&format!("pub static {}: &[&[&'static RomanChord; 4]] = &[\n", tier_name));
+    
+    for progression in progressions {
+        generated.push_str(&format!("    &{},\n", progression));
+    }
+    
+    generated.push_str("];\n\n");
+}
+
+/// Simple CSV parser that handles quoted fields containing commas
+fn parse_csv_line(line: &str) -> Vec<String> {
+    let mut fields = Vec::new();
+    let mut current_field = String::new();
+    let mut in_quotes = false;
+    let mut chars = line.chars().peekable();
+    
+    while let Some(ch) = chars.next() {
+        match ch {
+            '"' => {
+                // Toggle quote state
+                in_quotes = !in_quotes;
+            }
+            ',' if !in_quotes => {
+                // Field separator - end current field
+                fields.push(current_field.trim().to_string());
+                current_field.clear();
+            }
+            _ => {
+                // Regular character - add to current field
+                current_field.push(ch);
+            }
+        }
+    }
+    
+    // Don't forget the last field
+    fields.push(current_field.trim().to_string());
+    
+    fields
 }
