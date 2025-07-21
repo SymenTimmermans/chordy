@@ -234,7 +234,7 @@ impl Key {
         result
     }
 
-    /// Get chord progression options from a given chord in this key
+    /// Get chord progressions that can be made FROM a given chord in this key
     /// 
     /// Returns categorized progression options as actual Chord objects
     /// based on Stephen Mugglin's progression map:
@@ -250,10 +250,10 @@ impl Key {
     /// let c_major = Key::Major(note!("C"));
     /// let c_chord = Chord::major(note!("C"));
     /// 
-    /// let options = c_major.progression_options(&c_chord).unwrap();
+    /// let options = c_major.progressions_from(&c_chord).unwrap();
     /// assert!(!options.strong.is_empty());
     /// ```
-    pub fn progression_options(&self, chord: &Chord) -> Option<ChordProgressionOptions> {
+    pub fn progressions_from(&self, chord: &Chord) -> Option<ChordProgressionOptions> {
         // Find the progression node for this chord
         let node = self.find_node_for_chord(chord)?;
         
@@ -264,7 +264,7 @@ impl Key {
         };
         
         // Get progression options using the node directly
-        let node_options = graph.progression_options(node)?;
+        let node_options = graph.progressions_from(node)?;
         
         // Convert RomanChords to Chords in this key context
         let mut chord_options = ChordProgressionOptions::new();
@@ -288,6 +288,68 @@ impl Key {
         }
         
         Some(chord_options)
+    }
+    
+    /// Get chord progressions that lead TO a given chord in this key
+    /// 
+    /// Returns categorized progression options showing which chords can
+    /// naturally lead to the target chord:
+    /// - Strong: explicit arrows pointing to this chord (cadential motion)
+    /// - Moderate: primary chords that can jump to this chord
+    /// - Weak: secondary chords that can jump to this chord
+    /// 
+    /// # Examples
+    /// 
+    /// ```rust
+    /// use chordy::{Key, Chord, note};
+    /// 
+    /// let c_major = Key::Major(note!("C"));
+    /// let c_chord = Chord::major(note!("C")); // I chord
+    /// 
+    /// let options = c_major.progressions_to(&c_chord).unwrap();
+    /// // Should include V -> I as a strong progression
+    /// ```
+    pub fn progressions_to(&self, chord: &Chord) -> Option<ChordProgressionOptions> {
+        // Find the progression node for this chord
+        let node = self.find_node_for_chord(chord)?;
+        
+        // Get the appropriate progression graph
+        let graph = match self {
+            Key::Major(_) => ProgressionGraph::major(),
+            Key::Minor(_) => ProgressionGraph::minor(),
+        };
+        
+        // Get progressions that lead to this node
+        let node_options = graph.progressions_to(node)?;
+        
+        // Convert RomanChords to Chords in this key context
+        let mut chord_options = ChordProgressionOptions::new();
+        
+        // Convert strong options
+        for roman_chord in &node_options.strong {
+            let chord = roman_chord.in_key(self);
+            chord_options.strong.push(chord);
+        }
+        
+        // Convert moderate options
+        for roman_chord in &node_options.moderate {
+            let chord = roman_chord.in_key(self);
+            chord_options.moderate.push(chord);
+        }
+        
+        // Convert weak options
+        for roman_chord in &node_options.weak {
+            let chord = roman_chord.in_key(self);
+            chord_options.weak.push(chord);
+        }
+        
+        Some(chord_options)
+    }
+    
+    /// Deprecated: Use `progressions_from` instead.
+    #[deprecated(since = "0.2.0", note = "Use `progressions_from` for clarity")]
+    pub fn progression_options(&self, chord: &Chord) -> Option<ChordProgressionOptions> {
+        self.progressions_from(chord)
     }
 
     /// Internal helper to get the progression graph for this key

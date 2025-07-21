@@ -7,7 +7,7 @@ fn test_chord_api() {
     let c_major_key = Key::Major(note!("C"));
     let g_major_chord = Chord::major(note!("G"));
 
-    let options = c_major_key.progression_options(&g_major_chord).unwrap();
+    let options = c_major_key.progressions_from(&g_major_chord).unwrap();
 
     // there should be a strong progression towards the C (I) chord from G (V)
     let c_major_chord = Chord::major(note!("C"));
@@ -26,12 +26,12 @@ fn test_chord_api() {
 }
 
 #[test]
-fn test_major_key_progression_options() {
+fn test_major_key_progressions_from() {
     let c_major = Key::Major(note!("C"));
     
     // Test I chord progressions
     let c_chord = Chord::major(note!("C")); // I chord
-    let options = c_major.progression_options(&c_chord).unwrap();
+    let options = c_major.progressions_from(&c_chord).unwrap();
     
     // Based on new progression map, I should have strong progressions
     assert!(!options.strong.is_empty(), "I should have strong progression options");
@@ -47,12 +47,12 @@ fn test_major_key_progression_options() {
 }
 
 #[test]
-fn test_minor_key_progression_options() {
+fn test_minor_key_progressions_from() {
     let a_minor = Key::Minor(note!("A"));
     
     // Test i chord progressions in minor
     let a_chord = Chord::minor(note!("A")); // i chord
-    let options = a_minor.progression_options(&a_chord).unwrap();
+    let options = a_minor.progressions_from(&a_chord).unwrap();
     
     // In minor keys, i might not have strong progressions (no explicit edges)
     // but should have moderate progressions (jumps to primary nodes)
@@ -75,7 +75,7 @@ fn test_minor_key_progression_options() {
 fn test_progression_strength_categories() {
     let c_major = Key::Major(note!("C"));
     let g_chord = Chord::major(note!("G")); // V chord
-    let options = c_major.progression_options(&g_chord).unwrap();
+    let options = c_major.progressions_from(&g_chord).unwrap();
     
     // V should have strong progressions (explicit arrows)
     assert!(!options.strong.is_empty(), "V should have strong progressions");

@@ -11,11 +11,11 @@ use chordy::note;
 
 /// Test progression options include variant chords
 #[test]
-fn test_progression_options_include_variants() {
+fn test_progressions_from_include_variants() {
     let key = Key::Major(note!("C"));
     
     let c_chord = Chord::major(note!("C")); // I chord
-    let options = key.progression_options(&c_chord).unwrap();
+    let options = key.progressions_from(&c_chord).unwrap();
     
     // Check for progressions - the exact behavior depends on which I node is matched
     assert!(!options.strong.is_empty(), "I should have strong progression options");
@@ -50,12 +50,12 @@ fn test_progression_options_include_variants() {
 
 /// Test the chord-based progression options interface
 #[test]
-fn test_progression_options_from_chord() {
+fn test_progressions_from_from_chord() {
     let key = Key::Major(note!("C"));
     
     // Test progression from C major (I)
     let c_major = Chord::major(note!("C"));
-    let options = key.progression_options(&c_major).unwrap();
+    let options = key.progressions_from(&c_major).unwrap();
     
     // Should have strong progressions to IV and V family chords
     assert!(!options.strong.is_empty());
@@ -67,7 +67,7 @@ fn test_progression_options_from_chord() {
     
     // Check that progression from V7 includes I as strong resolution
     let g7 = Chord::dominant_7th(note!("G"));
-    let v7_options = key.progression_options(&g7).unwrap();
+    let v7_options = key.progressions_from(&g7).unwrap();
     
     // Should have strong resolution to I
     assert!(!v7_options.strong.is_empty());
@@ -81,10 +81,10 @@ fn test_progression_options_from_chord() {
 
 /// Test chord progression options have proper categorization
 #[test]
-fn test_chord_progression_options_categorization() {
+fn test_chord_progressions_from_categorization() {
     let key = Key::Major(note!("C"));
     let c_major = Chord::major(note!("C"));
-    let options = key.progression_options(&c_major).unwrap();
+    let options = key.progressions_from(&c_major).unwrap();
     
     // Should have all three categories
     assert!(!options.strong.is_empty(), "Should have strong progressions");
@@ -106,11 +106,11 @@ fn test_chord_progression_options_categorization() {
 
 /// Test progression options in different keys
 #[test]
-fn test_chord_progression_options_different_keys() {
+fn test_chord_progressions_from_different_keys() {
     // Test in G major
     let g_major_key = Key::Major(note!("G"));
     let g_major_chord = Chord::major(note!("G"));
-    let options = g_major_key.progression_options(&g_major_chord).unwrap();
+    let options = g_major_key.progressions_from(&g_major_chord).unwrap();
     
     // Check for progressions - the exact behavior depends on which I node is matched
     assert!(!options.strong.is_empty(), "I should have strong progression options");
@@ -132,19 +132,19 @@ fn test_chord_progression_options_different_keys() {
 
 /// Test that chord progression options work with chord extensions
 #[test]
-fn test_chord_progression_options_with_extensions() {
+fn test_chord_progressions_from_with_extensions() {
     let key = Key::Major(note!("C"));
     
     // Test with a major 7th chord
     let cmaj7 = Chord::major_7th(note!("C"));
-    let options = key.progression_options(&cmaj7).unwrap();
+    let options = key.progressions_from(&cmaj7).unwrap();
     
     // Should still get progression options (might find Imaj7 node or fallback to I)
     assert!(!options.is_empty(), "Should find progression options for Cmaj7");
     
     // Test with a minor 7th chord
     let dm7 = Chord::minor_7th(note!("D"));
-    let options = key.progression_options(&dm7).unwrap();
+    let options = key.progressions_from(&dm7).unwrap();
     
     // Should find ii7 progression options
     assert!(!options.is_empty(), "Should find progression options for Dm7");

@@ -32,5 +32,5 @@ pub use roman_numeral::{RomanDegree, RomanNumeral, RomanChord};
 pub mod progression;
 pub use progression::{
     NodeType, ProgressionStrength, ProgressionEdge,
-    ProgressionOptions, ProgressionGraph, ChordRef
+    ProgressionOptions, ChordProgressionOptions, ProgressionGraph, ChordRef
 };

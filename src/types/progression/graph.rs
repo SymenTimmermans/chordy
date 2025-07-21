@@ -102,8 +102,8 @@ impl ProgressionGraph {
         self.nodes.get(id).map(|(chord, _)| *chord)
     }
     
-    /// Get progression options from a given chord
-    pub fn progression_options(&self, from: impl Into<ChordRef>) -> Option<ProgressionOptions> {
+    /// Get progressions that can be made FROM a given chord
+    pub fn progressions_from(&self, from: impl Into<ChordRef>) -> Option<ProgressionOptions> {
         let from_chord = match from.into() {
             ChordRef::Chord(chord) => chord,
             ChordRef::Id(id) => self.get_node(&id)?,
@@ -140,6 +140,68 @@ impl ProgressionGraph {
                 continue;
             }
             
+            match node_type {
+                NodeType::Primary => options.moderate.push(*chord),
+                NodeType::Secondary => options.weak.push(*chord),
+            }
+        }
+        
+        // Sort all lists for deterministic ordering
+        // Use a comprehensive sort key including bass information
+        let sort_key = |chord: &RomanChord| {
+            (
+                chord.root,
+                chord.bass.map(|(bass, bass_type)| (bass, format!("{:?}", bass_type))),
+                chord.intervals.len(),
+                format!("{:?}", chord.intervals.as_slice())
+            )
+        };
+        options.strong.sort_by_key(sort_key);
+        options.moderate.sort_by_key(sort_key);
+        options.weak.sort_by_key(sort_key);
+        
+        Some(options)
+    }
+    
+    /// Get progressions that lead TO a given chord
+    pub fn progressions_to(&self, to: impl Into<ChordRef>) -> Option<ProgressionOptions> {
+        let to_chord = match to.into() {
+            ChordRef::Chord(chord) => chord,
+            ChordRef::Id(id) => self.get_node(&id)?,
+        };
+        
+        let mut options = ProgressionOptions::new();
+        
+        // Find strong connections (explicit edges that lead to this chord)
+        for edge in &self.edges {
+            if edge.to == to_chord {
+                options.strong.push(edge.from);
+            }
+        }
+        
+        // Find moderate and weak connections (any chord that could jump to this chord)
+        // Collect and sort nodes for deterministic iteration
+        let mut node_entries: Vec<_> = self.nodes.values().collect();
+        node_entries.sort_by_key(|(chord, _)| {
+            (
+                chord.root,
+                chord.bass.map(|(bass, bass_type)| (bass, format!("{:?}", bass_type))),
+                chord.intervals.len(),
+                format!("{:?}", chord.intervals.as_slice())
+            )
+        });
+        
+        for (chord, node_type) in node_entries {
+            if *chord == to_chord {
+                continue; // Skip self
+            }
+            
+            // Skip if already in strong connections
+            if options.strong.contains(chord) {
+                continue;
+            }
+            
+            // All chords can potentially lead to any chord via jumps
             match node_type {
                 NodeType::Primary => options.moderate.push(*chord),
                 NodeType::Secondary => options.weak.push(*chord),
@@ -287,9 +349,9 @@ mod tests {
     }
     
     #[test]
-    fn test_progression_options() {
+    fn test_progressions_from() {
         let graph = ProgressionGraph::major();
-        let options = graph.progression_options("I");
+        let options = graph.progressions_from("I");
         assert!(options.is_some());
         
         let options = options.unwrap();

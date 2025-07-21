@@ -23,7 +23,7 @@ fn test_simple_chords_match_simple_nodes() {
     ];
     
     for (expected_name, chord) in simple_chords {
-        let options = c_major.progression_options(&chord)
+        let options = c_major.progressions_from(&chord)
             .unwrap_or_else(|| panic!("Should find progression options for {}", expected_name));
         
         // Verify we get some options
@@ -50,7 +50,7 @@ fn test_deterministic_progression_behavior() {
     // Run the same query multiple times
     let mut all_results = Vec::new();
     for i in 0..10 {
-        let options = key.progression_options(&chord)
+        let options = key.progressions_from(&chord)
             .unwrap_or_else(|| panic!("Should find options on iteration {}", i));
         
         // Convert to comparable format (chord names)
@@ -89,8 +89,8 @@ fn test_bass_structure_matching() {
     let c_root = Chord::major(note!("C"));
     let c_first_inv = c_root.with_inversion(1); // C/E
     
-    let root_options = c_major.progression_options(&c_root);
-    let inv_options = c_major.progression_options(&c_first_inv);
+    let root_options = c_major.progressions_from(&c_root);
+    let inv_options = c_major.progressions_from(&c_first_inv);
     
     // Both should find options (might be same or different depending on progression map)
     assert!(root_options.is_some(), "Root position C should have progression options");
@@ -110,10 +110,10 @@ fn test_slash_chord_vs_inversion_matching() {
     let c_first_inv = c_root.with_inversion(1);         // C first inversion (E in bass)
     
     // All should find some progression options
-    let root_opts = c_major.progression_options(&c_root);
-    let slash_f_opts = c_major.progression_options(&c_slash_f);
-    let slash_e_opts = c_major.progression_options(&c_slash_e);
-    let inv_opts = c_major.progression_options(&c_first_inv);
+    let root_opts = c_major.progressions_from(&c_root);
+    let slash_f_opts = c_major.progressions_from(&c_slash_f);
+    let slash_e_opts = c_major.progressions_from(&c_slash_e);
+    let inv_opts = c_major.progressions_from(&c_first_inv);
     
     assert!(root_opts.is_some(), "C root should have options");
     assert!(slash_f_opts.is_some(), "C/F should have options");
@@ -142,7 +142,7 @@ fn test_progression_categories_populated() {
     ];
     
     for (name, chord) in test_chords {
-        let options = key.progression_options(&chord)
+        let options = key.progressions_from(&chord)
             .unwrap_or_else(|| panic!("Should find options for {}", name));
         
         // Each chord should have at least moderate options (jumps to primary nodes)
@@ -166,7 +166,7 @@ fn test_dominant_resolution() {
     let c_major = Key::Major(note!("C"));
     let g_chord = Chord::major(note!("G")); // V in C major
     
-    let options = c_major.progression_options(&g_chord)
+    let options = c_major.progressions_from(&g_chord)
         .expect("V chord should have progression options");
     
     // Should have strong progressions
@@ -206,7 +206,7 @@ fn test_multiple_keys_consistency() {
             Key::Minor(root) => Chord::minor(root),
         };
         
-        let options = key.progression_options(&tonic_chord)
+        let options = key.progressions_from(&tonic_chord)
             .unwrap_or_else(|| panic!("Should find options for tonic in {}", key));
         
         assert!(!options.is_empty(), "Tonic should have progressions in {}", key);
@@ -230,7 +230,7 @@ fn test_extended_chords_in_progressions() {
     ];
     
     for (name, chord) in extended_chords {
-        let options = c_major.progression_options(&chord)
+        let options = c_major.progressions_from(&chord)
             .unwrap_or_else(|| panic!("Should find options for {}", name));
         
         assert!(!options.is_empty(), "{} should have progression options", name);
@@ -252,7 +252,7 @@ fn test_rapid_query_consistency() {
     // Rapid-fire queries
     let mut results = Vec::new();
     for _ in 0..50 {
-        let options = key.progression_options(&chord)
+        let options = key.progressions_from(&chord)
             .expect("Should always find options");
         
         let signature = (
