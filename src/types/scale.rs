@@ -555,6 +555,20 @@ impl HasIntervals for Scale {
     fn intervals(&self) -> &[Interval] {
         self.intervals.as_slice()
     }
+
+    fn set_intervals(&mut self, intervals: Vec<Interval>) {
+        self.intervals = intervals.into_iter().collect();
+    }
+
+    fn remove_interval(&mut self, interval: Interval) {
+        self.intervals.remove(interval);
+    }
+
+    fn add_interval(&mut self, interval: Interval) {
+        if !self.intervals.contains(interval) {
+            self.intervals.push(interval);
+        }
+    }
 }
 
 use std::ops::Deref;

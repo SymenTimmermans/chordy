@@ -409,18 +409,35 @@ impl RomanChord {
 
     /// Get the bass note of this roman chord
     ///
-    /// Returns the bass note if present, otherwise returns the root note.
+    /// Returns the bass note if present, otherwise returns the root note. This method
+    /// handles both classical inversions and slash chords uniformly.
+    ///
+    /// In music theory, the bass note is the lowest-pitched note and significantly
+    /// influences harmonic function and voice leading. For roman chord analysis,
+    /// this is particularly important for understanding chord progressions and
+    /// harmonic relationships within a key.
+    ///
+    /// # Bass Note Types
+    /// - **Root position**: Bass note equals root (e.g., I has I in bass)
+    /// - **Classical inversion**: Bass note is a chord tone (e.g., I⁶ has III in bass)
+    /// - **Slash chord**: Bass note can be any roman numeral (e.g., I/V has V in bass)
     ///
     /// # Examples
     ///
     /// ```
     /// use chordy::{RomanChord, RomanNumeral};
     ///
+    /// // Root position - bass equals root
     /// let i_major = RomanChord::major(RomanNumeral::I());
     /// assert_eq!(i_major.bass_note(), RomanNumeral::I());
     ///
+    /// // First inversion - third in bass
     /// let i_first_inversion = i_major.with_inversion(1);
     /// assert_eq!(i_first_inversion.bass_note(), RomanNumeral::III());
+    ///
+    /// // Slash chord - arbitrary bass note
+    /// let i_slash_v = i_major.with_slash_bass(RomanNumeral::V());
+    /// assert_eq!(i_slash_v.bass_note(), RomanNumeral::V());
     /// ```
     pub fn bass_note(&self) -> RomanNumeral {
         match self.bass {
@@ -488,15 +505,45 @@ impl RomanChord {
 
     /// Create a roman chord with the specified inversion
     ///
+    /// Classical chord inversions place chord tones other than the root in the bass.
+    /// This creates different harmonic effects and voice leading possibilities while
+    /// maintaining the chord's essential harmonic function.
+    ///
+    /// Inversion numbers correspond to which chord tone is in the bass:
+    /// - **0**: Root position (root in bass)
+    /// - **1**: First inversion (third in bass) - often notated as ⁶
+    /// - **2**: Second inversion (fifth in bass) - often notated as ⁶₄  
+    /// - **3+**: Higher inversions for extended chords
+    ///
+    /// In roman numeral analysis, inversions affect voice leading and harmonic
+    /// stability. For example, I⁶ (first inversion tonic) often connects smoothly
+    /// to IV or serves as a passing chord.
+    ///
+    /// # Parameters
+    /// - `inversion`: The inversion number (0 = root position, 1 = first inversion, etc.)
+    ///
     /// # Examples
     ///
     /// ```
     /// use chordy::{RomanChord, RomanNumeral};
     ///
     /// let i_major = RomanChord::major(RomanNumeral::I());
-    /// let i_first_inversion = i_major.with_inversion(1);
-    /// assert!(i_first_inversion.is_inverted());
-    /// assert_eq!(i_first_inversion.bass_note(), RomanNumeral::III());
+    /// 
+    /// // Root position (no change)
+    /// let root_position = i_major.with_inversion(0);
+    /// assert_eq!(root_position.bass_note(), RomanNumeral::I());
+    /// assert!(!root_position.is_inverted());
+    ///
+    /// // First inversion - third in bass
+    /// let first_inversion = i_major.with_inversion(1);
+    /// assert_eq!(first_inversion.bass_note(), RomanNumeral::III());
+    /// assert!(first_inversion.is_inverted());
+    /// assert_eq!(first_inversion.inversion_number(), Some(1));
+    ///
+    /// // Second inversion - fifth in bass  
+    /// let second_inversion = i_major.with_inversion(2);
+    /// assert_eq!(second_inversion.bass_note(), RomanNumeral::V());
+    /// assert_eq!(second_inversion.inversion_number(), Some(2));
     /// ```
     pub fn with_inversion(mut self, inversion: u8) -> Self {
         if inversion == 0 {
@@ -515,15 +562,43 @@ impl RomanChord {
 
     /// Create a roman chord with the specified slash bass note
     ///
+    /// Slash chords (also called "chords over bass notes") feature a bass note that
+    /// is independent of the chord's normal inversion structure. Unlike classical
+    /// inversions, the bass note can be any roman numeral, not just a chord tone.
+    ///
+    /// This creates sophisticated harmonic relationships and smooth bass line motion
+    /// in roman numeral analysis. Slash chords are essential for understanding
+    /// complex progressions and voice leading patterns.
+    ///
+    /// # Common Uses in Roman Analysis
+    /// - **Pedal tones**: Static bass notes (e.g., I/V, ii/V, vi/V for dominant pedal)
+    /// - **Chromatic bass lines**: Smooth bass motion (e.g., I - I/VII - vi)  
+    /// - **Secondary functions**: Enhanced harmonic color (e.g., V/V/IV for dominant of dominant over subdominant)
+    /// - **Linear progressions**: Voice leading bass lines connecting chord roots
+    ///
+    /// # Parameters
+    /// - `bass`: The roman numeral to use as the bass note
+    ///
     /// # Examples
     ///
     /// ```
     /// use chordy::{RomanChord, RomanNumeral};
     ///
     /// let i_major = RomanChord::major(RomanNumeral::I());
+    /// 
+    /// // Simple slash chord
     /// let i_slash_v = i_major.with_slash_bass(RomanNumeral::V());
     /// assert!(i_slash_v.is_slash_chord());
+    /// assert!(!i_slash_v.is_inverted());  // Not a classical inversion
     /// assert_eq!(i_slash_v.bass_note(), RomanNumeral::V());
+    ///
+    /// // Chromatic bass line example: I - I/♭VII - vi
+    /// let i_slash_flat_vii = i_major.with_slash_bass(RomanNumeral::flat_VII());
+    /// assert_eq!(i_slash_flat_vii.bass_note(), RomanNumeral::flat_VII());
+    ///
+    /// // Bass note can be any roman numeral, even outside the key
+    /// let i_slash_sharp_iv = i_major.with_slash_bass(RomanNumeral::sharp_IV());
+    /// assert_eq!(i_slash_sharp_iv.bass_note(), RomanNumeral::sharp_IV());
     /// ```
     pub fn with_slash_bass(mut self, bass: RomanNumeral) -> Self {
         self.bass = Some((bass, super::chord::BassType::Slash));
@@ -611,6 +686,20 @@ impl From<u8> for RomanNumeral {
 impl HasIntervals for RomanChord {
     fn intervals(&self) -> &[Interval] {
         self.intervals.as_slice()
+    }
+
+    fn set_intervals(&mut self, intervals: Vec<Interval>) {
+        self.intervals = intervals.into_iter().collect();
+    }
+
+    fn remove_interval(&mut self, interval: Interval) {
+        self.intervals.remove(interval);
+    }
+
+    fn add_interval(&mut self, interval: Interval) {
+        if !self.intervals.contains(interval) {
+            self.intervals.push(interval);
+        }
     }
 }
 

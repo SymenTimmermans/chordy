@@ -113,6 +113,37 @@ impl<const N: usize> IntervalSet<N> {
         self.len = 0;
     }
     
+    /// Remove the first occurrence of an interval from the set
+    ///
+    /// Returns true if the interval was found and removed, false otherwise.
+    ///
+    /// # Examples
+    /// ```
+    /// use chordy::{IntervalSet, Interval};
+    /// 
+    /// let mut intervals: IntervalSet = IntervalSet::from_slice(&[
+    ///     Interval::PERFECT_UNISON,
+    ///     Interval::MAJOR_THIRD,
+    ///     Interval::PERFECT_FIFTH,
+    /// ]);
+    /// 
+    /// assert!(intervals.remove(Interval::MAJOR_THIRD));
+    /// assert!(!intervals.contains(Interval::MAJOR_THIRD));
+    /// assert_eq!(intervals.len(), 2);
+    /// ```
+    pub fn remove(&mut self, interval: Interval) -> bool {
+        if let Some(pos) = self.intervals[..self.len()].iter().position(|&i| i == interval) {
+            // Shift elements left to fill the gap
+            for i in pos..self.len() - 1 {
+                self.intervals[i] = self.intervals[i + 1];
+            }
+            self.len -= 1;
+            true
+        } else {
+            false
+        }
+    }
+    
     /// Remove duplicate intervals, keeping only unique values
     pub fn dedup(&mut self) {
         if self.len <= 1 {

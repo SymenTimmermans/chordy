@@ -123,6 +123,81 @@ pub trait HasIntervals {
             0.0
         }
     }
+
+    /// Sets the intervals of the structure, preserving other properties (like bass notes)
+    /// 
+    /// This method allows modifying the intervals while maintaining the structural integrity
+    /// of the musical object (root note, bass note, etc.). This is preferred over creating
+    /// new objects which may lose important context.
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use chordy::prelude::*;
+    /// 
+    /// let mut chord = Chord::major(note!("C")).with_slash_bass(note!("E"));
+    /// let original_bass = chord.bass_note();
+    /// 
+    /// // Add a 7th while preserving the bass note
+    /// chord.set_intervals(vec![
+    ///     Interval::PERFECT_UNISON,
+    ///     Interval::MAJOR_THIRD,
+    ///     Interval::PERFECT_FIFTH,
+    ///     Interval::MINOR_SEVENTH,
+    /// ]);
+    /// 
+    /// assert_eq!(chord.bass_note(), original_bass); // Bass preserved!
+    /// assert!(chord.contains_interval(Interval::MINOR_SEVENTH));
+    /// ```
+    fn set_intervals(&mut self, _intervals: Vec<Interval>) {
+        unimplemented!("set_intervals not implemented for this type")
+    }
+
+    /// Removes a specific interval from the structure
+    /// 
+    /// This method removes the first occurrence of the specified interval while
+    /// preserving other properties like bass notes. If the interval is not found,
+    /// the structure remains unchanged.
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use chordy::prelude::*;
+    /// 
+    /// let mut chord = Chord::major(note!("C")).with_slash_bass(note!("F"));
+    /// let original_bass = chord.bass_note();
+    /// 
+    /// chord.remove_interval(Interval::PERFECT_FIFTH);
+    /// 
+    /// assert_eq!(chord.bass_note(), original_bass); // Bass preserved!
+    /// assert!(!chord.contains_interval(Interval::PERFECT_FIFTH));
+    /// ```
+    fn remove_interval(&mut self, _interval: Interval) {
+        unimplemented!("remove_interval not implemented for this type")
+    }
+
+    /// Adds an interval to the structure if it doesn't already exist
+    /// 
+    /// This method adds the specified interval while preserving other properties
+    /// like bass notes. If the interval already exists, the structure remains unchanged.
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use chordy::prelude::*;
+    /// 
+    /// let mut chord = Chord::major(note!("C")).with_slash_bass(note!("F"));
+    /// let original_bass = chord.bass_note();
+    /// 
+    /// // Add a 7th
+    /// chord.add_interval(Interval::MINOR_SEVENTH);
+    /// 
+    /// assert_eq!(chord.bass_note(), original_bass); // Bass preserved!
+    /// assert!(chord.contains_interval(Interval::MINOR_SEVENTH));
+    /// ```
+    fn add_interval(&mut self, _interval: Interval) {
+        unimplemented!("add_interval not implemented for this type")
+    }
 }
 
 /// A trait for structures that can be inverted
