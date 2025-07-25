@@ -3,10 +3,10 @@
 //! This module contains the fundamental types used to represent Stephen Mugglin's
 //! chord progression graph, including nodes, edges, and connection strength.
 
-use crate::types::{RomanChord, Chord};
+use crate::types::{Chord, RomanChord};
 
 /// Classification of chord nodes in the progression graph
-/// 
+///
 /// Based on Mugglin's color coding:
 /// - Primary (blue): Diatonic chords that form stable harmonic centers
 /// - Secondary (green): Chromatic/borrowed chords that create tension and require resolution
@@ -21,7 +21,7 @@ pub enum NodeType {
 }
 
 /// Strength of harmonic progression between chords
-/// 
+///
 /// Derived from the graph structure rather than explicitly encoded:
 /// - Strong: Explicit arrows showing natural voice leading
 /// - Moderate: Jumps to primary nodes (stable but less directed)
@@ -40,10 +40,10 @@ pub enum ProgressionStrength {
 }
 
 /// An edge in the progression graph representing a harmonic connection
-/// 
+///
 /// Only explicit arrows (strong connections) are stored as edges.
 /// Moderate and weak connections are computed dynamically based on node types.
-/// 
+///
 /// Uses Copy semantics for efficient storage and manipulation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ProgressionEdge {
@@ -53,12 +53,11 @@ pub struct ProgressionEdge {
     pub to: RomanChord,
 }
 
-
 /// Available progression options from a given chord
-/// 
+///
 /// Categorizes all possible next chords by their harmonic relationship strength,
 /// allowing users to make informed choices about progression direction.
-/// 
+///
 /// Uses owned RomanChords for simplicity since they implement Copy.
 #[derive(Debug, Clone)]
 pub struct ProgressionOptions {
@@ -82,19 +81,25 @@ impl ProgressionOptions {
             weak: Vec::new(),
         }
     }
-    
+
     /// Get all progression options regardless of strength
     pub fn all(&self) -> impl Iterator<Item = (RomanChord, ProgressionStrength)> + '_ {
-        self.strong.iter().map(|&n| (n, ProgressionStrength::Strong))
-            .chain(self.moderate.iter().map(|&n| (n, ProgressionStrength::Moderate)))
+        self.strong
+            .iter()
+            .map(|&n| (n, ProgressionStrength::Strong))
+            .chain(
+                self.moderate
+                    .iter()
+                    .map(|&n| (n, ProgressionStrength::Moderate)),
+            )
             .chain(self.weak.iter().map(|&n| (n, ProgressionStrength::Weak)))
     }
-    
+
     /// Check if there are any progression options available
     pub fn is_empty(&self) -> bool {
         self.strong.is_empty() && self.moderate.is_empty() && self.weak.is_empty()
     }
-    
+
     /// Get the total number of progression options
     pub fn len(&self) -> usize {
         self.strong.len() + self.moderate.len() + self.weak.len()
@@ -108,7 +113,7 @@ impl Default for ProgressionOptions {
 }
 
 /// Available chord progression options from a given chord
-/// 
+///
 /// Categorizes all possible next chords by their harmonic relationship strength,
 /// using actual Chord objects rather than ProgressionNodes for direct usability.
 #[derive(Debug, Clone)]
@@ -133,19 +138,25 @@ impl ChordProgressionOptions {
             weak: Vec::new(),
         }
     }
-    
+
     /// Get all chord progression options regardless of strength
     pub fn all(&self) -> impl Iterator<Item = (&Chord, ProgressionStrength)> {
-        self.strong.iter().map(|c| (c, ProgressionStrength::Strong))
-            .chain(self.moderate.iter().map(|c| (c, ProgressionStrength::Moderate)))
+        self.strong
+            .iter()
+            .map(|c| (c, ProgressionStrength::Strong))
+            .chain(
+                self.moderate
+                    .iter()
+                    .map(|c| (c, ProgressionStrength::Moderate)),
+            )
             .chain(self.weak.iter().map(|c| (c, ProgressionStrength::Weak)))
     }
-    
+
     /// Check if there are any chord progression options available
     pub fn is_empty(&self) -> bool {
         self.strong.is_empty() && self.moderate.is_empty() && self.weak.is_empty()
     }
-    
+
     /// Get the total number of chord progression options
     pub fn len(&self) -> usize {
         self.strong.len() + self.moderate.len() + self.weak.len()

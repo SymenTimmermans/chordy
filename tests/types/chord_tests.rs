@@ -50,7 +50,7 @@ fn test_chord_notes() {
 #[test]
 fn test_chord_pitches_ascending_order() {
     use chordy::Pitch;
-    
+
     // Test basic triad - should stay in same octave
     let c_major = Chord::major(note!("C"));
     let pitches = c_major.pitches(4);
@@ -60,7 +60,7 @@ fn test_chord_pitches_ascending_order() {
         Pitch::new(Letter::G, Accidental::Natural, 4),
     ];
     assert_eq!(pitches, expected);
-    
+
     // Test Dm7 - C should cross to next octave (D3, F3, A3, C4)
     let d_minor_7 = Chord::minor_7th(note!("D"));
     let pitches = d_minor_7.pitches(3);
@@ -71,15 +71,18 @@ fn test_chord_pitches_ascending_order() {
         Pitch::new(Letter::C, Accidental::Natural, 4), // Should cross to octave 4
     ];
     assert_eq!(pitches, expected);
-    
+
     // Test extended chord with 9th
-    let c_maj9 = Chord::new(note!("C"), vec![
-        Interval::PERFECT_UNISON,
-        Interval::MAJOR_THIRD,
-        Interval::PERFECT_FIFTH,
-        Interval::MAJOR_SEVENTH,
-        Interval::MAJOR_NINTH,
-    ]);
+    let c_maj9 = Chord::new(
+        note!("C"),
+        vec![
+            Interval::PERFECT_UNISON,
+            Interval::MAJOR_THIRD,
+            Interval::PERFECT_FIFTH,
+            Interval::MAJOR_SEVENTH,
+            Interval::MAJOR_NINTH,
+        ],
+    );
     let pitches = c_maj9.pitches(4);
     let expected = vec![
         Pitch::new(Letter::C, Accidental::Natural, 4),
@@ -89,13 +92,16 @@ fn test_chord_pitches_ascending_order() {
         Pitch::new(Letter::D, Accidental::Natural, 5), // 9th in next octave
     ];
     assert_eq!(pitches, expected);
-    
+
     // Test chord with intervals that create octave crossings
-    let f_chord = Chord::new(note!("F"), vec![
-        Interval::PERFECT_UNISON,    // F
-        Interval::MAJOR_SEVENTH,     // E - would be lower than F in same octave
-        Interval::MAJOR_NINTH,       // G - already in next octave
-    ]);
+    let f_chord = Chord::new(
+        note!("F"),
+        vec![
+            Interval::PERFECT_UNISON, // F
+            Interval::MAJOR_SEVENTH,  // E - would be lower than F in same octave
+            Interval::MAJOR_NINTH,    // G - already in next octave
+        ],
+    );
     let pitches = f_chord.pitches(4);
     let expected = vec![
         Pitch::new(Letter::F, Accidental::Natural, 4),
@@ -110,14 +116,16 @@ fn test_chord_pitches_midi_ordering() {
     // Test that MIDI numbers are always ascending
     let d_minor_7 = Chord::minor_7th(note!("D"));
     let pitches = d_minor_7.pitches(3);
-    
+
     let midi_numbers: Vec<i8> = pitches.iter().map(|p| p.midi_number()).collect();
-    
+
     // Check that each MIDI number is greater than the previous
     for window in midi_numbers.windows(2) {
-        assert!(window[1] > window[0], 
-            "MIDI numbers should be ascending, but {} <= {}", 
-            window[1], window[0]
+        assert!(
+            window[1] > window[0],
+            "MIDI numbers should be ascending, but {} <= {}",
+            window[1],
+            window[0]
         );
     }
 }
@@ -125,67 +133,103 @@ fn test_chord_pitches_midi_ordering() {
 #[test]
 fn test_chord_dissonance_levels() {
     use chordy::prelude::HasIntervals;
-    
+
     // Test perfect consonances
-    let power_chord = Chord::new(note!("C"), vec![
-        Interval::PERFECT_UNISON,
-        Interval::PERFECT_FIFTH,
-    ]);
-    assert!(power_chord.dissonance_level() < 0.1, "Power chord should be very consonant");
-    
+    let power_chord = Chord::new(
+        note!("C"),
+        vec![Interval::PERFECT_UNISON, Interval::PERFECT_FIFTH],
+    );
+    assert!(
+        power_chord.dissonance_level() < 0.1,
+        "Power chord should be very consonant"
+    );
+
     // Test major triad (consonant)
     let c_major = Chord::major(note!("C"));
     let major_dissonance = c_major.dissonance_level();
-    assert!(major_dissonance < 0.2, "Major triad should be consonant: {}", major_dissonance);
-    
+    assert!(
+        major_dissonance < 0.2,
+        "Major triad should be consonant: {}",
+        major_dissonance
+    );
+
     // Test minor triad (consonant)
     let c_minor = Chord::minor(note!("C"));
     let minor_dissonance = c_minor.dissonance_level();
-    assert!(minor_dissonance < 0.2, "Minor triad should be consonant: {}", minor_dissonance);
-    
+    assert!(
+        minor_dissonance < 0.2,
+        "Minor triad should be consonant: {}",
+        minor_dissonance
+    );
+
     // Test diminished triad (dissonant due to tritone)
     let c_dim = Chord::diminished(note!("C"));
     let dim_dissonance = c_dim.dissonance_level();
-    assert!(dim_dissonance > 0.5, "Diminished triad should be quite dissonant: {}", dim_dissonance);
-    
+    assert!(
+        dim_dissonance > 0.5,
+        "Diminished triad should be quite dissonant: {}",
+        dim_dissonance
+    );
+
     // Test augmented triad (moderately dissonant)
     let c_aug = Chord::augmented(note!("C"));
     let aug_dissonance = c_aug.dissonance_level();
-    assert!(aug_dissonance > 0.25 && aug_dissonance < 0.4, 
-        "Augmented triad should be moderately dissonant: {}", aug_dissonance);
-    
+    assert!(
+        aug_dissonance > 0.25 && aug_dissonance < 0.4,
+        "Augmented triad should be moderately dissonant: {}",
+        aug_dissonance
+    );
+
     // Test seventh chords
     let c_maj7 = Chord::major_7th(note!("C"));
     let maj7_dissonance = c_maj7.dissonance_level();
-    assert!(maj7_dissonance > 0.2 && maj7_dissonance < 0.4, 
-        "Major 7th should have mild dissonance: {}", maj7_dissonance);
-    
+    assert!(
+        maj7_dissonance > 0.2 && maj7_dissonance < 0.4,
+        "Major 7th should have mild dissonance: {}",
+        maj7_dissonance
+    );
+
     let c7 = Chord::dominant_7th(note!("C"));
     let dom7_dissonance = c7.dissonance_level();
-    assert!(dom7_dissonance > 0.2 && dom7_dissonance < 0.4, 
-        "Dominant 7th should have mild dissonance: {}", dom7_dissonance);
-    
+    assert!(
+        dom7_dissonance > 0.2 && dom7_dissonance < 0.4,
+        "Dominant 7th should have mild dissonance: {}",
+        dom7_dissonance
+    );
+
     // Test extended chords
-    let c_maj9 = Chord::new(note!("C"), vec![
-        Interval::PERFECT_UNISON,
-        Interval::MAJOR_THIRD,
-        Interval::PERFECT_FIFTH,
-        Interval::MAJOR_SEVENTH,
-        Interval::MAJOR_NINTH,
-    ]);
+    let c_maj9 = Chord::new(
+        note!("C"),
+        vec![
+            Interval::PERFECT_UNISON,
+            Interval::MAJOR_THIRD,
+            Interval::PERFECT_FIFTH,
+            Interval::MAJOR_SEVENTH,
+            Interval::MAJOR_NINTH,
+        ],
+    );
     let maj9_dissonance = c_maj9.dissonance_level();
-    assert!(maj9_dissonance > 0.25 && maj9_dissonance < 0.4, 
-        "Major 9th should have moderate dissonance: {}", maj9_dissonance);
-    
+    assert!(
+        maj9_dissonance > 0.25 && maj9_dissonance < 0.4,
+        "Major 9th should have moderate dissonance: {}",
+        maj9_dissonance
+    );
+
     // Test cluster chord (very dissonant)
-    let cluster = Chord::new(note!("C"), vec![
-        Interval::PERFECT_UNISON,
-        Interval::MINOR_SECOND,
-        Interval::MAJOR_SECOND,
-    ]);
+    let cluster = Chord::new(
+        note!("C"),
+        vec![
+            Interval::PERFECT_UNISON,
+            Interval::MINOR_SECOND,
+            Interval::MAJOR_SECOND,
+        ],
+    );
     let cluster_dissonance = cluster.dissonance_level();
-    assert!(cluster_dissonance > 0.5, 
-        "Cluster chord should be very dissonant: {}", cluster_dissonance);
+    assert!(
+        cluster_dissonance > 0.5,
+        "Cluster chord should be very dissonant: {}",
+        cluster_dissonance
+    );
 }
 
 #[test]

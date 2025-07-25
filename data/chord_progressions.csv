@@ -1,0 +1,35 @@
+# Curated Chord Progression Database
+# Format: name,complexity_tier,roman_progression,description
+# Tiers: 1=Pop Standards, 2=Jazz Fundamentals, 3=Sophisticated Jazz, 4=Modern/Experimental
+
+# Tier 1: Pop Standards (0.0-0.25) - Accessible, widely recognized progressions
+"I-V-vi-IV",1,"I,V,vi,IV","The most popular progression in modern music - countless hits use this"
+"vi-IV-I-V",1,"vi,IV,I,V","Slightly melancholic variant of the pop progression"
+"I-vi-IV-V",1,"I,vi,IV,V","Classic '50s progression - doo-wop and early rock"
+"I-IV-V-I",1,"I,IV,V,I","The fundamental major cadence - timeless and stable"
+"vi-ii-V-I",1,"vi,ii,V,I","Gentle resolution with smooth voice leading"
+"I-V-IV-I",1,"I,V,IV,I","Plagal resolution variant - slightly folk/gospel feel"
+
+# Tier 2: Jazz Fundamentals (0.25-0.5) - Essential jazz progressions
+"ii-V-I",2,"ii,V,I,I","The cornerstone of jazz harmony - most important cadence"
+"I-vi-ii-V",2,"I,vi,ii,V","Circle of fifths progression - smooth jazz standard"
+"vi-ii-V-I",2,"vi,ii,V,I","Minor to major resolution - sophisticated and pleasing"
+"I-iii-vi-ii",2,"I,iii,vi,ii","Descending by thirds - creates harmonic momentum"
+"iii-vi-ii-V",2,"iii,vi,ii,V","Extended circle movement - builds to dominant"
+"I-IV-V-vi",2,"I,IV,V,vi","Deceptive cadence - unexpected but satisfying"
+
+# Tier 3: Sophisticated Jazz (0.5-0.75) - Advanced harmonic concepts
+"iii-vi-ii-V",3,"iii,vi,ii,V","Extended circle with chromatic mediant approach"
+"I-iii-IV-iv",3,"I,iii,IV,iv","Major to minor fourth - modal interchange flavor"
+"vi-IV-I-V",3,"vi,IV,I,V","Minor start with strong resolution drive"
+"ii-bII-I-vi",3,"ii,bII,I,vi","Tritone substitution - classic jazz reharmonization"
+"I-bVII-IV-I",3,"I,bVII,IV,I","Mixolydian flavor - modal borrowed chord"
+"vi-bVI-IV-V",3,"vi,bVI,IV,V","Chromatic mediant - sophisticated voice leading"
+
+# Tier 4: Modern/Experimental (0.75-1.0) - Contemporary and avant-garde
+"I-bII-bIII-IV",4,"I,bII,bIII,IV","Chromatic ascending - modern film scoring"
+"vi-bVI-bVII-V",4,"vi,bVI,bVII,V","Triple flat progression - dark and mysterious"
+"I-III-vi-bVI",4,"I,III,vi,bVI","Chromatic mediants - neo-Riemannian harmony"
+"ii-V-I-bVII",4,"ii,V,I,bVII","Jazz-rock fusion - adds mixolydian twist"
+"iii-bIII-ii-bII",4,"iii,bIII,ii,bII","Descending chromaticism - experimental tension"
+"I-bV-IV-bVII",4,"I,bV,IV,bVII","Tritone relationships - dissonant but structured"

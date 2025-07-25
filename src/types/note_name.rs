@@ -28,46 +28,22 @@ pub struct NoteName(i8);
 impl NoteName {
     /// Creates a new `NoteName` from a letter and accidental.
     pub fn new(letter: Letter, accidental: Accidental) -> Self {
-        use crate::types::Accidental::*;
         use crate::types::Letter::*;
 
-        match (letter, accidental) {
-            (F, DoubleFlat) => Self(-15),
-            (C, DoubleFlat) => Self(-14),
-            (G, DoubleFlat) => Self(-13),
-            (D, DoubleFlat) => Self(-12),
-            (A, DoubleFlat) => Self(-11),
-            (E, DoubleFlat) => Self(-10),
-            (B, DoubleFlat) => Self(-9),
-            (F, Flat) => Self(-8),
-            (C, Flat) => Self(-7),
-            (G, Flat) => Self(-6),
-            (D, Flat) => Self(-5),
-            (A, Flat) => Self(-4),
-            (E, Flat) => Self(-3),
-            (B, Flat) => Self(-2),
-            (F, Natural) => Self(-1),
-            (C, Natural) => Self(0),
-            (G, Natural) => Self(1),
-            (D, Natural) => Self(2),
-            (A, Natural) => Self(3),
-            (E, Natural) => Self(4),
-            (B, Natural) => Self(5),
-            (F, Sharp) => Self(6),
-            (C, Sharp) => Self(7),
-            (G, Sharp) => Self(8),
-            (D, Sharp) => Self(9),
-            (A, Sharp) => Self(10),
-            (E, Sharp) => Self(11),
-            (B, Sharp) => Self(12),
-            (F, DoubleSharp) => Self(13),
-            (C, DoubleSharp) => Self(14),
-            (G, DoubleSharp) => Self(15),
-            (D, DoubleSharp) => Self(16),
-            (A, DoubleSharp) => Self(17),
-            (E, DoubleSharp) => Self(18),
-            (B, DoubleSharp) => Self(19),
-        }
+        // Calculate the base fifths position for this letter
+        let base_fifths = match letter {
+            F => -1,
+            C => 0,
+            G => 1,
+            D => 2,
+            A => 3,
+            E => 4,
+            B => 5,
+        };
+
+        // Calculate the final fifths position
+        let fifths = base_fifths + accidental.semitone_offset() * 7;
+        Self(fifths)
     }
 
     /// Creates a new `NoteName` from a number of fifths.
@@ -96,15 +72,27 @@ impl NoteName {
 
     /// Returns the accidental of this note name.
     pub fn accidental(&self) -> Accidental {
-        match self.0 {
-            -15..-8 => Accidental::DoubleFlat,
-            -8..-1 => Accidental::Flat,
-            -1..6 => Accidental::Natural,
-            6..13 => Accidental::Sharp,
-            13..=19 => Accidental::DoubleSharp,
-            _ => {
-                panic!("Invalid NoteName value: {}", self.0);
-            }
+        // Calculate the base fifths position for this letter
+        let base_fifths = match self.letter() {
+            Letter::F => -1,
+            Letter::C => 0,
+            Letter::G => 1,
+            Letter::D => 2,
+            Letter::A => 3,
+            Letter::E => 4,
+            Letter::B => 5,
+        };
+
+        // Calculate the accidental level (how many sharps/flats beyond natural)
+        let accidental_level = (self.0 - base_fifths) / 7;
+
+        match accidental_level {
+            -2 => Accidental::DoubleFlat,
+            -1 => Accidental::Flat,
+            0 => Accidental::Natural,
+            1 => Accidental::Sharp,
+            2 => Accidental::DoubleSharp,
+            level => Accidental::Extreme(level),
         }
     }
 
@@ -172,8 +160,10 @@ impl NoteName {
         use crate::types::chord::naming::ChordFormat;
         match self.accidental() {
             Accidental::Natural => self.letter().to_string(),
-            acc => format!("{}<sup>{}</sup>", 
-                self.letter(), 
+            Accidental::Extreme(0) => self.letter().to_string(), // Extreme with 0 is natural
+            acc => format!(
+                "{}<sup>{}</sup>",
+                self.letter(),
                 acc.render_for_format(ChordFormat::Html)
             ),
         }
@@ -265,5 +255,41 @@ impl FromStr for NoteName {
         };
 
         Ok(NoteName::new(letter, accidental))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_extreme_transpositions_no_panic() {
+        let c = NoteName::new(Letter::C, Accidental::Natural);
+
+        // Test multiple tritone transpositions that would previously panic with invalid fifths value 24
+        let extreme_note = c
+            + Interval::AUGMENTED_FOURTH
+            + Interval::AUGMENTED_FOURTH
+            + Interval::AUGMENTED_FOURTH
+            + Interval::AUGMENTED_FOURTH;
+
+        // Should not panic - this is the key fix
+        let accidental = extreme_note.accidental();
+        assert!(matches!(accidental, Accidental::Extreme(_)));
+
+        // The note should display with repeated sharp symbols
+        let display = extreme_note.to_string();
+        assert!(display.contains("♯"));
+    }
+
+    #[test]
+    fn test_extreme_accidental_display() {
+        let triple_sharp = NoteName::new(Letter::C, Accidental::Extreme(3));
+        let display = triple_sharp.to_string();
+        assert_eq!(display.chars().filter(|&c| c == '♯').count(), 3);
+
+        let quad_flat = NoteName::new(Letter::F, Accidental::Extreme(-4));
+        let display = quad_flat.to_string();
+        assert_eq!(display.chars().filter(|&c| c == '♭').count(), 4);
     }
 }

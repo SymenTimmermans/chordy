@@ -1,5 +1,5 @@
 //! Traits for musical structures
-use crate::{Chord, Interval, NoteName, ChordQuality};
+use crate::{Chord, ChordQuality, Interval, NoteName};
 
 /// A trait for musical structures that have a root note
 pub trait HasRoot {
@@ -23,7 +23,7 @@ pub trait HasIntervals {
     }
 
     /// Detects the chord quality based on the intervals
-    /// 
+    ///
     /// Analyzes the third and fifth intervals to determine the chord quality.
     /// Returns None if the quality cannot be determined (e.g., no clear third).
     fn quality(&self) -> Option<ChordQuality> {
@@ -31,31 +31,31 @@ pub trait HasIntervals {
     }
 
     /// Calculates the dissonance level of the intervals
-    /// 
+    ///
     /// Returns a value between 0.0 (perfectly consonant) and 1.0 (highly dissonant).
     /// The calculation considers:
     /// - Dissonance of intervals from the root
     /// - Dissonance between adjacent intervals in the chord
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use chordy::prelude::*;
-    /// 
+    ///
     /// let c_major = Chord::major(note!("C"));
     /// assert!(c_major.dissonance_level() < 0.2); // Very consonant
-    /// 
+    ///
     /// let c_dim = Chord::diminished(note!("C"));
     /// assert!(c_dim.dissonance_level() > 0.5); // Quite dissonant
     /// ```
     fn dissonance_level(&self) -> f32 {
         use crate::Interval;
-        
+
         let intervals = self.intervals();
         if intervals.is_empty() {
             return 0.0;
         }
-        
+
         // Define dissonance weights for intervals
         let interval_dissonance = |interval: &Interval| -> f32 {
             match interval.semitones() % 12 {
@@ -74,33 +74,31 @@ pub trait HasIntervals {
                 _ => 0.5,   // Should not happen
             }
         };
-        
+
         // Calculate dissonance from root
         let mut total_dissonance = 0.0;
         let mut count = 0.0;
-        
+
         for interval in intervals {
             // Skip unison
             if interval.semitones() != 0 {
                 let mut weight = interval_dissonance(interval);
-                
+
                 // Add extra weight for extended intervals
                 if interval.semitones() > 12 {
                     weight += 0.1; // 9ths, 11ths, 13ths add tension
                 }
-                
+
                 total_dissonance += weight;
                 count += 1.0;
             }
         }
-        
+
         // Calculate dissonance between chord tones
-        let notes: Vec<_> = intervals.iter()
-            .map(|i| i.semitones() % 12)
-            .collect();
-            
+        let notes: Vec<_> = intervals.iter().map(|i| i.semitones() % 12).collect();
+
         for i in 0..notes.len() {
-            for j in i+1..notes.len() {
+            for j in i + 1..notes.len() {
                 let interval_between = (notes[j] - notes[i] + 12) % 12;
                 let dissonance = match interval_between {
                     1 => 0.7,  // Minor second between chord tones
@@ -115,13 +113,88 @@ pub trait HasIntervals {
                 }
             }
         }
-        
+
         // Normalize to 0.0-1.0 range
         if count > 0.0 {
             (total_dissonance / count).min(1.0)
         } else {
             0.0
         }
+    }
+
+    /// Sets the intervals of the structure, preserving other properties (like bass notes)
+    ///
+    /// This method allows modifying the intervals while maintaining the structural integrity
+    /// of the musical object (root note, bass note, etc.). This is preferred over creating
+    /// new objects which may lose important context.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::prelude::*;
+    ///
+    /// let mut chord = Chord::major(note!("C")).with_slash_bass(note!("E"));
+    /// let original_bass = chord.bass_note();
+    ///
+    /// // Add a 7th while preserving the bass note
+    /// chord.set_intervals(vec![
+    ///     Interval::PERFECT_UNISON,
+    ///     Interval::MAJOR_THIRD,
+    ///     Interval::PERFECT_FIFTH,
+    ///     Interval::MINOR_SEVENTH,
+    /// ]);
+    ///
+    /// assert_eq!(chord.bass_note(), original_bass); // Bass preserved!
+    /// assert!(chord.contains_interval(Interval::MINOR_SEVENTH));
+    /// ```
+    fn set_intervals(&mut self, _intervals: Vec<Interval>) {
+        unimplemented!("set_intervals not implemented for this type")
+    }
+
+    /// Removes a specific interval from the structure
+    ///
+    /// This method removes the first occurrence of the specified interval while
+    /// preserving other properties like bass notes. If the interval is not found,
+    /// the structure remains unchanged.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::prelude::*;
+    ///
+    /// let mut chord = Chord::major(note!("C")).with_slash_bass(note!("F"));
+    /// let original_bass = chord.bass_note();
+    ///
+    /// chord.remove_interval(Interval::PERFECT_FIFTH);
+    ///
+    /// assert_eq!(chord.bass_note(), original_bass); // Bass preserved!
+    /// assert!(!chord.contains_interval(Interval::PERFECT_FIFTH));
+    /// ```
+    fn remove_interval(&mut self, _interval: Interval) {
+        unimplemented!("remove_interval not implemented for this type")
+    }
+
+    /// Adds an interval to the structure if it doesn't already exist
+    ///
+    /// This method adds the specified interval while preserving other properties
+    /// like bass notes. If the interval already exists, the structure remains unchanged.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::prelude::*;
+    ///
+    /// let mut chord = Chord::major(note!("C")).with_slash_bass(note!("F"));
+    /// let original_bass = chord.bass_note();
+    ///
+    /// // Add a 7th
+    /// chord.add_interval(Interval::MINOR_SEVENTH);
+    ///
+    /// assert_eq!(chord.bass_note(), original_bass); // Bass preserved!
+    /// assert!(chord.contains_interval(Interval::MINOR_SEVENTH));
+    /// ```
+    fn add_interval(&mut self, _interval: Interval) {
+        unimplemented!("add_interval not implemented for this type")
     }
 }
 
@@ -214,7 +287,7 @@ pub trait ChordLike: HasRoot + HasIntervals {
     fn sevenths(&self) -> impl Iterator<Item = Chord> + '_ {
         let intervals = self.intervals();
         let tonic = self.root();
-        
+
         (0..intervals.len()).flat_map(move |i| {
             (0..intervals.len()).flat_map(move |j| {
                 (0..intervals.len()).flat_map(move |k| {
@@ -223,13 +296,16 @@ pub trait ChordLike: HasRoot + HasIntervals {
                         if i == j || i == k || i == l || j == k || j == l || k == l {
                             return None;
                         }
-                        
+
                         let root_interval = intervals[i];
                         let third_interval = intervals[j] - root_interval;
                         let fifth_interval = intervals[k] - root_interval;
                         let seventh_interval = intervals[l] - root_interval;
-                        
-                        if third_interval.is_third() && fifth_interval.is_fifth() && seventh_interval.is_seventh() {
+
+                        if third_interval.is_third()
+                            && fifth_interval.is_fifth()
+                            && seventh_interval.is_seventh()
+                        {
                             let root = tonic + root_interval;
                             Some(Chord::new(
                                 root,
@@ -237,8 +313,8 @@ pub trait ChordLike: HasRoot + HasIntervals {
                                     Interval::PERFECT_UNISON,
                                     third_interval,
                                     fifth_interval,
-                                    seventh_interval
-                                ]
+                                    seventh_interval,
+                                ],
                             ))
                         } else {
                             None

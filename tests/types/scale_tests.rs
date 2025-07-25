@@ -12,7 +12,6 @@ macro_rules! scale_test {
     };
 }
 
-
 // Major scale tests
 scale_test!(
     test_major_scale_c,
@@ -322,43 +321,70 @@ fn test_scale_degree_to_interval_with_double_accidentals() {
     // Test double flat scale degrees
     let double_flat_2 = ScaleDegree::new(2, Some(Accidental::DoubleFlat));
     assert_eq!(double_flat_2.to_interval(), Interval::DIMINISHED_SECOND);
-    
+
     let double_flat_3 = ScaleDegree::new(3, Some(Accidental::DoubleFlat));
     assert_eq!(double_flat_3.to_interval(), Interval::DIMINISHED_THIRD);
-    
+
     let double_flat_4 = ScaleDegree::new(4, Some(Accidental::DoubleFlat));
-    assert_eq!(double_flat_4.to_interval(), Interval::DOUBLY_DIMINISHED_FOURTH);
-    
+    assert_eq!(
+        double_flat_4.to_interval(),
+        Interval::DOUBLY_DIMINISHED_FOURTH
+    );
+
     let double_flat_5 = ScaleDegree::new(5, Some(Accidental::DoubleFlat));
-    assert_eq!(double_flat_5.to_interval(), Interval::DOUBLY_DIMINISHED_FIFTH);
-    
+    assert_eq!(
+        double_flat_5.to_interval(),
+        Interval::DOUBLY_DIMINISHED_FIFTH
+    );
+
     let double_flat_6 = ScaleDegree::new(6, Some(Accidental::DoubleFlat));
     assert_eq!(double_flat_6.to_interval(), Interval::DIMINISHED_SIXTH);
-    
+
     let double_flat_7 = ScaleDegree::new(7, Some(Accidental::DoubleFlat));
     assert_eq!(double_flat_7.to_interval(), Interval::DIMINISHED_SEVENTH);
-    
+
     // Test double sharp scale degrees
     let double_sharp_1 = ScaleDegree::new(1, Some(Accidental::DoubleSharp));
-    assert_eq!(double_sharp_1.to_interval(), Interval::DOUBLY_AUGMENTED_UNISON);
-    
+    assert_eq!(
+        double_sharp_1.to_interval(),
+        Interval::DOUBLY_AUGMENTED_UNISON
+    );
+
     let double_sharp_2 = ScaleDegree::new(2, Some(Accidental::DoubleSharp));
-    assert_eq!(double_sharp_2.to_interval(), Interval::DOUBLY_AUGMENTED_SECOND);
-    
+    assert_eq!(
+        double_sharp_2.to_interval(),
+        Interval::DOUBLY_AUGMENTED_SECOND
+    );
+
     let double_sharp_3 = ScaleDegree::new(3, Some(Accidental::DoubleSharp));
-    assert_eq!(double_sharp_3.to_interval(), Interval::DOUBLY_AUGMENTED_THIRD);
-    
+    assert_eq!(
+        double_sharp_3.to_interval(),
+        Interval::DOUBLY_AUGMENTED_THIRD
+    );
+
     let double_sharp_4 = ScaleDegree::new(4, Some(Accidental::DoubleSharp));
-    assert_eq!(double_sharp_4.to_interval(), Interval::DOUBLY_AUGMENTED_FOURTH);
-    
+    assert_eq!(
+        double_sharp_4.to_interval(),
+        Interval::DOUBLY_AUGMENTED_FOURTH
+    );
+
     let double_sharp_5 = ScaleDegree::new(5, Some(Accidental::DoubleSharp));
-    assert_eq!(double_sharp_5.to_interval(), Interval::DOUBLY_AUGMENTED_FIFTH);
-    
+    assert_eq!(
+        double_sharp_5.to_interval(),
+        Interval::DOUBLY_AUGMENTED_FIFTH
+    );
+
     let double_sharp_6 = ScaleDegree::new(6, Some(Accidental::DoubleSharp));
-    assert_eq!(double_sharp_6.to_interval(), Interval::DOUBLY_AUGMENTED_SIXTH);
-    
+    assert_eq!(
+        double_sharp_6.to_interval(),
+        Interval::DOUBLY_AUGMENTED_SIXTH
+    );
+
     let double_sharp_7 = ScaleDegree::new(7, Some(Accidental::DoubleSharp));
-    assert_eq!(double_sharp_7.to_interval(), Interval::DOUBLY_AUGMENTED_SEVENTH);
+    assert_eq!(
+        double_sharp_7.to_interval(),
+        Interval::DOUBLY_AUGMENTED_SEVENTH
+    );
 }
 
 #[test]
@@ -368,79 +394,79 @@ fn test_interval_to_scale_degree_with_double_accidentals() {
         ScaleDegree::from(Interval::DOUBLY_DIMINISHED_UNISON),
         ScaleDegree::new(1, Some(Accidental::DoubleFlat))
     );
-    
+
     assert_eq!(
         ScaleDegree::from(Interval::DOUBLY_DIMINISHED_SECOND),
         ScaleDegree::new(2, Some(Accidental::DoubleFlat))
     );
-    
+
     assert_eq!(
         ScaleDegree::from(Interval::DOUBLY_DIMINISHED_THIRD),
         ScaleDegree::new(3, Some(Accidental::DoubleFlat))
     );
-    
+
     assert_eq!(
         ScaleDegree::from(Interval::DOUBLY_DIMINISHED_FOURTH),
         ScaleDegree::new(4, Some(Accidental::DoubleFlat))
     );
-    
+
     assert_eq!(
         ScaleDegree::from(Interval::DOUBLY_DIMINISHED_FIFTH),
         ScaleDegree::new(5, Some(Accidental::DoubleFlat))
     );
-    
+
     assert_eq!(
         ScaleDegree::from(Interval::DOUBLY_DIMINISHED_SIXTH),
         ScaleDegree::new(6, Some(Accidental::DoubleFlat))
     );
-    
+
     assert_eq!(
         ScaleDegree::from(Interval::DOUBLY_DIMINISHED_SEVENTH),
         ScaleDegree::new(7, Some(Accidental::DoubleFlat))
     );
-    
+
     // Test doubly augmented intervals
     assert_eq!(
         ScaleDegree::from(Interval::DOUBLY_AUGMENTED_UNISON),
         ScaleDegree::new(1, Some(Accidental::DoubleSharp))
     );
-    
+
     assert_eq!(
         ScaleDegree::from(Interval::DOUBLY_AUGMENTED_SECOND),
         ScaleDegree::new(2, Some(Accidental::DoubleSharp))
     );
-    
+
     assert_eq!(
         ScaleDegree::from(Interval::DOUBLY_AUGMENTED_THIRD),
         ScaleDegree::new(3, Some(Accidental::DoubleSharp))
     );
-    
+
     assert_eq!(
         ScaleDegree::from(Interval::DOUBLY_AUGMENTED_FOURTH),
         ScaleDegree::new(4, Some(Accidental::DoubleSharp))
     );
-    
+
     assert_eq!(
         ScaleDegree::from(Interval::DOUBLY_AUGMENTED_FIFTH),
         ScaleDegree::new(5, Some(Accidental::DoubleSharp))
     );
-    
+
     assert_eq!(
         ScaleDegree::from(Interval::DOUBLY_AUGMENTED_SIXTH),
         ScaleDegree::new(6, Some(Accidental::DoubleSharp))
     );
-    
+
     assert_eq!(
         ScaleDegree::from(Interval::DOUBLY_AUGMENTED_SEVENTH),
         ScaleDegree::new(7, Some(Accidental::DoubleSharp))
     );
-    
+
     // Test compound intervals with double accidentals
     assert_eq!(
         ScaleDegree::from(Interval::DOUBLY_DIMINISHED_NINTH),
         ScaleDegree::new(2, Some(Accidental::DoubleFlat))
     );
-    
+
     assert_eq!(
         ScaleDegree::from(Interval::DOUBLY_AUGMENTED_TENTH),
         ScaleDegree::new(3, Some(Accidental::DoubleSharp))
@@ -450,48 +476,48 @@ fn test_interval_to_scale_degree_with_double_accidentals() {
 #[test]
 fn test_scale_key_mapping() {
     use chordy::Key;
-    
+
     // Test major scales
     let c_major = Scale::major(note!("C"));
     assert_eq!(c_major.key(), Key::Major(note!("C")));
-    
+
     let g_major = Scale::major(note!("G"));
     assert_eq!(g_major.key(), Key::Major(note!("G")));
-    
+
     // Test minor scales
     let a_minor = Scale::minor(note!("A"));
     assert_eq!(a_minor.key(), Key::Minor(note!("A")));
-    
+
     let d_minor = Scale::minor(note!("D"));
     assert_eq!(d_minor.key(), Key::Minor(note!("D")));
-    
+
     // Test major modes (Ionian, Lydian, Mixolydian)
     let c_ionian = Scale::from_definition(note!("C"), scales::IONIAN);
     assert_eq!(c_ionian.key(), Key::Major(note!("C")));
-    
+
     let f_lydian = Scale::from_definition(note!("F"), scales::LYDIAN);
     assert_eq!(f_lydian.key(), Key::Major(note!("F")));
-    
+
     let g_mixolydian = Scale::from_definition(note!("G"), scales::MIXOLYDIAN);
     assert_eq!(g_mixolydian.key(), Key::Major(note!("G")));
-    
+
     // Test minor modes (Dorian, Phrygian, Aeolian, Locrian)
     let d_dorian = Scale::from_definition(note!("D"), scales::DORIAN);
     assert_eq!(d_dorian.key(), Key::Minor(note!("D")));
-    
+
     let e_phrygian = Scale::from_definition(note!("E"), scales::PHRYGIAN);
     assert_eq!(e_phrygian.key(), Key::Minor(note!("E")));
-    
+
     let a_aeolian = Scale::from_definition(note!("A"), scales::AEOLIAN);
     assert_eq!(a_aeolian.key(), Key::Minor(note!("A")));
-    
+
     let b_locrian = Scale::from_definition(note!("B"), scales::LOCRIAN);
     assert_eq!(b_locrian.key(), Key::Minor(note!("B")));
-    
+
     // Test harmonic and melodic minor
     let a_harmonic_minor = Scale::from_definition(note!("A"), scales::HARMONIC_MINOR);
     assert_eq!(a_harmonic_minor.key(), Key::Minor(note!("A")));
-    
+
     let c_melodic_minor = Scale::from_definition(note!("C"), scales::MELODIC_MINOR);
     assert_eq!(c_melodic_minor.key(), Key::Minor(note!("C")));
 }
@@ -501,13 +527,13 @@ fn test_scale_key_chord_analysis() {
     // Test that we can analyze chords from a scale using its key
     let g_mixolydian = Scale::from_definition(note!("G"), scales::MIXOLYDIAN);
     let g_major_key = g_mixolydian.key();
-    
+
     // G Mixolydian has the same notes as C major, but centered on G
     // The I chord in G Mixolydian is G major
     let g_chord = Chord::major(note!("G"));
     let roman = g_major_key.analyze_chord(&g_chord);
     assert_eq!(roman.degree, RomanDegree::I);
-    
+
     // The bVII chord in G Mixolydian is F major
     let f_chord = Chord::major(note!("F"));
     let roman = g_major_key.analyze_chord(&f_chord);

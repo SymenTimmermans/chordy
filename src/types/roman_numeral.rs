@@ -1,6 +1,9 @@
+use super::{Accidental, Chord, ChordQuality, Interval, IntervalSet, Key};
+use crate::{
+    error::ParseError,
+    traits::{HasIntervals, HasRoot},
+};
 use std::{fmt::Display, str::FromStr};
-use super::{Interval, IntervalSet, Key, Chord, Accidental, ChordQuality};
-use crate::{error::ParseError, traits::{HasIntervals, HasRoot}};
 
 /// Roman degree representation (I-VII), analogous to Letter enum
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -34,7 +37,7 @@ impl RomanDegree {
             RomanDegree::VII => 7,
         }
     }
-    
+
     /// Create from numeric value (1-7)
     pub fn from_number(n: u8) -> Option<Self> {
         match n {
@@ -48,7 +51,7 @@ impl RomanDegree {
             _ => None,
         }
     }
-    
+
     /// Get the base roman numeral string (uppercase)
     pub fn base_string(self) -> &'static str {
         match self {
@@ -61,7 +64,7 @@ impl RomanDegree {
             RomanDegree::VII => "VII",
         }
     }
-    
+
     /// Get the lowercase version
     pub fn lowercase_string(self) -> &'static str {
         match self {
@@ -94,64 +97,94 @@ impl RomanNumeral {
     // Convenience constructors for natural degrees
     /// I - Tonic
     #[allow(non_snake_case)]
-    pub const fn I() -> Self { Self::new(RomanDegree::I, Accidental::Natural) }
+    pub const fn I() -> Self {
+        Self::new(RomanDegree::I, Accidental::Natural)
+    }
     /// II - Supertonic  
     #[allow(non_snake_case)]
-    pub const fn II() -> Self { Self::new(RomanDegree::II, Accidental::Natural) }
+    pub const fn II() -> Self {
+        Self::new(RomanDegree::II, Accidental::Natural)
+    }
     /// III - Mediant
     #[allow(non_snake_case)]
-    pub const fn III() -> Self { Self::new(RomanDegree::III, Accidental::Natural) }
+    pub const fn III() -> Self {
+        Self::new(RomanDegree::III, Accidental::Natural)
+    }
     /// IV - Subdominant
     #[allow(non_snake_case)]
-    pub const fn IV() -> Self { Self::new(RomanDegree::IV, Accidental::Natural) }
+    pub const fn IV() -> Self {
+        Self::new(RomanDegree::IV, Accidental::Natural)
+    }
     /// V - Dominant
     #[allow(non_snake_case)]
-    pub const fn V() -> Self { Self::new(RomanDegree::V, Accidental::Natural) }
+    pub const fn V() -> Self {
+        Self::new(RomanDegree::V, Accidental::Natural)
+    }
     /// VI - Submediant
     #[allow(non_snake_case)]
-    pub const fn VI() -> Self { Self::new(RomanDegree::VI, Accidental::Natural) }
+    pub const fn VI() -> Self {
+        Self::new(RomanDegree::VI, Accidental::Natural)
+    }
     /// VII - Leading tone
     #[allow(non_snake_case)]
-    pub const fn VII() -> Self { Self::new(RomanDegree::VII, Accidental::Natural) }
+    pub const fn VII() -> Self {
+        Self::new(RomanDegree::VII, Accidental::Natural)
+    }
 
     // Convenience constructors for flat degrees
     /// ♭II - Flat supertonic
     #[allow(non_snake_case)]
-    pub const fn flat_II() -> Self { Self::new(RomanDegree::II, Accidental::Flat) }
+    pub const fn flat_II() -> Self {
+        Self::new(RomanDegree::II, Accidental::Flat)
+    }
     /// ♭III - Flat mediant
     #[allow(non_snake_case)]
-    pub const fn flat_III() -> Self { Self::new(RomanDegree::III, Accidental::Flat) }
+    pub const fn flat_III() -> Self {
+        Self::new(RomanDegree::III, Accidental::Flat)
+    }
     /// ♭VI - Flat submediant
     #[allow(non_snake_case)]
-    pub const fn flat_VI() -> Self { Self::new(RomanDegree::VI, Accidental::Flat) }
+    pub const fn flat_VI() -> Self {
+        Self::new(RomanDegree::VI, Accidental::Flat)
+    }
     /// ♭VII - Flat subtonic
     #[allow(non_snake_case)]
-    pub const fn flat_VII() -> Self { Self::new(RomanDegree::VII, Accidental::Flat) }
+    pub const fn flat_VII() -> Self {
+        Self::new(RomanDegree::VII, Accidental::Flat)
+    }
 
     // Convenience constructors for sharp degrees
     /// ♯I - Sharp tonic
     #[allow(non_snake_case)]
-    pub const fn sharp_I() -> Self { Self::new(RomanDegree::I, Accidental::Sharp) }
+    pub const fn sharp_I() -> Self {
+        Self::new(RomanDegree::I, Accidental::Sharp)
+    }
     /// ♯IV - Sharp subdominant
     #[allow(non_snake_case)]
-    pub const fn sharp_IV() -> Self { Self::new(RomanDegree::IV, Accidental::Sharp) }
+    pub const fn sharp_IV() -> Self {
+        Self::new(RomanDegree::IV, Accidental::Sharp)
+    }
     /// ♯V - Sharp dominant
     #[allow(non_snake_case)]
-    pub const fn sharp_V() -> Self { Self::new(RomanDegree::V, Accidental::Sharp) }
+    pub const fn sharp_V() -> Self {
+        Self::new(RomanDegree::V, Accidental::Sharp)
+    }
     /// ♯VII - Sharp leading tone
     #[allow(non_snake_case)]
-    pub const fn sharp_VII() -> Self { Self::new(RomanDegree::VII, Accidental::Sharp) }
-    
+    pub const fn sharp_VII() -> Self {
+        Self::new(RomanDegree::VII, Accidental::Sharp)
+    }
+
     /// Get the degree
     pub fn degree(self) -> RomanDegree {
         self.degree
     }
-    
+
     /// Get the accidental
     pub fn accidental(self) -> Accidental {
         self.accidental
     }
-    
+
     /// Convert this roman numeral to its corresponding interval from the tonic
     ///
     /// This delegates to the underlying ScaleDegree conversion, providing a convenient
@@ -174,8 +207,8 @@ impl RomanNumeral {
     pub fn to_interval(self) -> Interval {
         // Convert RomanNumeral to ScaleDegree manually since From trait doesn't exist in reverse
         let scale_degree = super::scale::ScaleDegree::new(
-            self.degree.to_number(), 
-            self.accidental.as_alteration()
+            self.degree.to_number(),
+            self.accidental.as_alteration(),
         );
         scale_degree.to_interval()
     }
@@ -185,7 +218,7 @@ impl Display for RomanNumeral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // Default display without quality context - use uppercase
         let base = self.degree.base_string();
-        
+
         write!(f, "{}{}", self.accidental.component_str(), base)
     }
 }
@@ -197,12 +230,12 @@ impl FromStr for RomanNumeral {
         if s.is_empty() {
             return Err(ParseError::InvalidRomanNumeral(s.to_string()));
         }
-        
+
         // Parse accidental prefix using centralized Accidental::FromStr
         // Try different prefix lengths to find the longest match
         let mut accidental = Accidental::Natural;
         let mut degree_start = 0;
-        
+
         // Try double accidentals first (longer strings)
         for prefix_len in (1..=s.len()).rev() {
             if let Some(prefix) = s.get(0..prefix_len) {
@@ -213,13 +246,13 @@ impl FromStr for RomanNumeral {
                 }
             }
         }
-        
+
         // Parse the roman numeral part
         let roman_part = &s[degree_start..];
         if roman_part.is_empty() {
             return Err(ParseError::InvalidRomanNumeral(s.to_string()));
         }
-        
+
         let degree = match roman_part.to_uppercase().as_str() {
             "I" => RomanDegree::I,
             "II" => RomanDegree::II,
@@ -230,7 +263,7 @@ impl FromStr for RomanNumeral {
             "VII" => RomanDegree::VII,
             _ => return Err(ParseError::InvalidRomanNumeral(s.to_string())),
         };
-        
+
         Ok(RomanNumeral::new(degree, accidental))
     }
 }
@@ -252,18 +285,22 @@ pub struct RomanChord {
 impl RomanChord {
     /// Create a new roman chord from root and intervals
     pub fn new(root: RomanNumeral, intervals: Vec<Interval>) -> Self {
-        RomanChord { 
-            root, 
+        RomanChord {
+            root,
             intervals: IntervalSet::from_slice(&intervals),
             bass: None,
         }
     }
-    
+
     /// Create a new roman chord from root and interval set
     pub fn from_interval_set(root: RomanNumeral, intervals: IntervalSet) -> Self {
-        RomanChord { root, intervals, bass: None }
+        RomanChord {
+            root,
+            intervals,
+            bass: None,
+        }
     }
-    
+
     /// Create a simple roman chord with basic quality (triad intervals)
     pub fn simple(root: RomanNumeral, quality: ChordQuality) -> Self {
         let intervals = match quality {
@@ -336,7 +373,7 @@ impl RomanChord {
             ],
         )
     }
-    
+
     /// Create an augmented roman chord
     pub fn augmented(root: RomanNumeral) -> Self {
         Self::new(
@@ -382,45 +419,63 @@ impl RomanChord {
         let interval_from_base = self.root.to_interval();
         let actual_root = base_root + interval_from_base;
         let mut chord = Chord::new(actual_root, self.intervals.iter().collect());
-        
+
         // Handle bass note if present
         if let Some((bass_roman, bass_type)) = self.bass {
             let bass_interval = bass_roman.to_interval();
             let actual_bass = base_root + bass_interval;
             chord.bass = Some((actual_bass, bass_type));
         }
-        
+
         chord
     }
-    
+
     /// Convert this roman chord to a ChordName using the new naming system
     pub fn to_chord_name(&self) -> super::chord::ChordName {
-        use super::chord::{ChordRoot, ChordAnalyzer};
+        use super::chord::{ChordAnalyzer, ChordRoot};
         let chord_root = ChordRoot::Roman(self.root);
-        let mut chord_name = ChordAnalyzer::analyze_with_root(chord_root, self.intervals.as_slice());
-        
+        let mut chord_name =
+            ChordAnalyzer::analyze_with_root(chord_root, self.intervals.as_slice());
+
         // Add bass note if present
         if let Some((bass_roman, _)) = self.bass {
             chord_name = chord_name.with_bass(ChordRoot::Roman(bass_roman));
         }
-        
+
         chord_name
     }
 
     /// Get the bass note of this roman chord
     ///
-    /// Returns the bass note if present, otherwise returns the root note.
+    /// Returns the bass note if present, otherwise returns the root note. This method
+    /// handles both classical inversions and slash chords uniformly.
+    ///
+    /// In music theory, the bass note is the lowest-pitched note and significantly
+    /// influences harmonic function and voice leading. For roman chord analysis,
+    /// this is particularly important for understanding chord progressions and
+    /// harmonic relationships within a key.
+    ///
+    /// # Bass Note Types
+    /// - **Root position**: Bass note equals root (e.g., I has I in bass)
+    /// - **Classical inversion**: Bass note is a chord tone (e.g., I⁶ has III in bass)
+    /// - **Slash chord**: Bass note can be any roman numeral (e.g., I/V has V in bass)
     ///
     /// # Examples
     ///
     /// ```
     /// use chordy::{RomanChord, RomanNumeral};
     ///
+    /// // Root position - bass equals root
     /// let i_major = RomanChord::major(RomanNumeral::I());
     /// assert_eq!(i_major.bass_note(), RomanNumeral::I());
     ///
+    /// // First inversion - third in bass
     /// let i_first_inversion = i_major.with_inversion(1);
     /// assert_eq!(i_first_inversion.bass_note(), RomanNumeral::III());
+    ///
+    /// // Slash chord - arbitrary bass note
+    /// let i_slash_v = i_major.with_slash_bass(RomanNumeral::V());
+    /// assert_eq!(i_slash_v.bass_note(), RomanNumeral::V());
     /// ```
     pub fn bass_note(&self) -> RomanNumeral {
         match self.bass {
@@ -488,15 +543,45 @@ impl RomanChord {
 
     /// Create a roman chord with the specified inversion
     ///
+    /// Classical chord inversions place chord tones other than the root in the bass.
+    /// This creates different harmonic effects and voice leading possibilities while
+    /// maintaining the chord's essential harmonic function.
+    ///
+    /// Inversion numbers correspond to which chord tone is in the bass:
+    /// - **0**: Root position (root in bass)
+    /// - **1**: First inversion (third in bass) - often notated as ⁶
+    /// - **2**: Second inversion (fifth in bass) - often notated as ⁶₄  
+    /// - **3+**: Higher inversions for extended chords
+    ///
+    /// In roman numeral analysis, inversions affect voice leading and harmonic
+    /// stability. For example, I⁶ (first inversion tonic) often connects smoothly
+    /// to IV or serves as a passing chord.
+    ///
+    /// # Parameters
+    /// - `inversion`: The inversion number (0 = root position, 1 = first inversion, etc.)
+    ///
     /// # Examples
     ///
     /// ```
     /// use chordy::{RomanChord, RomanNumeral};
     ///
     /// let i_major = RomanChord::major(RomanNumeral::I());
-    /// let i_first_inversion = i_major.with_inversion(1);
-    /// assert!(i_first_inversion.is_inverted());
-    /// assert_eq!(i_first_inversion.bass_note(), RomanNumeral::III());
+    ///
+    /// // Root position (no change)
+    /// let root_position = i_major.with_inversion(0);
+    /// assert_eq!(root_position.bass_note(), RomanNumeral::I());
+    /// assert!(!root_position.is_inverted());
+    ///
+    /// // First inversion - third in bass
+    /// let first_inversion = i_major.with_inversion(1);
+    /// assert_eq!(first_inversion.bass_note(), RomanNumeral::III());
+    /// assert!(first_inversion.is_inverted());
+    /// assert_eq!(first_inversion.inversion_number(), Some(1));
+    ///
+    /// // Second inversion - fifth in bass  
+    /// let second_inversion = i_major.with_inversion(2);
+    /// assert_eq!(second_inversion.bass_note(), RomanNumeral::V());
+    /// assert_eq!(second_inversion.inversion_number(), Some(2));
     /// ```
     pub fn with_inversion(mut self, inversion: u8) -> Self {
         if inversion == 0 {
@@ -515,15 +600,43 @@ impl RomanChord {
 
     /// Create a roman chord with the specified slash bass note
     ///
+    /// Slash chords (also called "chords over bass notes") feature a bass note that
+    /// is independent of the chord's normal inversion structure. Unlike classical
+    /// inversions, the bass note can be any roman numeral, not just a chord tone.
+    ///
+    /// This creates sophisticated harmonic relationships and smooth bass line motion
+    /// in roman numeral analysis. Slash chords are essential for understanding
+    /// complex progressions and voice leading patterns.
+    ///
+    /// # Common Uses in Roman Analysis
+    /// - **Pedal tones**: Static bass notes (e.g., I/V, ii/V, vi/V for dominant pedal)
+    /// - **Chromatic bass lines**: Smooth bass motion (e.g., I - I/VII - vi)  
+    /// - **Secondary functions**: Enhanced harmonic color (e.g., V/V/IV for dominant of dominant over subdominant)
+    /// - **Linear progressions**: Voice leading bass lines connecting chord roots
+    ///
+    /// # Parameters
+    /// - `bass`: The roman numeral to use as the bass note
+    ///
     /// # Examples
     ///
     /// ```
     /// use chordy::{RomanChord, RomanNumeral};
     ///
     /// let i_major = RomanChord::major(RomanNumeral::I());
+    ///
+    /// // Simple slash chord
     /// let i_slash_v = i_major.with_slash_bass(RomanNumeral::V());
     /// assert!(i_slash_v.is_slash_chord());
+    /// assert!(!i_slash_v.is_inverted());  // Not a classical inversion
     /// assert_eq!(i_slash_v.bass_note(), RomanNumeral::V());
+    ///
+    /// // Chromatic bass line example: I - I/♭VII - vi
+    /// let i_slash_flat_vii = i_major.with_slash_bass(RomanNumeral::flat_VII());
+    /// assert_eq!(i_slash_flat_vii.bass_note(), RomanNumeral::flat_VII());
+    ///
+    /// // Bass note can be any roman numeral, even outside the key
+    /// let i_slash_sharp_iv = i_major.with_slash_bass(RomanNumeral::sharp_IV());
+    /// assert_eq!(i_slash_sharp_iv.bass_note(), RomanNumeral::sharp_IV());
     /// ```
     pub fn with_slash_bass(mut self, bass: RomanNumeral) -> Self {
         self.bass = Some((bass, super::chord::BassType::Slash));
@@ -565,15 +678,13 @@ impl Display for RomanChord {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // Use the new chord naming system for consistent and complete notation
         use super::chord::{ChordRenderer, NamingConvention};
-        
+
         let chord_name = self.to_chord_name();
-        
+
         // Use Roman numeral specific renderer
-        let renderer = ChordRenderer::new(
-            super::chord::ChordFormat::Unicode, 
-            NamingConvention::Jazz
-        );
-        
+        let renderer =
+            ChordRenderer::new(super::chord::ChordFormat::Unicode, NamingConvention::Jazz);
+
         write!(f, "{}", renderer.render(&chord_name))
     }
 }
@@ -582,9 +693,9 @@ impl From<super::scale::ScaleDegree> for RomanNumeral {
     fn from(scale_degree: super::scale::ScaleDegree) -> Self {
         let degree = RomanDegree::from_number(scale_degree.step)
             .expect("ScaleDegree should always have a valid step (1-7)");
-        
+
         let accidental = scale_degree.alteration.unwrap_or(Accidental::Natural);
-        
+
         RomanNumeral::new(degree, accidental)
     }
 }
@@ -598,12 +709,12 @@ impl From<Interval> for RomanNumeral {
 
 impl From<u8> for RomanNumeral {
     /// Create a natural roman numeral from a degree number (1-7)
-    /// 
+    ///
     /// # Panics
     /// Panics if the number is not in the range 1-7
     fn from(degree_num: u8) -> Self {
-        let degree = RomanDegree::from_number(degree_num)
-            .expect("Degree number must be in range 1-7");
+        let degree =
+            RomanDegree::from_number(degree_num).expect("Degree number must be in range 1-7");
         RomanNumeral::new(degree, Accidental::Natural)
     }
 }
@@ -611,6 +722,20 @@ impl From<u8> for RomanNumeral {
 impl HasIntervals for RomanChord {
     fn intervals(&self) -> &[Interval] {
         self.intervals.as_slice()
+    }
+
+    fn set_intervals(&mut self, intervals: Vec<Interval>) {
+        self.intervals = intervals.into_iter().collect();
+    }
+
+    fn remove_interval(&mut self, interval: Interval) {
+        self.intervals.remove(interval);
+    }
+
+    fn add_interval(&mut self, interval: Interval) {
+        if !self.intervals.contains(interval) {
+            self.intervals.push(interval);
+        }
     }
 }
 

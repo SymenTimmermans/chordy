@@ -194,10 +194,10 @@ impl ChordName {
 
     /// Check if this is a basic triad (no seventh, extensions, etc.)
     pub fn is_triad(&self) -> bool {
-        self.seventh.is_none() && 
-        self.extensions.is_empty() && 
-        self.added_tones.is_empty() &&
-        self.suspensions.is_empty()
+        self.seventh.is_none()
+            && self.extensions.is_empty()
+            && self.added_tones.is_empty()
+            && self.suspensions.is_empty()
     }
 
     /// Check if the chord has any alterations

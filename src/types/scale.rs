@@ -1,5 +1,5 @@
+use super::{chord::HarmonicFunction, Accidental, Chord, Interval, IntervalSet, Key, NoteName};
 use crate::traits::{ChordLike, HasIntervals, HasRoot};
-use super::{chord::HarmonicFunction, Accidental, Chord, Interval, IntervalSet, NoteName, Key};
 
 pub mod definition;
 pub use definition::ScaleDefinition;
@@ -269,7 +269,8 @@ impl Scale {
     ///
     /// ```
     pub fn harmonic_function(&self, chord: &Chord) -> Option<HarmonicFunction> {
-        let scale_degrees: Vec<ScaleDegree> = chord.notes_iter()
+        let scale_degrees: Vec<ScaleDegree> = chord
+            .notes_iter()
             .filter_map(|note| self.degree_of(&note))
             .collect();
 
@@ -291,25 +292,24 @@ impl Scale {
         if !(1..=7).contains(&degree) {
             panic!("Scale degree must be in range 1-7, got {}", degree);
         }
-        
+
         let notes = self.notes();
         let root = notes[(degree - 1) as usize];
-        
+
         // Build triad using scale notes
         let third_degree = ((degree - 1 + 2) % 7) as usize;
         let fifth_degree = ((degree - 1 + 4) % 7) as usize;
-        
+
         let third = notes[third_degree];
         let fifth = notes[fifth_degree];
-        
+
         let third_interval = root.interval_to(third);
         let fifth_interval = root.interval_to(fifth);
-        
-        Chord::new(root, vec![
-            Interval::PERFECT_UNISON,
-            third_interval,
-            fifth_interval,
-        ])
+
+        Chord::new(
+            root,
+            vec![Interval::PERFECT_UNISON, third_interval, fifth_interval],
+        )
     }
 
     /// Gets the tonic chord (I)
@@ -346,28 +346,28 @@ impl Scale {
     pub fn leading_tone_chord(&self) -> Chord {
         self.chord_at_degree(7)
     }
-    
+
     /// Returns the major or minor key signature for this scale
-    /// 
+    ///
     /// Determines the key based on the third interval of the scale:
     /// - Scales with a major third map to major keys
     /// - Scales with a minor third map to minor keys
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use chordy::prelude::*;
-    /// 
+    ///
     /// let c_major = Scale::major(note!("C"));
     /// assert_eq!(c_major.key(), Key::Major(note!("C")));
-    /// 
+    ///
     /// let a_minor = Scale::minor(note!("A"));
     /// assert_eq!(a_minor.key(), Key::Minor(note!("A")));
-    /// 
+    ///
     /// // Modes also map to their appropriate key signatures
     /// let d_dorian = Scale::from_definition(note!("D"), scales::DORIAN);
     /// assert_eq!(d_dorian.key(), Key::Minor(note!("D")));
-    /// 
+    ///
     /// let f_lydian = Scale::from_definition(note!("F"), scales::LYDIAN);
     /// assert_eq!(f_lydian.key(), Key::Major(note!("F")));
     /// ```
@@ -380,7 +380,7 @@ impl Scale {
             Key::Minor(self.tonic)
         }
     }
-    
+
     /// Returns the relative major/minor of this scale
     pub fn relative(&self) -> Option<Scale> {
         if *self == scales::IONIAN {
@@ -446,7 +446,7 @@ impl Scale {
     ///
     /// let c_major = Scale::major(note!("C"));
     /// let extended = c_major.extended_intervals(2);
-    /// 
+    ///
     /// // Should include 9th, 11th, 13th intervals
     /// assert!(extended.iter().any(|i| i.semitones() == 14)); // Major 9th
     /// assert!(extended.iter().any(|i| i.semitones() == 17)); // Perfect 11th  
@@ -454,14 +454,14 @@ impl Scale {
     /// ```
     pub fn extended_intervals(&self, octaves: u8) -> Vec<Interval> {
         let mut extended = Vec::new();
-        
+
         for octave in 0..octaves {
             for interval in self.intervals.iter() {
                 let extended_interval: Interval = interval + Interval::new(0, octave as i8);
                 extended.push(extended_interval);
             }
         }
-        
+
         extended.sort_by_key(|i| i.semitones());
         extended.dedup();
         extended
@@ -478,7 +478,7 @@ impl Scale {
     ///
     /// let c_major = Scale::major(note!("C"));
     /// let extended_notes = c_major.extended_notes(2);
-    /// 
+    ///
     /// // Should have 14 notes (7 per octave x 2 octaves)
     /// assert_eq!(extended_notes.len(), 14);
     /// ```
@@ -506,7 +506,7 @@ impl Scale {
     ///
     /// // The joined scale will have the tonic of C and intervals (notes) from both scales
     /// assert_eq!(joined.root(), note!("C"));
-    /// 
+    ///
     /// let notes = joined.notes();
     /// // F# from D Lydian should be included
     /// assert!(notes.contains(&note!("F#")));
@@ -522,12 +522,7 @@ impl Scale {
         let mut intervals: Vec<Interval> = self.intervals.iter().collect();
 
         // add each of the other intervals, adjusted by the tonic difference
-        intervals.extend(
-            other
-                .intervals
-                .iter()
-                .map(|i| i + tonic_difference),
-        );
+        intervals.extend(other.intervals.iter().map(|i| i + tonic_difference));
 
         intervals.sort();
         intervals.dedup();
@@ -554,6 +549,20 @@ impl HasRoot for Scale {
 impl HasIntervals for Scale {
     fn intervals(&self) -> &[Interval] {
         self.intervals.as_slice()
+    }
+
+    fn set_intervals(&mut self, intervals: Vec<Interval>) {
+        self.intervals = intervals.into_iter().collect();
+    }
+
+    fn remove_interval(&mut self, interval: Interval) {
+        self.intervals.remove(interval);
+    }
+
+    fn add_interval(&mut self, interval: Interval) {
+        if !self.intervals.contains(interval) {
+            self.intervals.push(interval);
+        }
     }
 }
 
@@ -590,4 +599,3 @@ impl PartialEq<&Scale> for ScaleDefinition {
         self.intervals == other.intervals()
     }
 }
-

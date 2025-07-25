@@ -1,6 +1,6 @@
 //! Neo-Riemann transformations
-use crate::{Chord, Interval, NoteName};
 use crate::traits::ChordLike;
+use crate::{Chord, Interval, NoteName};
 
 /// Transform to parallel major or minor chord
 pub fn transform_p(chord: &Chord) -> Chord {
