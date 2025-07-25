@@ -82,10 +82,10 @@ impl NoteName {
             Letter::E => 4,
             Letter::B => 5,
         };
-        
+
         // Calculate the accidental level (how many sharps/flats beyond natural)
         let accidental_level = (self.0 - base_fifths) / 7;
-        
+
         match accidental_level {
             -2 => Accidental::DoubleFlat,
             -1 => Accidental::Flat,
@@ -161,8 +161,9 @@ impl NoteName {
         match self.accidental() {
             Accidental::Natural => self.letter().to_string(),
             Accidental::Extreme(0) => self.letter().to_string(), // Extreme with 0 is natural
-            acc => format!("{}<sup>{}</sup>", 
-                self.letter(), 
+            acc => format!(
+                "{}<sup>{}</sup>",
+                self.letter(),
                 acc.render_for_format(ChordFormat::Html)
             ),
         }
@@ -264,17 +265,18 @@ mod tests {
     #[test]
     fn test_extreme_transpositions_no_panic() {
         let c = NoteName::new(Letter::C, Accidental::Natural);
-        
+
         // Test multiple tritone transpositions that would previously panic with invalid fifths value 24
-        let extreme_note = c + Interval::AUGMENTED_FOURTH
-                            + Interval::AUGMENTED_FOURTH
-                            + Interval::AUGMENTED_FOURTH
-                            + Interval::AUGMENTED_FOURTH;
-        
+        let extreme_note = c
+            + Interval::AUGMENTED_FOURTH
+            + Interval::AUGMENTED_FOURTH
+            + Interval::AUGMENTED_FOURTH
+            + Interval::AUGMENTED_FOURTH;
+
         // Should not panic - this is the key fix
         let accidental = extreme_note.accidental();
         assert!(matches!(accidental, Accidental::Extreme(_)));
-        
+
         // The note should display with repeated sharp symbols
         let display = extreme_note.to_string();
         assert!(display.contains("♯"));
@@ -285,7 +287,7 @@ mod tests {
         let triple_sharp = NoteName::new(Letter::C, Accidental::Extreme(3));
         let display = triple_sharp.to_string();
         assert_eq!(display.chars().filter(|&c| c == '♯').count(), 3);
-        
+
         let quad_flat = NoteName::new(Letter::F, Accidental::Extreme(-4));
         let display = quad_flat.to_string();
         assert_eq!(display.chars().filter(|&c| c == '♭').count(), 4);

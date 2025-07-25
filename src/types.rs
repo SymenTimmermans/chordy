@@ -9,7 +9,7 @@ mod note_name;
 pub use note_name::NoteName;
 
 mod chord;
-pub use chord::{Chord, ChordQuality, HarmonicFunction, BassType};
+pub use chord::{BassType, Chord, ChordQuality, HarmonicFunction};
 
 mod accidental;
 pub use accidental::Accidental;
@@ -27,10 +27,10 @@ mod interval_set;
 pub use interval_set::IntervalSet;
 
 mod roman_numeral;
-pub use roman_numeral::{RomanDegree, RomanNumeral, RomanChord};
+pub use roman_numeral::{RomanChord, RomanDegree, RomanNumeral};
 
 pub mod progression;
 pub use progression::{
-    NodeType, ProgressionStrength, ProgressionEdge,
-    ProgressionOptions, ChordProgressionOptions, ProgressionGraph, ChordRef
+    ChordProgressionOptions, ChordRef, NodeType, ProgressionEdge, ProgressionGraph,
+    ProgressionOptions, ProgressionStrength,
 };

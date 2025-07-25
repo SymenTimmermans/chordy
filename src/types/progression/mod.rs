@@ -30,23 +30,20 @@
 //! println!("Weak progressions: {:?}", options.weak);        // bIII, bVI, bVII
 //! ```
 
-pub mod types;
 pub mod graph;
+pub mod types;
 
 // Generated static data modules
+pub mod chord_progressions;
 pub mod major_data;
 pub mod minor_data;
-pub mod chord_progressions;
-
 
 // Re-export commonly used types
-pub use types::{
-    NodeType, ProgressionStrength, ProgressionEdge, ProgressionOptions, ChordProgressionOptions
-};
-pub use graph::{
-    ProgressionGraph, ChordRef
-};
 pub use chord_progressions::{
-    select_progression_tier, TIER_1_PROGRESSIONS, TIER_2_PROGRESSIONS, 
-    TIER_3_PROGRESSIONS, TIER_4_PROGRESSIONS, PROGRESSION_METADATA
+    select_progression_tier, PROGRESSION_METADATA, TIER_1_PROGRESSIONS, TIER_2_PROGRESSIONS,
+    TIER_3_PROGRESSIONS, TIER_4_PROGRESSIONS,
+};
+pub use graph::{ChordRef, ProgressionGraph};
+pub use types::{
+    ChordProgressionOptions, NodeType, ProgressionEdge, ProgressionOptions, ProgressionStrength,
 };

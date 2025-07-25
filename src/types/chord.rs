@@ -13,7 +13,7 @@
 //!
 //! ```rust
 //! use chordy::prelude::*;
-//! 
+//!
 //! let c_major = Chord::major(note!("C"));
 //! assert_eq!(c_major.bass_note(), note!("C"));  // Root is in bass
 //! assert!(!c_major.is_inverted());
@@ -30,7 +30,7 @@
 //!
 //! ```rust
 //! use chordy::prelude::*;
-//! 
+//!
 //! let c_major = Chord::major(note!("C"));
 //!
 //! // First inversion - third (E) in bass
@@ -52,7 +52,7 @@
 //!
 //! ```rust
 //! use chordy::prelude::*;
-//! 
+//!
 //! let c_major = Chord::major(note!("C"));
 //!
 //! // C/F - C major with F in bass (not a chord tone)
@@ -83,7 +83,7 @@
 //! ### Creating Bass Chords
 //! ```rust
 //! use chordy::prelude::*;
-//! 
+//!
 //! let chord = Chord::major(note!("C"));
 //!
 //! // Method chaining for fluent interface
@@ -101,7 +101,7 @@
 //!
 //! ```rust
 //! use chordy::prelude::*;
-//! 
+//!
 //! let mut chord = Chord::major(note!("C")).with_slash_bass(note!("F"));
 //! let original_bass = chord.bass_note();
 //!
@@ -116,7 +116,9 @@ use std::{fmt::Display, str::FromStr};
 
 use super::{scale::ScaleDegree, Interval, IntervalSet, NoteName};
 use crate::{
-    error::ParseError, note, traits::{HasIntervals, HasRoot, Invertible}
+    error::ParseError,
+    note,
+    traits::{HasIntervals, HasRoot, Invertible},
 };
 
 mod quality;
@@ -126,79 +128,79 @@ pub mod naming;
 pub use naming::*;
 
 /// Type of bass note in a chord
-/// 
+///
 /// This enum is crucial for distinguishing between two different musical concepts:
 /// classical inversions and slash chords. While both result in a note other than
 /// the root being in the bass, they have different theoretical implications and
 /// are used in different musical contexts.
-/// 
+///
 /// # Music Theory Background
-/// 
+///
 /// ## Classical Inversions
 /// In traditional harmony, an inversion occurs when a chord tone other than the
 /// root is placed in the bass. This creates different harmonic functions and
 /// voice leading possibilities:
-/// 
+///
 /// - **Root Position**: Most stable, strong harmonic foundation
 /// - **First Inversion**: Softer, more melodic bass line, less stable
 /// - **Second Inversion**: Often requires resolution, creates tension
 /// - **Third Inversion**: Common in jazz, creates smooth voice leading
-/// 
+///
 /// ## Slash Chords  
 /// Slash chords (also called "polychords" or "bass alterations") place any note
 /// in the bass, whether it's a chord tone or not. They're widely used in:
-/// 
+///
 /// - Popular music for creating memorable bass lines
 /// - Jazz for reharmonization and sophisticated colors
 /// - Contemporary classical music for extended harmony
-/// 
+///
 /// # Practical Implications
-/// 
+///
 /// The distinction between [`BassType::Inversion`] and [`BassType::Slash`] affects:
-/// 
+///
 /// - **Analysis**: Different Roman numeral notation (e.g., I⁶ vs I/♭VI)
 /// - **Voice Leading**: Inversions follow classical rules, slash chords are freer
 /// - **Harmonic Function**: Inversions maintain function, slash chords may alter it
 /// - **Resolution Tendencies**: Different bass notes create different tensions
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use chordy::{Chord, note, BassType};
-/// 
+///
 /// let c_major = Chord::major(note!("C"));
-/// 
+///
 /// // Classical inversion - bass note is a chord tone (third = E)
 /// let inversion = c_major.with_inversion(1);
 /// if let Some((bass, bass_type)) = inversion.bass {
 ///     assert_eq!(bass, note!("E"));
 ///     assert!(matches!(bass_type, BassType::Inversion(1)));
 /// }
-/// 
+///
 /// // Slash chord - bass note can be any note (F is not in C major triad)
 /// let slash_chord = c_major.with_slash_bass(note!("F"));
 /// if let Some((bass, bass_type)) = slash_chord.bass {
 ///     assert_eq!(bass, note!("F"));
 ///     assert!(matches!(bass_type, BassType::Slash));
 /// }
-/// 
+///
 /// // Same bass note, different meanings:
 /// let c_over_e_inversion = c_major.with_inversion(1);      // Theoretical: C major in first inversion
 /// let c_over_e_slash = c_major.with_slash_bass(note!("E")); // Practical: C major over E bass
-/// 
+///
 /// // Both have E in bass, but different BassType values
 /// assert!(c_over_e_inversion.is_inverted());
 /// assert!(c_over_e_slash.is_slash_chord());
 /// ```
-/// 
+///
 /// # When to Use Each
-/// 
+///
 /// ## Use [`BassType::Inversion`] when:
 /// - Analyzing classical or traditional music
 /// - The bass note is definitively a chord tone
 /// - Following voice leading rules and harmonic progressions
 /// - You need theoretical precision for analysis
-/// 
+///
 /// ## Use [`BassType::Slash`] when:
 /// - Working with popular music or jazz
 /// - The bass note is chosen for melodic or color reasons
@@ -207,91 +209,91 @@ pub use naming::*;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum BassType {
     /// Classical inversion where the bass note is a chord tone
-    /// 
+    ///
     /// The number indicates which chord tone is in the bass, counting from the root:
-    /// 
+    ///
     /// - **1st inversion** (`Inversion(1)`): Third in bass
     ///   - C major → C/E (C-E-G with E in bass)
     ///   - Creates softer, more melodic sound
     ///   - Roman numeral: I⁶
-    /// 
+    ///
     /// - **2nd inversion** (`Inversion(2)`): Fifth in bass  
     ///   - C major → C/G (C-E-G with G in bass)
     ///   - Often unstable, may require resolution
     ///   - Roman numeral: I⁶₄
-    /// 
+    ///
     /// - **3rd inversion** (`Inversion(3)`): Seventh in bass
     ///   - C7 → C7/B♭ (C-E-G-B♭ with B♭ in bass)
     ///   - Common in jazz, creates smooth voice leading
     ///   - Roman numeral: I⁴₃
-    /// 
+    ///
     /// Higher inversion numbers work for extended chords (9ths, 11ths, etc.).
     Inversion(u8),
-    
+
     /// Slash chord with arbitrary bass note
-    /// 
+    ///
     /// The bass note can be any pitch, creating various harmonic effects:
-    /// 
+    ///
     /// - **Non-chord tones**: Create color and tension
     ///   - C/F: C major over F (sus4 sound in bass)
     ///   - Am/C: A minor over C (creates Am/C or C6 sound)
-    /// 
+    ///
     /// - **Chord tones**: Same notes as inversion, different context
     ///   - C/E: Could be slash notation instead of first inversion
     ///   - Useful when harmonic function differs from classical inversion
-    /// 
+    ///
     /// - **Bass lines**: Chosen for melodic rather than harmonic reasons
     ///   - G/B: G major over B (common in progressions like G/B-C)
     ///   - Creates smooth bass motion
-    /// 
+    ///
     /// Common in popular music chord charts and lead sheets.
     Slash,
 }
 
 /// A chord represented by a root note, intervals, and optional bass note specification
-/// 
+///
 /// The [`Chord`] struct is the primary representation of harmonic structures in chordy.
 /// It supports the full spectrum of chord representations from simple triads to complex
 /// extended chords, with comprehensive bass note support for both classical inversions
 /// and modern slash chord notation.
-/// 
+///
 /// # Structure
-/// 
+///
 /// A chord consists of three components:
-/// 
+///
 /// - **Root**: The fundamental note that defines the chord's identity
 /// - **Intervals**: The harmonic content defining the chord quality and extensions  
 /// - **Bass**: Optional bass note specification for inversions and slash chords
-/// 
+///
 /// # Bass Note Support
-/// 
+///
 /// The bass field enables sophisticated representation of chord voicings:
-/// 
+///
 /// ## Root Position (Default)
 /// When `bass` is `None`, the chord is in root position with the root note in the bass.
 /// This is the most stable and common chord configuration.
-/// 
+///
 /// ## Classical Inversions  
 /// When `bass` contains `BassType::Inversion(n)`, the chord represents a classical
 /// inversion where the nth chord tone is in the bass. This maintains the chord's
 /// harmonic function while altering its stability and voice leading characteristics.
-/// 
+///
 /// ## Slash Chords
 /// When `bass` contains `BassType::Slash`, the chord represents a slash chord with
 /// an arbitrary bass note. This is common in popular music and jazz for creating
 /// specific harmonic colors or bass line motion.
-/// 
+///
 /// # Practical Usage
-/// 
+///
 /// ## Basic Chord Creation
 /// ```rust
 /// use chordy::{Chord, note, Interval};
-/// 
+///
 /// // Simple triad construction
 /// let c_major = Chord::major(note!("C"));
 /// let d_minor = Chord::minor(note!("D"));
 /// let g_dominant7 = Chord::dominant_7th(note!("G"));
-/// 
+///
 /// // Custom chord from intervals
 /// let custom = Chord::new(note!("F"), vec![
 ///     Interval::PERFECT_UNISON,
@@ -299,47 +301,47 @@ pub enum BassType {
 ///     Interval::AUGMENTED_FIFTH,  // F augmented
 /// ]);
 /// ```
-/// 
+///
 /// ## Bass Note Operations
 /// ```rust
 /// use chordy::{Chord, note, BassType};
-/// 
+///
 /// let c_major = Chord::major(note!("C"));
-/// 
+///
 /// // Classical inversions
 /// let first_inversion = c_major.with_inversion(1);  // C/E
 /// let second_inversion = c_major.with_inversion(2); // C/G
-/// 
+///
 /// // Slash chords  
 /// let c_over_f = c_major.with_slash_bass(note!("F")); // C/F
 /// let c_over_a = c_major.with_slash_bass(note!("A")); // C/A
-/// 
+///
 /// // Query bass properties
 /// assert_eq!(first_inversion.bass_note(), note!("E"));
 /// assert!(first_inversion.is_inverted());
 /// assert_eq!(first_inversion.inversion_number(), Some(1));
-/// 
+///
 /// assert_eq!(c_over_f.bass_note(), note!("F"));
 /// assert!(c_over_f.is_slash_chord());
 /// assert!(!c_over_f.is_inverted());
 /// ```
-/// 
+///
 /// ## Method Chaining
 /// The fluent interface allows elegant chord construction:
-/// 
+///
 /// ```rust
 /// use chordy::{Chord, note, Interval};
-/// 
+///
 /// let complex_chord = Chord::major(note!("C"))
 ///     .with_interval(Interval::MINOR_SEVENTH)  // Add dominant 7th
 ///     .with_interval(Interval::MAJOR_NINTH)    // Add 9th extension
 ///     .with_inversion(1);                      // First inversion
-/// 
+///
 /// // Result: C9/E (C dominant 9th in first inversion)
 /// ```
-/// 
+///
 /// # Thread Safety and Performance
-/// 
+///
 /// [`Chord`] implements `Copy` and is completely immutable after creation.
 /// Bass note operations return new chord instances, making the API both
 /// thread-safe and functional in style. The compact representation using
@@ -354,7 +356,7 @@ pub struct Chord {
     /// PERFECT_UNISON.
     pub intervals: IntervalSet,
     /// The bass note for inversions and slash chords
-    /// 
+    ///
     /// When `None`, the chord is in root position (bass note is the root).
     /// When `Some((note, bass_type))`, the chord has a different bass note:
     /// - `BassType::Inversion(n)`: Classical inversion with chord tone in bass
@@ -365,16 +367,20 @@ pub struct Chord {
 impl Chord {
     /// Create a new chord from root and intervals
     pub fn new(root: NoteName, intervals: Vec<Interval>) -> Self {
-        Chord { 
-            root, 
+        Chord {
+            root,
             intervals: IntervalSet::from_slice(&intervals),
             bass: None,
         }
     }
-    
+
     /// Create a new chord from root and interval set
     pub fn from_interval_set(root: NoteName, intervals: IntervalSet) -> Self {
-        Chord { root, intervals, bass: None }
+        Chord {
+            root,
+            intervals,
+            bass: None,
+        }
     }
 
     /// Create a chord from a list of notes
@@ -433,9 +439,9 @@ impl Chord {
     }
 
     /// Create a chord from an ordered list of notes and a specified root
-    /// 
-    /// This method assumes the notes are in ascending order and calculates 
-    /// compound intervals when necessary. For example, in "G,B,D,F,Ab", 
+    ///
+    /// This method assumes the notes are in ascending order and calculates
+    /// compound intervals when necessary. For example, in "G,B,D,F,Ab",
     /// the Ab will be treated as a minor 9th rather than a minor 2nd.
     ///
     /// # Examples
@@ -455,7 +461,7 @@ impl Chord {
 
         let mut intervals = Vec::new();
         let mut last_semitone_position = 0; // Position of the root
-        
+
         for &note in notes {
             if note == root {
                 // Root note, add perfect unison
@@ -465,25 +471,27 @@ impl Chord {
 
             // Calculate the basic interval from root to this note
             let base_interval = root.interval_to(note);
-            
+
             // Calculate how many semitones this represents (using positive modulo)
-            let base_semitones = (base_interval.fifths as i32 * 7 + base_interval.octaves as i32 * 12).rem_euclid(12);
+            let base_semitones = (base_interval.fifths as i32 * 7
+                + base_interval.octaves as i32 * 12)
+                .rem_euclid(12);
             let mut final_semitones = base_semitones;
             let mut octaves_to_add = 0;
-            
+
             // If this note would be at the same position or lower than the last note,
             // move it up octaves until it's higher
             while final_semitones <= last_semitone_position {
                 final_semitones += 12;
                 octaves_to_add += 1;
             }
-            
+
             // Create the final interval
             let final_interval = Interval {
                 fifths: base_interval.fifths,
                 octaves: base_interval.octaves + octaves_to_add,
             };
-            
+
             intervals.push(final_interval);
             last_semitone_position = final_semitones;
         }
@@ -492,8 +500,8 @@ impl Chord {
     }
 
     /// Create a chord from an ordered list of notes, using the first note as root
-    /// 
-    /// This is a convenience method that uses the first note as the root and 
+    ///
+    /// This is a convenience method that uses the first note as the root and
     /// applies ordered parsing to the rest.
     ///
     /// # Examples
@@ -510,7 +518,7 @@ impl Chord {
         if notes.is_empty() {
             return Self::new(note!("C"), vec![]);
         }
-        
+
         let root = notes[0];
         Self::from_notes_ordered(notes, root)
     }
@@ -645,8 +653,6 @@ impl Chord {
         self.intervals.contains(Interval::MAJOR_THIRD)
     }
 
-
-
     /// Return abbreviated name of the chord.
     ///
     /// Uses the new chord naming system for consistent and accurate chord symbol generation.
@@ -681,13 +687,14 @@ impl Chord {
     /// Convert this chord to a roman numeral chord in the given key
     pub fn to_roman(&self, key: &super::Key) -> Option<super::RomanChord> {
         use super::RomanNumeral;
-        
+
         // Calculate the interval from the key root to this chord's root
         let interval_from_key = key.root().interval_to(self.root);
-        
+
         let roman_numeral: RomanNumeral = interval_from_key.into();
-        let mut roman_chord = super::RomanChord::new(roman_numeral, self.intervals.iter().collect());
-        
+        let mut roman_chord =
+            super::RomanChord::new(roman_numeral, self.intervals.iter().collect());
+
         // Preserve bass information if present
         if let Some((bass_note, bass_type)) = self.bass {
             // Convert bass note to roman numeral relative to the key
@@ -695,7 +702,7 @@ impl Chord {
             let bass_roman: RomanNumeral = bass_interval.into();
             roman_chord.bass = Some((bass_roman, bass_type));
         }
-        
+
         Some(roman_chord)
     }
 
@@ -711,7 +718,10 @@ impl Chord {
     /// let (roman, function) = g_chord.analyze_in_key(&c_major_key);
     /// // roman would be V, function would be Some(Dominant)
     /// ```
-    pub fn analyze_in_key(&self, key: &super::Key) -> (super::RomanNumeral, Option<super::HarmonicFunction>) {
+    pub fn analyze_in_key(
+        &self,
+        key: &super::Key,
+    ) -> (super::RomanNumeral, Option<super::HarmonicFunction>) {
         let roman = key.analyze_chord(self);
         let function = key.harmonic_function(self);
         (roman, function)
@@ -762,12 +772,12 @@ impl Chord {
     /// ```
     pub fn to_chord_name(&self) -> ChordName {
         let mut chord_name = ChordAnalyzer::analyze(self.root, self.intervals.as_slice());
-        
+
         // Add bass note if present
         if let Some((bass_note, _)) = self.bass {
             chord_name = chord_name.with_bass(ChordRoot::Note(bass_note));
         }
-        
+
         chord_name
     }
 
@@ -974,7 +984,7 @@ impl Chord {
     /// // Chord tone in bass - same notes as inversion, different meaning
     /// let c_slash_e = c_major.with_slash_bass(note!("E"));
     /// let c_first_inv = c_major.with_inversion(1);
-    /// 
+    ///
     /// // Same bass note, different theoretical treatment
     /// assert_eq!(c_slash_e.bass_note(), c_first_inv.bass_note());
     /// assert!(c_slash_e.is_slash_chord());
@@ -1022,7 +1032,7 @@ impl Chord {
     }
 
     // Fluent interface methods for method chaining
-    
+
     /// Add an interval to this chord (fluent interface)
     ///
     /// # Examples
@@ -1133,14 +1143,14 @@ impl Chord {
     pub fn pitches(&self, octave: i8) -> Vec<super::Pitch> {
         let mut pitches = Vec::new();
         let mut last_midi = None;
-        
+
         for interval in self.intervals.iter() {
             let note = self.root + interval;
             let mut pitch_octave = octave + interval.octaves();
-            
-            // Calculate MIDI number for this pitch  
+
+            // Calculate MIDI number for this pitch
             let mut midi_note = note.base_midi_number() + ((pitch_octave + 2) * 12);
-            
+
             // If this note would be lower than or equal to the previous note, bump it up an octave
             if let Some(last) = last_midi {
                 while midi_note <= last {
@@ -1148,12 +1158,12 @@ impl Chord {
                     midi_note = note.base_midi_number() + ((pitch_octave + 2) * 12);
                 }
             }
-            
+
             let pitch = note.to_pitch(pitch_octave);
             pitches.push(pitch);
             last_midi = Some(midi_note);
         }
-        
+
         pitches
     }
 }

@@ -3,7 +3,7 @@
 //! Music theory library for Rust
 //!
 //! ## Getting Started
-//! 
+//!
 //! ```rust
 //! use chordy::prelude::*;
 //!
@@ -13,7 +13,7 @@
 //!
 //! // Use trait methods (all available via prelude)
 //! let notes = chord.notes(); // From ChordLike
-//! let triads = scale.triads(); // From ChordLike 
+//! let triads = scale.triads(); // From ChordLike
 //! let transposed = chord.transposed(Interval::MAJOR_THIRD); // From Transposable
 //!
 //! // Create chord inversions and slash chords
@@ -51,7 +51,7 @@
 //! let c_major = Chord::major(note!("C"));
 //! let first_inversion = c_major.with_inversion(1);  // C/E
 //! let slash_chord = c_major.with_slash_bass(note!("G")); // C/G
-//! 
+//!
 //! // Check chord bass types
 //! assert_eq!(first_inversion.bass_note(), note!("E"));
 //! assert!(first_inversion.is_inverted());
@@ -141,7 +141,7 @@ macro_rules! pitch {
 ///
 /// ```rust
 /// use chordy::{RomanNumeral, RomanDegree, Accidental};
-/// 
+///
 /// let roman_one = chordy::roman!("I");
 /// let roman_flat_three = chordy::roman!("♭III");
 /// let roman_sharp_four = chordy::roman!("♯IV");
@@ -158,7 +158,9 @@ macro_rules! roman {
         const _VALIDATE: () = {
             if !$crate::is_valid_roman($s) {
                 panic!(concat!(
-                    "Invalid roman numeral string '", $s, "'. ",
+                    "Invalid roman numeral string '",
+                    $s,
+                    "'. ",
                     "Must be a valid roman numeral (I, ii, iii, IV, V, vi, vii°)"
                 ));
             }
@@ -173,7 +175,7 @@ macro_rules! roman {
 ///
 /// ```rust
 /// use chordy::{Key, note};
-/// 
+///
 /// let c_major = chordy::key!("C");
 /// let a_minor = chordy::key!("Am");
 /// let f_sharp_major = chordy::key!("F#");
@@ -197,7 +199,7 @@ macro_rules! key {
                 ));
             }
         };
-        
+
         // Parse at runtime
         if $s.ends_with('m') {
             let note_str = &$s[..$s.len() - 1];
@@ -215,26 +217,30 @@ pub const fn is_valid_key(s: &str) -> bool {
     if bytes.is_empty() {
         return false;
     }
-    
+
     // Check if it ends with 'm' for minor
     let is_minor = bytes[bytes.len() - 1] == b'm';
-    let note_end = if is_minor { bytes.len() - 1 } else { bytes.len() };
-    
+    let note_end = if is_minor {
+        bytes.len() - 1
+    } else {
+        bytes.len()
+    };
+
     // Validate the note part
     if note_end == 0 {
         return false;
     }
-    
+
     // Validate first character is a valid note letter
     let valid_letter = matches!(
         bytes[0] as char,
         'C' | 'c' | 'D' | 'd' | 'E' | 'e' | 'F' | 'f' | 'G' | 'g' | 'A' | 'a' | 'B' | 'b'
     );
-    
+
     if !valid_letter {
         return false;
     }
-    
+
     // If there's more than just the letter (and not the 'm'), validate accidentals
     if note_end > 1 {
         let mut i = 1;
@@ -247,7 +253,7 @@ pub const fn is_valid_key(s: &str) -> bool {
             }
         }
     }
-    
+
     true
 }
 

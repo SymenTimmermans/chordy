@@ -65,14 +65,14 @@ impl Accidental {
 
     /// Returns true if the accidental is a sharp variant (sharp or double sharp)
     pub fn is_sharp(self) -> bool {
-        matches!(self, Accidental::Sharp | Accidental::DoubleSharp) || 
-        matches!(self, Accidental::Extreme(n) if n > 0)
+        matches!(self, Accidental::Sharp | Accidental::DoubleSharp)
+            || matches!(self, Accidental::Extreme(n) if n > 0)
     }
 
     /// Returns true if the accidental is a flat variant (flat or double flat)
     pub fn is_flat(self) -> bool {
-        matches!(self, Accidental::Flat | Accidental::DoubleFlat) ||
-        matches!(self, Accidental::Extreme(n) if n < 0)
+        matches!(self, Accidental::Flat | Accidental::DoubleFlat)
+            || matches!(self, Accidental::Extreme(n) if n < 0)
     }
 
     /// Returns the string representation of the accidental for use as a component in another
@@ -139,7 +139,7 @@ impl Accidental {
                 } else {
                     "♮".to_string()
                 }
-            },
+            }
             (Accidental::Extreme(level), ChordFormat::Ascii) => {
                 if *level > 0 {
                     "#".repeat(*level as usize)
@@ -148,7 +148,7 @@ impl Accidental {
                 } else {
                     "♮".to_string()
                 }
-            },
+            }
             (Accidental::Extreme(level), ChordFormat::Html) => {
                 if *level > 0 {
                     "&sharp;".repeat(*level as usize)
@@ -157,11 +157,11 @@ impl Accidental {
                 } else {
                     "&natural;".to_string()
                 }
-            },
+            }
         }
     }
 
-    /// Returns the string representation of the accidental for use as a component in 
+    /// Returns the string representation of the accidental for use as a component in
     /// another string for a specific output format. Natural accidentals return empty string.
     pub fn component_str_for_format(&self, format: ChordFormat) -> String {
         match self {

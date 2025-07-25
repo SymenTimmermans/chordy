@@ -506,7 +506,6 @@ impl PartialOrd for Interval {
     }
 }
 
-
 impl Ord for Interval {
     /// Compare intervals based on their semitone distance.
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {

@@ -85,7 +85,7 @@ fn test_interval_classification_with_double_accidentals() {
     assert!(Interval::PERFECT_FIFTH.is_fifth());
     assert!(Interval::AUGMENTED_FIFTH.is_fifth());
     assert!(Interval::DOUBLY_AUGMENTED_FIFTH.is_fifth());
-    
+
     // Test is_third()
     assert!(Interval::DOUBLY_DIMINISHED_THIRD.is_third());
     assert!(Interval::DIMINISHED_THIRD.is_third());
@@ -93,7 +93,7 @@ fn test_interval_classification_with_double_accidentals() {
     assert!(Interval::MAJOR_THIRD.is_third());
     assert!(Interval::AUGMENTED_THIRD.is_third());
     assert!(Interval::DOUBLY_AUGMENTED_THIRD.is_third());
-    
+
     // Test is_seventh()
     assert!(Interval::DOUBLY_DIMINISHED_SEVENTH.is_seventh());
     assert!(Interval::DIMINISHED_SEVENTH.is_seventh());
@@ -114,7 +114,7 @@ fn test_display_doubly_modified_intervals() {
     assert_eq!(Interval::DOUBLY_DIMINISHED_SIXTH.to_string(), "dd6");
     assert_eq!(Interval::DOUBLY_DIMINISHED_SEVENTH.to_string(), "dd7");
     assert_eq!(Interval::DOUBLY_DIMINISHED_OCTAVE.to_string(), "dd8");
-    
+
     // Doubly augmented
     assert_eq!(Interval::DOUBLY_AUGMENTED_UNISON.to_string(), "AA1");
     assert_eq!(Interval::DOUBLY_AUGMENTED_SECOND.to_string(), "AA2");

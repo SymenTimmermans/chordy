@@ -101,8 +101,8 @@ impl From<Interval> for ScaleDegree {
             Interval::AUGMENTED_UNISON => Self::new(1, Some(Accidental::Sharp)),
             Interval::DOUBLY_AUGMENTED_UNISON => Self::new(1, Some(Accidental::DoubleSharp)),
 
-            // Seconds  
-            Interval::DOUBLY_DIMINISHED_SECOND => Self::new(2, Some(Accidental::DoubleFlat)),  // ♭♭2 = 2 with double flat
+            // Seconds
+            Interval::DOUBLY_DIMINISHED_SECOND => Self::new(2, Some(Accidental::DoubleFlat)), // ♭♭2 = 2 with double flat
             Interval::DIMINISHED_SECOND => Self::new(2, Some(Accidental::DoubleFlat)),
             Interval::MINOR_SECOND => Self::new(2, Some(Accidental::Flat)),
             Interval::MAJOR_SECOND => Self::new(2, None),
@@ -110,7 +110,7 @@ impl From<Interval> for ScaleDegree {
             Interval::DOUBLY_AUGMENTED_SECOND => Self::new(2, Some(Accidental::DoubleSharp)),
 
             // Thirds
-            Interval::DOUBLY_DIMINISHED_THIRD => Self::new(3, Some(Accidental::DoubleFlat)),  // ♭♭3
+            Interval::DOUBLY_DIMINISHED_THIRD => Self::new(3, Some(Accidental::DoubleFlat)), // ♭♭3
             Interval::DIMINISHED_THIRD => Self::new(3, Some(Accidental::DoubleFlat)),
             Interval::MINOR_THIRD => Self::new(3, Some(Accidental::Flat)),
             Interval::MAJOR_THIRD => Self::new(3, None),
@@ -132,7 +132,7 @@ impl From<Interval> for ScaleDegree {
             Interval::DOUBLY_AUGMENTED_FIFTH => Self::new(5, Some(Accidental::DoubleSharp)),
 
             // Sixths
-            Interval::DOUBLY_DIMINISHED_SIXTH => Self::new(6, Some(Accidental::DoubleFlat)),  // ♭♭6
+            Interval::DOUBLY_DIMINISHED_SIXTH => Self::new(6, Some(Accidental::DoubleFlat)), // ♭♭6
             Interval::DIMINISHED_SIXTH => Self::new(6, Some(Accidental::DoubleFlat)),
             Interval::MINOR_SIXTH => Self::new(6, Some(Accidental::Flat)),
             Interval::MAJOR_SIXTH => Self::new(6, None),
@@ -140,7 +140,7 @@ impl From<Interval> for ScaleDegree {
             Interval::DOUBLY_AUGMENTED_SIXTH => Self::new(6, Some(Accidental::DoubleSharp)),
 
             // Sevenths
-            Interval::DOUBLY_DIMINISHED_SEVENTH => Self::new(7, Some(Accidental::DoubleFlat)),  // ♭♭7
+            Interval::DOUBLY_DIMINISHED_SEVENTH => Self::new(7, Some(Accidental::DoubleFlat)), // ♭♭7
             Interval::DIMINISHED_SEVENTH => Self::new(7, Some(Accidental::DoubleFlat)),
             Interval::MINOR_SEVENTH => Self::new(7, Some(Accidental::Flat)),
             Interval::MAJOR_SEVENTH => Self::new(7, None),
@@ -163,7 +163,7 @@ impl From<Interval> for ScaleDegree {
             Interval::AUGMENTED_NINTH => Self::new(2, Some(Accidental::Sharp)),
             Interval::DOUBLY_AUGMENTED_NINTH => Self::new(2, Some(Accidental::DoubleSharp)),
 
-            // Tenths -> Thirds  
+            // Tenths -> Thirds
             Interval::DOUBLY_DIMINISHED_TENTH => Self::new(3, Some(Accidental::DoubleFlat)),
             Interval::DIMINISHED_TENTH => Self::new(3, Some(Accidental::DoubleFlat)),
             Interval::MINOR_TENTH => Self::new(3, Some(Accidental::Flat)),
@@ -206,7 +206,7 @@ impl From<Interval> for ScaleDegree {
                 // Calculate generic interval from fifths using the same formula as the private method
                 let base_generic = ((interval.fifths * 4) % 7 + 7) % 7;
                 let octave_generics = interval.octaves * 7;
-                let generic_num = base_generic + octave_generics + 1;  // +1 because intervals start at 1
+                let generic_num = base_generic + octave_generics + 1; // +1 because intervals start at 1
                 let reduced_degree = ((generic_num - 1) % 7) + 1;
                 Self::new(reduced_degree as u8, None)
             }
@@ -297,14 +297,14 @@ impl ScaleDegree {
                 // For extreme accidentals, return the base interval
                 // This is a fallback for theoretical cases beyond double sharp/flat
                 base_interval
-            },
+            }
         }
     }
 }
 
 impl From<u8> for ScaleDegree {
     /// Create a natural scale degree from a step number (1-7)
-    /// 
+    ///
     /// # Panics
     /// Panics if the number is not in the range 1-7
     fn from(step: u8) -> Self {

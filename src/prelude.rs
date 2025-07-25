@@ -13,10 +13,26 @@
 
 // Core Types
 pub use crate::types::{
-    Accidental, Chord, ChordQuality, HarmonicFunction, Interval, IntervalSet, Key, 
-    Letter, NoteName, Pitch, RomanChord, RomanDegree, RomanNumeral, Scale, ScaleDefinition, ScaleDegree,
+    Accidental,
+    Chord,
+    ChordProgressionOptions,
+    ChordQuality,
+    HarmonicFunction,
+    Interval,
+    IntervalSet,
+    Key,
+    Letter,
+    NoteName,
+    Pitch,
+    ProgressionGraph,
     // Progression types
-    ProgressionOptions, ChordProgressionOptions, ProgressionGraph
+    ProgressionOptions,
+    RomanChord,
+    RomanDegree,
+    RomanNumeral,
+    Scale,
+    ScaleDefinition,
+    ScaleDegree,
 };
 
 // All Musical Traits
@@ -26,13 +42,12 @@ pub use crate::traits::*;
 pub use crate::error::{ParseError, TypeError};
 
 // Constants and Symbols
-pub use crate::symbols::*;
 pub use crate::scales;
+pub use crate::symbols::*;
 
 // Essential Std Traits
 pub use std::fmt::{Debug, Display};
 pub use std::str::FromStr;
 
 // Macros
-pub use crate::{note, pitch, roman, key};
-
+pub use crate::{key, note, pitch, roman};

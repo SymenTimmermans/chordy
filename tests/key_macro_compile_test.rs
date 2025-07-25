@@ -6,7 +6,7 @@
 // This should fail: Invalid note letter
 // const INVALID_NOTE: chordy::Key = key!("H");
 
-// This should fail: Invalid syntax (extra characters after 'm')  
+// This should fail: Invalid syntax (extra characters after 'm')
 // const INVALID_SYNTAX: chordy::Key = key!("Cm7");
 
 // This should fail: Empty string
