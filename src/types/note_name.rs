@@ -42,7 +42,7 @@ impl NoteName {
         };
 
         // Calculate the final fifths position
-        let fifths = base_fifths + accidental.semitone_offset() as i8 * 7;
+        let fifths = base_fifths + accidental.semitone_offset() * 7;
         Self(fifths)
     }
 
@@ -92,7 +92,7 @@ impl NoteName {
             0 => Accidental::Natural,
             1 => Accidental::Sharp,
             2 => Accidental::DoubleSharp,
-            level => Accidental::Extreme(level as i8),
+            level => Accidental::Extreme(level),
         }
     }
 

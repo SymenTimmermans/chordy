@@ -90,7 +90,7 @@ impl Accidental {
                 if *level > 0 {
                     SHARP.repeat(*level as usize)
                 } else if *level < 0 {
-                    FLAT.repeat(level.abs() as usize)
+                    FLAT.repeat(level.unsigned_abs() as usize)
                 } else {
                     "".to_string()
                 }
@@ -135,7 +135,7 @@ impl Accidental {
                 if *level > 0 {
                     "♯".repeat(*level as usize)
                 } else if *level < 0 {
-                    "♭".repeat(level.abs() as usize)
+                    "♭".repeat(level.unsigned_abs() as usize)
                 } else {
                     "♮".to_string()
                 }
@@ -144,7 +144,7 @@ impl Accidental {
                 if *level > 0 {
                     "#".repeat(*level as usize)
                 } else if *level < 0 {
-                    "b".repeat(level.abs() as usize)
+                    "b".repeat(level.unsigned_abs() as usize)
                 } else {
                     "♮".to_string()
                 }
@@ -153,7 +153,7 @@ impl Accidental {
                 if *level > 0 {
                     "&sharp;".repeat(*level as usize)
                 } else if *level < 0 {
-                    "&flat;".repeat(level.abs() as usize)
+                    "&flat;".repeat(level.unsigned_abs() as usize)
                 } else {
                     "&natural;".to_string()
                 }
@@ -186,7 +186,7 @@ impl fmt::Display for Accidental {
                 if *level > 0 {
                     write!(f, "{}", SHARP.repeat(*level as usize))
                 } else if *level < 0 {
-                    write!(f, "{}", FLAT.repeat(level.abs() as usize))
+                    write!(f, "{}", FLAT.repeat(level.unsigned_abs() as usize))
                 } else {
                     write!(f, "{}", NATURAL)
                 }

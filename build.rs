@@ -1187,7 +1187,7 @@ fn parse_csv_line(line: &str) -> Vec<String> {
     let mut in_quotes = false;
     let mut chars = line.chars().peekable();
 
-    while let Some(ch) = chars.next() {
+    for ch in chars {
         match ch {
             '"' => {
                 // Toggle quote state
