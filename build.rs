@@ -954,8 +954,9 @@ fn generate_chord_progressions() {
     generated
         .push_str("//! Curated chord progression database generated from chord_progressions.csv\n");
     generated.push_str("//! Do not edit manually.\n\n");
-    generated.push_str("use crate::types::{RomanChord, RomanNumeral, RomanDegree, Accidental, Interval, IntervalSet};\n");
-    generated.push_str("use crate::types::chord::BassType;\n\n");
+    generated.push_str("#![allow(non_upper_case_globals)]\n");
+    generated.push_str("#![allow(dead_code)]\n\n");
+    generated.push_str("use crate::types::{RomanChord, RomanNumeral, RomanDegree, Accidental, Interval, IntervalSet};\n\n");
 
     // Generate standard chord constants that we'll reference
     generated.push_str("// Standard chord constants (major triads)\n");
@@ -1185,7 +1186,7 @@ fn parse_csv_line(line: &str) -> Vec<String> {
     let mut fields = Vec::new();
     let mut current_field = String::new();
     let mut in_quotes = false;
-    let mut chars = line.chars().peekable();
+    let chars = line.chars().peekable();
 
     for ch in chars {
         match ch {

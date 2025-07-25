@@ -1,6 +1,9 @@
 //! Curated chord progression database generated from chord_progressions.csv
 //! Do not edit manually.
 
+#![allow(non_upper_case_globals)]
+#![allow(dead_code)]
+
 use crate::types::{RomanChord, RomanNumeral, RomanDegree, Accidental, Interval, IntervalSet};
 
 // Standard chord constants (major triads)
@@ -166,7 +169,7 @@ static iv_CHORD: RomanChord = RomanChord {
 
 /// I-V-vi-IV: The most popular progression in modern music - countless hits use this
 /// Chords: I,V,vi,IV
-static PROGRESSION_0: [&RomanChord; 4] = [
+static PROGRESSION_0: [&'static RomanChord; 4] = [
     &I_CHORD,
     &V_CHORD,
     &vi_CHORD,
@@ -175,7 +178,7 @@ static PROGRESSION_0: [&RomanChord; 4] = [
 
 /// vi-IV-I-V: Slightly melancholic variant of the pop progression
 /// Chords: vi,IV,I,V
-static PROGRESSION_1: [&RomanChord; 4] = [
+static PROGRESSION_1: [&'static RomanChord; 4] = [
     &vi_CHORD,
     &IV_CHORD,
     &I_CHORD,
@@ -184,7 +187,7 @@ static PROGRESSION_1: [&RomanChord; 4] = [
 
 /// I-vi-IV-V: Classic '50s progression - doo-wop and early rock
 /// Chords: I,vi,IV,V
-static PROGRESSION_2: [&RomanChord; 4] = [
+static PROGRESSION_2: [&'static RomanChord; 4] = [
     &I_CHORD,
     &vi_CHORD,
     &IV_CHORD,
@@ -193,7 +196,7 @@ static PROGRESSION_2: [&RomanChord; 4] = [
 
 /// I-IV-V-I: The fundamental major cadence - timeless and stable
 /// Chords: I,IV,V,I
-static PROGRESSION_3: [&RomanChord; 4] = [
+static PROGRESSION_3: [&'static RomanChord; 4] = [
     &I_CHORD,
     &IV_CHORD,
     &V_CHORD,
@@ -202,7 +205,7 @@ static PROGRESSION_3: [&RomanChord; 4] = [
 
 /// vi-ii-V-I: Gentle resolution with smooth voice leading
 /// Chords: vi,ii,V,I
-static PROGRESSION_4: [&RomanChord; 4] = [
+static PROGRESSION_4: [&'static RomanChord; 4] = [
     &vi_CHORD,
     &ii_CHORD,
     &V_CHORD,
@@ -211,7 +214,7 @@ static PROGRESSION_4: [&RomanChord; 4] = [
 
 /// I-V-IV-I: Plagal resolution variant - slightly folk/gospel feel
 /// Chords: I,V,IV,I
-static PROGRESSION_5: [&RomanChord; 4] = [
+static PROGRESSION_5: [&'static RomanChord; 4] = [
     &I_CHORD,
     &V_CHORD,
     &IV_CHORD,
@@ -220,7 +223,7 @@ static PROGRESSION_5: [&RomanChord; 4] = [
 
 /// ii-V-I: The cornerstone of jazz harmony - most important cadence
 /// Chords: ii,V,I,I
-static PROGRESSION_6: [&RomanChord; 4] = [
+static PROGRESSION_6: [&'static RomanChord; 4] = [
     &ii_CHORD,
     &V_CHORD,
     &I_CHORD,
@@ -229,7 +232,7 @@ static PROGRESSION_6: [&RomanChord; 4] = [
 
 /// I-vi-ii-V: Circle of fifths progression - smooth jazz standard
 /// Chords: I,vi,ii,V
-static PROGRESSION_7: [&RomanChord; 4] = [
+static PROGRESSION_7: [&'static RomanChord; 4] = [
     &I_CHORD,
     &vi_CHORD,
     &ii_CHORD,
@@ -238,7 +241,7 @@ static PROGRESSION_7: [&RomanChord; 4] = [
 
 /// vi-ii-V-I: Minor to major resolution - sophisticated and pleasing
 /// Chords: vi,ii,V,I
-static PROGRESSION_8: [&RomanChord; 4] = [
+static PROGRESSION_8: [&'static RomanChord; 4] = [
     &vi_CHORD,
     &ii_CHORD,
     &V_CHORD,
@@ -247,7 +250,7 @@ static PROGRESSION_8: [&RomanChord; 4] = [
 
 /// I-iii-vi-ii: Descending by thirds - creates harmonic momentum
 /// Chords: I,iii,vi,ii
-static PROGRESSION_9: [&RomanChord; 4] = [
+static PROGRESSION_9: [&'static RomanChord; 4] = [
     &I_CHORD,
     &iii_CHORD,
     &vi_CHORD,
@@ -256,7 +259,7 @@ static PROGRESSION_9: [&RomanChord; 4] = [
 
 /// iii-vi-ii-V: Extended circle movement - builds to dominant
 /// Chords: iii,vi,ii,V
-static PROGRESSION_10: [&RomanChord; 4] = [
+static PROGRESSION_10: [&'static RomanChord; 4] = [
     &iii_CHORD,
     &vi_CHORD,
     &ii_CHORD,
@@ -265,7 +268,7 @@ static PROGRESSION_10: [&RomanChord; 4] = [
 
 /// I-IV-V-vi: Deceptive cadence - unexpected but satisfying
 /// Chords: I,IV,V,vi
-static PROGRESSION_11: [&RomanChord; 4] = [
+static PROGRESSION_11: [&'static RomanChord; 4] = [
     &I_CHORD,
     &IV_CHORD,
     &V_CHORD,
@@ -274,7 +277,7 @@ static PROGRESSION_11: [&RomanChord; 4] = [
 
 /// iii-vi-ii-V: Extended circle with chromatic mediant approach
 /// Chords: iii,vi,ii,V
-static PROGRESSION_12: [&RomanChord; 4] = [
+static PROGRESSION_12: [&'static RomanChord; 4] = [
     &iii_CHORD,
     &vi_CHORD,
     &ii_CHORD,
@@ -283,7 +286,7 @@ static PROGRESSION_12: [&RomanChord; 4] = [
 
 /// I-iii-IV-iv: Major to minor fourth - modal interchange flavor
 /// Chords: I,iii,IV,iv
-static PROGRESSION_13: [&RomanChord; 4] = [
+static PROGRESSION_13: [&'static RomanChord; 4] = [
     &I_CHORD,
     &iii_CHORD,
     &IV_CHORD,
@@ -292,7 +295,7 @@ static PROGRESSION_13: [&RomanChord; 4] = [
 
 /// vi-IV-I-V: Minor start with strong resolution drive
 /// Chords: vi,IV,I,V
-static PROGRESSION_14: [&RomanChord; 4] = [
+static PROGRESSION_14: [&'static RomanChord; 4] = [
     &vi_CHORD,
     &IV_CHORD,
     &I_CHORD,
@@ -301,7 +304,7 @@ static PROGRESSION_14: [&RomanChord; 4] = [
 
 /// ii-bII-I-vi: Tritone substitution - classic jazz reharmonization
 /// Chords: ii,bII,I,vi
-static PROGRESSION_15: [&RomanChord; 4] = [
+static PROGRESSION_15: [&'static RomanChord; 4] = [
     &ii_CHORD,
     &bII_CHORD,
     &I_CHORD,
@@ -310,7 +313,7 @@ static PROGRESSION_15: [&RomanChord; 4] = [
 
 /// I-bVII-IV-I: Mixolydian flavor - modal borrowed chord
 /// Chords: I,bVII,IV,I
-static PROGRESSION_16: [&RomanChord; 4] = [
+static PROGRESSION_16: [&'static RomanChord; 4] = [
     &I_CHORD,
     &bVII_CHORD,
     &IV_CHORD,
@@ -319,7 +322,7 @@ static PROGRESSION_16: [&RomanChord; 4] = [
 
 /// vi-bVI-IV-V: Chromatic mediant - sophisticated voice leading
 /// Chords: vi,bVI,IV,V
-static PROGRESSION_17: [&RomanChord; 4] = [
+static PROGRESSION_17: [&'static RomanChord; 4] = [
     &vi_CHORD,
     &bVI_CHORD,
     &IV_CHORD,
@@ -328,7 +331,7 @@ static PROGRESSION_17: [&RomanChord; 4] = [
 
 /// I-bII-bIII-IV: Chromatic ascending - modern film scoring
 /// Chords: I,bII,bIII,IV
-static PROGRESSION_18: [&RomanChord; 4] = [
+static PROGRESSION_18: [&'static RomanChord; 4] = [
     &I_CHORD,
     &bII_CHORD,
     &bIII_CHORD,
@@ -337,7 +340,7 @@ static PROGRESSION_18: [&RomanChord; 4] = [
 
 /// vi-bVI-bVII-V: Triple flat progression - dark and mysterious
 /// Chords: vi,bVI,bVII,V
-static PROGRESSION_19: [&RomanChord; 4] = [
+static PROGRESSION_19: [&'static RomanChord; 4] = [
     &vi_CHORD,
     &bVI_CHORD,
     &bVII_CHORD,
@@ -346,7 +349,7 @@ static PROGRESSION_19: [&RomanChord; 4] = [
 
 /// I-III-vi-bVI: Chromatic mediants - neo-Riemannian harmony
 /// Chords: I,III,vi,bVI
-static PROGRESSION_20: [&RomanChord; 4] = [
+static PROGRESSION_20: [&'static RomanChord; 4] = [
     &I_CHORD,
     &III_CHORD,
     &vi_CHORD,
@@ -355,7 +358,7 @@ static PROGRESSION_20: [&RomanChord; 4] = [
 
 /// ii-V-I-bVII: Jazz-rock fusion - adds mixolydian twist
 /// Chords: ii,V,I,bVII
-static PROGRESSION_21: [&RomanChord; 4] = [
+static PROGRESSION_21: [&'static RomanChord; 4] = [
     &ii_CHORD,
     &V_CHORD,
     &I_CHORD,
@@ -364,7 +367,7 @@ static PROGRESSION_21: [&RomanChord; 4] = [
 
 /// iii-bIII-ii-bII: Descending chromaticism - experimental tension
 /// Chords: iii,bIII,ii,bII
-static PROGRESSION_22: [&RomanChord; 4] = [
+static PROGRESSION_22: [&'static RomanChord; 4] = [
     &iii_CHORD,
     &bIII_CHORD,
     &ii_CHORD,
@@ -373,7 +376,7 @@ static PROGRESSION_22: [&RomanChord; 4] = [
 
 /// I-bV-IV-bVII: Tritone relationships - dissonant but structured
 /// Chords: I,bV,IV,bVII
-static PROGRESSION_23: [&RomanChord; 4] = [
+static PROGRESSION_23: [&'static RomanChord; 4] = [
     &I_CHORD,
     &bV_CHORD,
     &IV_CHORD,
@@ -381,7 +384,7 @@ static PROGRESSION_23: [&RomanChord; 4] = [
 ];
 
 /// Pop Standards (0.0-0.25) - 6 progressions
-pub static TIER_1_PROGRESSIONS: &[&[&RomanChord; 4]] = &[
+pub static TIER_1_PROGRESSIONS: &[&[&'static RomanChord; 4]] = &[
     &PROGRESSION_0,
     &PROGRESSION_1,
     &PROGRESSION_2,
@@ -391,7 +394,7 @@ pub static TIER_1_PROGRESSIONS: &[&[&RomanChord; 4]] = &[
 ];
 
 /// Jazz Fundamentals (0.25-0.5) - 6 progressions
-pub static TIER_2_PROGRESSIONS: &[&[&RomanChord; 4]] = &[
+pub static TIER_2_PROGRESSIONS: &[&[&'static RomanChord; 4]] = &[
     &PROGRESSION_6,
     &PROGRESSION_7,
     &PROGRESSION_8,
@@ -401,7 +404,7 @@ pub static TIER_2_PROGRESSIONS: &[&[&RomanChord; 4]] = &[
 ];
 
 /// Sophisticated Jazz (0.5-0.75) - 6 progressions
-pub static TIER_3_PROGRESSIONS: &[&[&RomanChord; 4]] = &[
+pub static TIER_3_PROGRESSIONS: &[&[&'static RomanChord; 4]] = &[
     &PROGRESSION_12,
     &PROGRESSION_13,
     &PROGRESSION_14,
@@ -411,7 +414,7 @@ pub static TIER_3_PROGRESSIONS: &[&[&RomanChord; 4]] = &[
 ];
 
 /// Modern/Experimental (0.75-1.0) - 6 progressions
-pub static TIER_4_PROGRESSIONS: &[&[&RomanChord; 4]] = &[
+pub static TIER_4_PROGRESSIONS: &[&[&'static RomanChord; 4]] = &[
     &PROGRESSION_18,
     &PROGRESSION_19,
     &PROGRESSION_20,
