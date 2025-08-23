@@ -1731,59 +1731,10 @@ impl IntervalFirstGuitarFinder {
 
 // Legacy GuitarChordAnalyzer removed - use IntervalFirstGuitarFinder instead
 
-// Test-only compatibility shim for legacy tests
-#[cfg(test)]
-mod test_compat {
-    use super::*;
-
-    pub struct GuitarChordMatch {
-        pub fingering: GuitarFingering,
-        pub target_root: NoteName,
-        pub score: f32,
-        pub pitches: Vec<Pitch>,
-    }
-
-    pub struct GuitarChordAnalyzer {
-        tuning: GuitarTuning,
-    }
-
-    impl GuitarChordAnalyzer {
-        pub fn new() -> Self {
-            Self {
-                tuning: GuitarTuning::standard(),
-            }
-        }
-
-        pub fn find_matches(&self, chord: &Chord) -> Vec<GuitarChordMatch> {
-            let finder = IntervalFirstGuitarFinder::with_tuning(self.tuning.clone());
-            let voicings = finder.find_voicings(chord);
-
-            // Convert voicings to legacy format for tests
-            voicings
-                .into_iter()
-                .map(|(fingering, score)| {
-                    let pitches = fingering.to_pitches(&self.tuning);
-                    GuitarChordMatch {
-                        fingering,
-                        target_root: chord.root(),
-                        score,
-                        pitches,
-                    }
-                })
-                .collect()
-        }
-    }
-
-    impl Default for GuitarChordAnalyzer {
-        fn default() -> Self {
-            Self::new()
-        }
-    }
-}
+// Legacy compatibility removed - use IntervalFirstGuitarFinder directly
 
 #[cfg(test)]
 mod tests {
-    use super::test_compat::GuitarChordAnalyzer;
     use super::*;
     use crate::note;
 
@@ -2246,18 +2197,18 @@ mod tests {
     }
 
     #[test]
-    fn test_guitar_chord_analyzer_score_ordering() {
+    fn test_interval_first_guitar_finder_score_ordering() {
         use crate::types::Chord;
 
-        let analyzer = GuitarChordAnalyzer::new();
+        let finder = IntervalFirstGuitarFinder::new();
         let c_major = Chord::major(note!("C"));
-        let matches = analyzer.find_matches(&c_major);
+        let voicings = finder.find_voicings(&c_major);
 
         // Should be sorted by score (ascending - lower is better)
-        for i in 1..matches.len() {
+        for i in 1..voicings.len() {
             assert!(
-                matches[i - 1].score <= matches[i].score,
-                "Matches should be sorted by score (lower is better)"
+                voicings[i - 1].1 <= voicings[i].1,
+                "Voicings should be sorted by score (lower is better)"
             );
         }
     }
@@ -2325,18 +2276,15 @@ mod tests {
         use crate::types::Chord;
 
         // Create a chord that might not have good guitar fingerings
-        // For this test, let's assume our basic pattern set might not cover everything
-        let analyzer = GuitarChordAnalyzer::new();
+        let finder = IntervalFirstGuitarFinder::new();
 
         // Test with a basic B♭ major chord
         let unusual_chord = Chord::major(note!("B♭"));
-        // For now, let's test with a chord we know should work,
-        // since our pattern matching is basic
-
-        let matches = analyzer.find_matches(&unusual_chord);
-        // Even basic chords should find some match, even if not perfect
-        // If no matches found, should handle gracefully
-        if matches.is_empty() {
+        let voicings = finder.find_voicings(&unusual_chord);
+        
+        // The interval-first approach should find voicings for most basic chords
+        // If no voicings found, test that the voicing engine handles this case
+        if voicings.is_empty() {
             // Test that the voicing engine handles this case
             let config = VoicingConfig::guitar();
             let voicer = Voicer::new(config);
@@ -2349,6 +2297,9 @@ mod tests {
             } else {
                 panic!("Expected UnsupportedStyle error, got: {:?}", result);
             }
+        } else {
+            // Should find at least one voicing for basic chords
+            assert!(!voicings.is_empty(), "Should find voicings for B♭ major");
         }
     }
 
