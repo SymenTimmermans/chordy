@@ -488,7 +488,7 @@ impl Voicer {
                 return Err(VoicingError::OutOfRange);
             }
 
-            let pitch = root_pitch + (interval.semitones() as i8);
+            let pitch = root_pitch + interval.semitones();
             pitches.push(pitch);
         }
 
@@ -496,7 +496,7 @@ impl Voicer {
         pitches.sort_by_key(|p| p.midi_number());
 
         let info = VoicingInfo::new(VoicingStyle::Closed, self.config.range, 0);
-        Ok(VoicedChord::new(chord.clone(), pitches, info))
+        Ok(VoicedChord::new(*chord, pitches, info))
     }
 
     /// Implement open voicing: spread notes across multiple octaves
@@ -532,8 +532,8 @@ impl Voicer {
                 return Err(VoicingError::OutOfRange);
             }
 
-            let mut pitch = root_pitch + (interval.semitones() as i8);
-            pitch = pitch + (current_octave_offset as i8);
+            let mut pitch = root_pitch + interval.semitones();
+            pitch += current_octave_offset as i8;
 
             pitches.push(pitch);
         }
@@ -542,7 +542,7 @@ impl Voicer {
         pitches.sort_by_key(|p| p.midi_number());
 
         let info = VoicingInfo::new(VoicingStyle::Open, self.config.range, 0);
-        Ok(VoicedChord::new(chord.clone(), pitches, info))
+        Ok(VoicedChord::new(*chord, pitches, info))
     }
 
     /// Implement drop-2 voicing: take second-highest note and drop it an octave
@@ -565,7 +565,7 @@ impl Voicer {
         let second_highest_index = pitches.len() - 2;
 
         // Drop the second-highest note an octave
-        pitches[second_highest_index] = pitches[second_highest_index] + (-12i8);
+        pitches[second_highest_index] += -12i8;
 
         // Ensure all pitches are still within range
         if pitches
@@ -579,7 +579,7 @@ impl Voicer {
         pitches.sort_by_key(|p| p.midi_number());
 
         let info = VoicingInfo::new(VoicingStyle::Drop2, self.config.range, 0);
-        Ok(VoicedChord::new(chord.clone(), pitches, info))
+        Ok(VoicedChord::new(*chord, pitches, info))
     }
 
     /// Implement drop-3 voicing: take third-highest note and drop it an octave
@@ -602,7 +602,7 @@ impl Voicer {
         let third_highest_index = pitches.len() - 3;
 
         // Drop the third-highest note an octave
-        pitches[third_highest_index] = pitches[third_highest_index] + (-12i8);
+        pitches[third_highest_index] += -12i8;
 
         // Ensure all pitches are still within range
         if pitches
@@ -616,7 +616,7 @@ impl Voicer {
         pitches.sort_by_key(|p| p.midi_number());
 
         let info = VoicingInfo::new(VoicingStyle::Drop3, self.config.range, 0);
-        Ok(VoicedChord::new(chord.clone(), pitches, info))
+        Ok(VoicedChord::new(*chord, pitches, info))
     }
 
     /// Implement spread voicing: distribute notes with specified interval constraints
@@ -643,7 +643,7 @@ impl Voicer {
                 return Err(VoicingError::OutOfRange);
             }
 
-            let target_pitch = root_pitch + (interval.semitones() as i8);
+            let target_pitch = root_pitch + interval.semitones();
 
             // Adjust the pitch to respect spacing constraints
             let current_pitch = if !pitches.is_empty() {
@@ -658,7 +658,7 @@ impl Voicer {
                         return Err(VoicingError::OutOfRange);
                     }
                     // Too close, push it up
-                    *last_pitch + (min_interval.semitones() as i8)
+                    *last_pitch + min_interval.semitones()
                 } else if interval_to_target > max_interval.semitones() {
                     // Check for overflow before adding
                     let last_midi = last_pitch.midi_number() as i16;
@@ -667,7 +667,7 @@ impl Voicer {
                         return Err(VoicingError::OutOfRange);
                     }
                     // Too far, bring it closer
-                    *last_pitch + (max_interval.semitones() as i8)
+                    *last_pitch + max_interval.semitones()
                 } else {
                     target_pitch
                 }
@@ -691,7 +691,7 @@ impl Voicer {
             self.config.range,
             0,
         );
-        Ok(VoicedChord::new(chord.clone(), pitches, info))
+        Ok(VoicedChord::new(*chord, pitches, info))
     }
 
     /// Voice a chord using guitar fingering patterns
@@ -710,7 +710,7 @@ impl Voicer {
         let pitches = best_fingering.to_pitches(&tuning);
 
         let info = VoicingInfo::new(VoicingStyle::Guitar, self.config.range, 0);
-        Ok(VoicedChord::new(chord.clone(), pitches, info))
+        Ok(VoicedChord::new(*chord, pitches, info))
     }
 }
 
@@ -988,7 +988,7 @@ impl GuitarFingering {
         for fret_state in &mut new_frets {
             if let StringState::Fretted(fret) = fret_state {
                 let new_fret = (*fret as i8) + offset;
-                if new_fret < 0 || new_fret > 24 {
+                if !(0..=24).contains(&new_fret) {
                     return Err(ParseError::InvalidChordFormat(format!(
                         "Transposition would result in invalid fret: {}",
                         new_fret
@@ -1106,6 +1106,12 @@ impl FromStr for GuitarFingering {
 pub struct IntervalFirstGuitarFinder {
     tuning: GuitarTuning,
     shapes: &'static [&'static GuitarShape],
+}
+
+impl Default for IntervalFirstGuitarFinder {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl IntervalFirstGuitarFinder {
@@ -1235,6 +1241,7 @@ impl IntervalFirstGuitarFinder {
     }
 
     /// Recursive helper to try all combinations and collect ALL valid ones
+    #[allow(clippy::too_many_arguments)]
     fn try_all_combinations(
         &self,
         required_notes: &[NoteName],
@@ -1557,15 +1564,15 @@ impl IntervalFirstGuitarFinder {
 
             for (i, candidate) in candidates.iter().enumerate() {
                 // Step 3: Check if it matches a known shape (for now, accept all)
-                let shape_match = self.matches_known_shape(&candidate);
+                let shape_match = self.matches_known_shape(candidate);
                 let shape_info = if shape_match {
-                    format!(" (matches known shape)")
+                    " (matches known shape)".to_string()
                 } else {
-                    format!(" (algorithmic)")
+                    " (algorithmic)".to_string()
                 };
 
                 if candidate.root_pitch(&self.tuning).is_some() {
-                    let score = self.calculate_score_for_chord(chord, bass_pos, &candidate);
+                    let score = self.calculate_score_for_chord(chord, bass_pos, candidate);
                     let pitches = candidate.to_pitches(&self.tuning);
 
                     println!("  Candidate {}: {:?}{}", i + 1, candidate, shape_info);
