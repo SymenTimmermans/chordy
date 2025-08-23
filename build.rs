@@ -73,6 +73,9 @@ fn main() {
 
     // Generate chord progression database
     generate_chord_progressions();
+    
+    // Generate guitar shapes
+    generate_guitar_shapes();
 }
 
 fn generate_scales() {
@@ -1210,4 +1213,98 @@ fn parse_csv_line(line: &str) -> Vec<String> {
     fields.push(current_field.trim().to_string());
 
     fields
+}
+
+
+fn generate_guitar_shapes() {
+    let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let shapes_path = Path::new(&manifest_dir).join("data/guitar_shapes.shapes");
+
+    let file = File::open(&shapes_path).expect("Failed to open guitar_shapes.shapes");
+    let reader = BufReader::new(file);
+
+    let mut generated = String::new();
+
+    generated.push_str("//! Generated guitar chord shapes from guitar_shapes.shapes\n");
+    generated.push_str("//! Do not edit manually.\n\n");
+    generated.push_str("#![allow(dead_code)]\n\n");
+    generated.push_str("use crate::types::voicing::GuitarShape;\n\n");
+
+    let mut shapes = Vec::new();
+    let mut shape_counter = 0;
+
+    for line in reader.lines() {
+        let line = line.expect("Failed to read line");
+        let line = line.trim();
+
+        // Skip comments and empty lines
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+
+        // Parse shape format: "1-3-3-2-1-1    # F major barre"
+        if let Some(shape_part) = line.split('#').next() {
+            let shape_part = shape_part.trim();
+            if !shape_part.is_empty() {
+                let positions: Result<Vec<u8>, _> = shape_part
+                    .split('-')
+                    .map(|s| s.parse::<u8>())
+                    .collect();
+
+                match positions {
+                    Ok(pos) if !pos.is_empty() => {
+                        let shape_name = format!("GUITAR_SHAPE_{}", shape_counter);
+                        shape_counter += 1;
+
+                        // Extract comment for documentation
+                        let comment = line.split('#').nth(1).unwrap_or("Guitar shape").trim();
+
+                        // Generate the shape constant
+                        generated.push_str(&format!("/// {}\n", comment));
+                        generated.push_str(&format!("/// Pattern: {}\n", shape_part));
+                        generated.push_str(&format!(
+                            "pub const {}: GuitarShape = GuitarShape {{\n",
+                            shape_name
+                        ));
+                        generated.push_str(&format!(
+                            "    positions: &[{}],\n",
+                            pos.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(", ")
+                        ));
+                        generated.push_str("};\n\n");
+
+                        shapes.push(shape_name);
+                    }
+                    _ => {
+                        eprintln!("Warning: Failed to parse shape line: '{}'", line);
+                    }
+                }
+            }
+        }
+    }
+
+    // Generate the shapes array
+    generated.push_str(&format!(
+        "/// All guitar chord shapes ({} total)\n",
+        shapes.len()
+    ));
+    generated.push_str("pub static ALL_GUITAR_SHAPES: &[&'static GuitarShape] = &[\n");
+    for shape_name in &shapes {
+        generated.push_str(&format!("    &{},\n", shape_name));
+    }
+    generated.push_str("];\n\n");
+
+    // Generate shape count
+    generated.push_str("/// Number of guitar shapes available\n");
+    generated.push_str(&format!(
+        "pub const GUITAR_SHAPE_COUNT: usize = {};\n",
+        shapes.len()
+    ));
+
+    let output_path = Path::new(&manifest_dir).join("src/types/guitar_shapes.rs");
+    fs::write(&output_path, &generated).expect("Failed to write guitar shapes module");
+
+    println!(
+        "cargo:warning=Generated {} guitar chord shapes",
+        shapes.len()
+    );
 }
