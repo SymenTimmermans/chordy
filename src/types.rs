@@ -36,6 +36,9 @@ pub use progression::{
 };
 
 mod voicing;
-pub use voicing::{GuitarFingering, GuitarTuning, PitchRange, StringState, VoicedChord, VoicingConfig, VoicingError, VoicingInfo, VoicingStyle, Voicer, IntervalFirstGuitarFinder};
+pub use voicing::{
+    GuitarFingering, GuitarTuning, IntervalFirstGuitarFinder, PitchRange, StringState, VoicedChord,
+    Voicer, VoicingConfig, VoicingError, VoicingInfo, VoicingStyle,
+};
 
 pub mod guitar_shapes;

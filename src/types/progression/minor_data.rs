@@ -1,25 +1,45 @@
 //! Generated progression data for minor keys from minor.progression
 //! Do not edit manually.
 
-use crate::types::progression::{ProgressionEdge, NodeType};
-use crate::types::{RomanChord, RomanNumeral, RomanDegree, Accidental, Interval, IntervalSet};
 use crate::types::chord::BassType;
+use crate::types::progression::{NodeType, ProgressionEdge};
+use crate::types::{Accidental, Interval, IntervalSet, RomanChord, RomanDegree, RomanNumeral};
 use std::collections::HashMap;
 
 // Common interval patterns (reused across multiple chords)
 /// Standard major triad intervals: root, major third, perfect fifth
 const MAJOR_TRIAD_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON, Interval::MAJOR_THIRD, Interval::PERFECT_FIFTH,
-     Interval::NONE, Interval::NONE, Interval::NONE,
-     Interval::NONE, Interval::NONE, Interval::NONE,
-     Interval::NONE], 3);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MAJOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    3,
+);
 
 /// Standard minor triad intervals: root, minor third, perfect fifth
 const MINOR_TRIAD_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON, Interval::MINOR_THIRD, Interval::PERFECT_FIFTH,
-     Interval::NONE, Interval::NONE, Interval::NONE,
-     Interval::NONE, Interval::NONE, Interval::NONE,
-     Interval::NONE], 3);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MINOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    3,
+);
 
 /// iidim chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth
@@ -34,7 +54,10 @@ pub static MINOR_IIDIM: RomanChord = RomanChord {
 pub static MINOR_VIIDIM_SLASH_2: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::VII, Accidental::Natural),
     intervals: MINOR_TRIAD_SET,
-    bass: Some((RomanNumeral::new(RomanDegree::II, Accidental::Natural), BassType::Slash)),
+    bass: Some((
+        RomanNumeral::new(RomanDegree::II, Accidental::Natural),
+        BassType::Slash,
+    )),
 };
 
 /// V chord - creates tension, seeks resolution (p node)
@@ -46,16 +69,20 @@ pub static V: RomanChord = RomanChord {
 };
 
 const V_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MAJOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MINOR_SEVENTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MAJOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MINOR_SEVENTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// V7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh
@@ -66,16 +93,20 @@ pub static V_7: RomanChord = RomanChord {
 };
 
 const V_FLAT_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MAJOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MINOR_NINTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MAJOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MINOR_NINTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// Vb9 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth, minor ninth
@@ -86,16 +117,20 @@ pub static V_FLAT_9: RomanChord = RomanChord {
 };
 
 const V_FLAT_13_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MAJOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MINOR_THIRTEENTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MAJOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MINOR_THIRTEENTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// Vb13 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major third, perfect fifth, minor thirteenth
@@ -106,16 +141,20 @@ pub static V_FLAT_13: RomanChord = RomanChord {
 };
 
 const V_SUS4_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::PERFECT_FOURTH,
-     Interval::PERFECT_FIFTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 3);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::PERFECT_FOURTH,
+        Interval::PERFECT_FIFTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    3,
+);
 
 /// Vsus4 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, perfect fourth, perfect fifth
@@ -138,7 +177,10 @@ pub static MINOR_FLAT_IIIAUG: RomanChord = RomanChord {
 pub static MINOR_I_SLASH_FLAT_3: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
     intervals: MINOR_TRIAD_SET,
-    bass: Some((RomanNumeral::new(RomanDegree::III, Accidental::Flat), BassType::Slash)),
+    bass: Some((
+        RomanNumeral::new(RomanDegree::III, Accidental::Flat),
+        BassType::Slash,
+    )),
 };
 
 /// bVI chord - creates tension, seeks resolution (p node)
@@ -150,16 +192,20 @@ pub static MINOR_FLAT_VI: RomanChord = RomanChord {
 };
 
 const MINOR_FLAT_VI_6_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MINOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MAJOR_SIXTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MINOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MAJOR_SIXTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// bVI6 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, major sixth
@@ -170,16 +216,20 @@ pub static MINOR_FLAT_VI_6: RomanChord = RomanChord {
 };
 
 const MINOR_FLAT_VI_MAJ7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MINOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MAJOR_SEVENTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MINOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MAJOR_SEVENTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// bVImaj7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, major seventh
@@ -194,47 +244,64 @@ pub static MINOR_FLAT_VI_MAJ7: RomanChord = RomanChord {
 pub static MINOR_IV_SLASH_FLAT_6: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
     intervals: MINOR_TRIAD_SET,
-    bass: Some((RomanNumeral::new(RomanDegree::VI, Accidental::Flat), BassType::Slash)),
+    bass: Some((
+        RomanNumeral::new(RomanDegree::VI, Accidental::Flat),
+        BassType::Slash,
+    )),
 };
 
 const MINOR_IV_SLASH_FLAT_6_M6_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MINOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MAJOR_SIXTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MINOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MAJOR_SIXTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// iv/b6m6 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, major sixth
 pub static MINOR_IV_SLASH_FLAT_6_M6: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
     intervals: MINOR_IV_SLASH_FLAT_6_M6_INTERVALS_SET,
-    bass: Some((RomanNumeral::new(RomanDegree::VI, Accidental::Flat), BassType::Slash)),
+    bass: Some((
+        RomanNumeral::new(RomanDegree::VI, Accidental::Flat),
+        BassType::Slash,
+    )),
 };
 
 const MINOR_IV_SLASH_FLAT_6_M7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MINOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MINOR_SEVENTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MINOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MINOR_SEVENTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// iv/b6m7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh
 pub static MINOR_IV_SLASH_FLAT_6_M7: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
     intervals: MINOR_IV_SLASH_FLAT_6_M7_INTERVALS_SET,
-    bass: Some((RomanNumeral::new(RomanDegree::VI, Accidental::Flat), BassType::Slash)),
+    bass: Some((
+        RomanNumeral::new(RomanDegree::VI, Accidental::Flat),
+        BassType::Slash,
+    )),
 };
 
 /// iv chord - creates tension, seeks resolution (p node)
@@ -246,16 +313,20 @@ pub static MINOR_IV: RomanChord = RomanChord {
 };
 
 const MINOR_IV_M6_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MINOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MAJOR_SIXTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MINOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MAJOR_SIXTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// ivm6 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, major sixth
@@ -266,16 +337,20 @@ pub static MINOR_IV_M6: RomanChord = RomanChord {
 };
 
 const MINOR_IV_M7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MINOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MINOR_SEVENTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MINOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MINOR_SEVENTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// ivm7 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh
@@ -286,16 +361,20 @@ pub static MINOR_IV_M7: RomanChord = RomanChord {
 };
 
 const MINOR_IV_M9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MINOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MINOR_SEVENTH,
-     Interval::MAJOR_NINTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 5);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MINOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MINOR_SEVENTH,
+        Interval::MAJOR_NINTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    5,
+);
 
 /// ivm9 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh, major ninth
@@ -310,7 +389,10 @@ pub static MINOR_IV_M9: RomanChord = RomanChord {
 pub static MINOR_FLAT_II_SLASH_4: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::II, Accidental::Natural),
     intervals: MINOR_TRIAD_SET,
-    bass: Some((RomanNumeral::new(RomanDegree::IV, Accidental::Natural), BassType::Slash)),
+    bass: Some((
+        RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
+        BassType::Slash,
+    )),
 };
 
 /// i/5 chord - creates tension, seeks resolution (p node)
@@ -318,7 +400,10 @@ pub static MINOR_FLAT_II_SLASH_4: RomanChord = RomanChord {
 pub static MINOR_I_SLASH_5: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::I, Accidental::Natural),
     intervals: MINOR_TRIAD_SET,
-    bass: Some((RomanNumeral::new(RomanDegree::V, Accidental::Natural), BassType::Slash)),
+    bass: Some((
+        RomanNumeral::new(RomanDegree::V, Accidental::Natural),
+        BassType::Slash,
+    )),
 };
 
 /// i chord - creates tension, seeks resolution (p node)
@@ -330,16 +415,20 @@ pub static MINOR_I: RomanChord = RomanChord {
 };
 
 const MINOR_I_SUS2_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MAJOR_SECOND,
-     Interval::PERFECT_FIFTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 3);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MAJOR_SECOND,
+        Interval::PERFECT_FIFTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    3,
+);
 
 /// isus2 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, major second, perfect fifth
@@ -350,16 +439,20 @@ pub static MINOR_I_SUS2: RomanChord = RomanChord {
 };
 
 const MINOR_I_SUS4_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::PERFECT_FOURTH,
-     Interval::PERFECT_FIFTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 3);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::PERFECT_FOURTH,
+        Interval::PERFECT_FIFTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    3,
+);
 
 /// isus4 chord - creates tension, seeks resolution (p node)
 /// Intervals: perfect unison, perfect fourth, perfect fifth
@@ -374,7 +467,10 @@ pub static MINOR_I_SUS4: RomanChord = RomanChord {
 pub static MINOR_IV_SLASH_1: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::IV, Accidental::Natural),
     intervals: MINOR_TRIAD_SET,
-    bass: Some((RomanNumeral::new(RomanDegree::I, Accidental::Natural), BassType::Slash)),
+    bass: Some((
+        RomanNumeral::new(RomanDegree::I, Accidental::Natural),
+        BassType::Slash,
+    )),
 };
 
 /// V/1 chord - creates tension, seeks resolution (p node)
@@ -382,7 +478,10 @@ pub static MINOR_IV_SLASH_1: RomanChord = RomanChord {
 pub static V_SLASH_1: RomanChord = RomanChord {
     root: RomanNumeral::new(RomanDegree::V, Accidental::Natural),
     intervals: MAJOR_TRIAD_SET,
-    bass: Some((RomanNumeral::new(RomanDegree::I, Accidental::Natural), BassType::Slash)),
+    bass: Some((
+        RomanNumeral::new(RomanDegree::I, Accidental::Natural),
+        BassType::Slash,
+    )),
 };
 
 /// iidim7 chord - creates tension, seeks resolution (s node)
@@ -402,16 +501,20 @@ pub static V7: RomanChord = RomanChord {
 };
 
 const V7_FLAT_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MAJOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MINOR_NINTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MAJOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MINOR_NINTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// V7b9 chord - creates tension, seeks resolution (s node)
 /// Intervals: perfect unison, major third, perfect fifth, minor ninth
@@ -454,16 +557,20 @@ pub static I: RomanChord = RomanChord {
 };
 
 const I_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MAJOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MINOR_SEVENTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MAJOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MINOR_SEVENTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// I7 chord - creates tension, seeks resolution (s node)
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh
@@ -474,16 +581,20 @@ pub static I_7: RomanChord = RomanChord {
 };
 
 const I_FLAT_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MAJOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MINOR_NINTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MAJOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MINOR_NINTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// Ib9 chord - creates tension, seeks resolution (s node)
 /// Intervals: perfect unison, major third, perfect fifth, minor ninth
@@ -510,16 +621,20 @@ pub static II: RomanChord = RomanChord {
 };
 
 const II_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MAJOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MINOR_SEVENTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MAJOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MINOR_SEVENTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// II7 chord - creates tension, seeks resolution (s node)
 /// Intervals: perfect unison, major third, perfect fifth, minor seventh
@@ -530,16 +645,20 @@ pub static II_7: RomanChord = RomanChord {
 };
 
 const II_FLAT_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MAJOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MINOR_NINTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MAJOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MINOR_NINTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// IIb9 chord - creates tension, seeks resolution (s node)
 /// Intervals: perfect unison, major third, perfect fifth, minor ninth
@@ -566,16 +685,20 @@ pub static MINOR_FLAT_VII: RomanChord = RomanChord {
 };
 
 const MINOR_FLAT_VII_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MINOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MINOR_SEVENTH,
-     Interval::MAJOR_NINTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 5);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MINOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MINOR_SEVENTH,
+        Interval::MAJOR_NINTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    5,
+);
 
 /// bVII9 chord - creates tension, seeks resolution (s node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh, major ninth
@@ -594,16 +717,20 @@ pub static MINOR_FLAT_III: RomanChord = RomanChord {
 };
 
 const MINOR_FLAT_III_7_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MINOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MINOR_SEVENTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MINOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MINOR_SEVENTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// bIII7 chord - creates tension, seeks resolution (s node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh
@@ -614,16 +741,20 @@ pub static MINOR_FLAT_III_7: RomanChord = RomanChord {
 };
 
 const MINOR_FLAT_III_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MINOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MINOR_SEVENTH,
-     Interval::MAJOR_NINTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 5);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MINOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MINOR_SEVENTH,
+        Interval::MAJOR_NINTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    5,
+);
 
 /// bIII9 chord - creates tension, seeks resolution (s node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor seventh, major ninth
@@ -634,16 +765,20 @@ pub static MINOR_FLAT_III_9: RomanChord = RomanChord {
 };
 
 const MINOR_FLAT_III_FLAT_9_INTERVALS_SET: IntervalSet = IntervalSet::const_from_array(
-    [Interval::PERFECT_UNISON,
-     Interval::MINOR_THIRD,
-     Interval::PERFECT_FIFTH,
-     Interval::MINOR_NINTH,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE,
-     Interval::NONE], 4);
+    [
+        Interval::PERFECT_UNISON,
+        Interval::MINOR_THIRD,
+        Interval::PERFECT_FIFTH,
+        Interval::MINOR_NINTH,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+        Interval::NONE,
+    ],
+    4,
+);
 
 /// bIIIb9 chord - creates tension, seeks resolution (s node)
 /// Intervals: perfect unison, minor third, perfect fifth, minor ninth
@@ -1182,16 +1317,18 @@ pub static EDGE_MINOR_I_SLASH_FLAT_3_TO_MINOR_IV_SLASH_FLAT_6: ProgressionEdge =
 };
 
 /// Progression edge: i/b3 → iv/b6
-pub static EDGE_MINOR_I_SLASH_FLAT_3_TO_MINOR_IV_SLASH_FLAT_6_M6: ProgressionEdge = ProgressionEdge {
-    from: MINOR_I_SLASH_FLAT_3,
-    to: MINOR_IV_SLASH_FLAT_6_M6,
-};
+pub static EDGE_MINOR_I_SLASH_FLAT_3_TO_MINOR_IV_SLASH_FLAT_6_M6: ProgressionEdge =
+    ProgressionEdge {
+        from: MINOR_I_SLASH_FLAT_3,
+        to: MINOR_IV_SLASH_FLAT_6_M6,
+    };
 
 /// Progression edge: i/b3 → iv/b6
-pub static EDGE_MINOR_I_SLASH_FLAT_3_TO_MINOR_IV_SLASH_FLAT_6_M7: ProgressionEdge = ProgressionEdge {
-    from: MINOR_I_SLASH_FLAT_3,
-    to: MINOR_IV_SLASH_FLAT_6_M7,
-};
+pub static EDGE_MINOR_I_SLASH_FLAT_3_TO_MINOR_IV_SLASH_FLAT_6_M7: ProgressionEdge =
+    ProgressionEdge {
+        from: MINOR_I_SLASH_FLAT_3,
+        to: MINOR_IV_SLASH_FLAT_6_M7,
+    };
 
 /// Progression edge: bVI → iv/b6
 pub static EDGE_MINOR_FLAT_VI_TO_MINOR_IV_SLASH_FLAT_6: ProgressionEdge = ProgressionEdge {
@@ -1506,16 +1643,18 @@ pub static EDGE_MINOR_IV_SLASH_FLAT_6_TO_MINOR_FLAT_II_SLASH_4: ProgressionEdge 
 };
 
 /// Progression edge: iv/b6 → bII/4
-pub static EDGE_MINOR_IV_SLASH_FLAT_6_M6_TO_MINOR_FLAT_II_SLASH_4: ProgressionEdge = ProgressionEdge {
-    from: MINOR_IV_SLASH_FLAT_6_M6,
-    to: MINOR_FLAT_II_SLASH_4,
-};
+pub static EDGE_MINOR_IV_SLASH_FLAT_6_M6_TO_MINOR_FLAT_II_SLASH_4: ProgressionEdge =
+    ProgressionEdge {
+        from: MINOR_IV_SLASH_FLAT_6_M6,
+        to: MINOR_FLAT_II_SLASH_4,
+    };
 
 /// Progression edge: iv/b6 → bII/4
-pub static EDGE_MINOR_IV_SLASH_FLAT_6_M7_TO_MINOR_FLAT_II_SLASH_4: ProgressionEdge = ProgressionEdge {
-    from: MINOR_IV_SLASH_FLAT_6_M7,
-    to: MINOR_FLAT_II_SLASH_4,
-};
+pub static EDGE_MINOR_IV_SLASH_FLAT_6_M7_TO_MINOR_FLAT_II_SLASH_4: ProgressionEdge =
+    ProgressionEdge {
+        from: MINOR_IV_SLASH_FLAT_6_M7,
+        to: MINOR_FLAT_II_SLASH_4,
+    };
 
 /// Progression edge: iv/b6 → iidim
 pub static EDGE_MINOR_IV_SLASH_FLAT_6_TO_MINOR_IIDIM: ProgressionEdge = ProgressionEdge {
@@ -1542,16 +1681,18 @@ pub static EDGE_MINOR_IV_SLASH_FLAT_6_TO_MINOR_VIIDIM_SLASH_2: ProgressionEdge =
 };
 
 /// Progression edge: iv/b6 → viidim/2
-pub static EDGE_MINOR_IV_SLASH_FLAT_6_M6_TO_MINOR_VIIDIM_SLASH_2: ProgressionEdge = ProgressionEdge {
-    from: MINOR_IV_SLASH_FLAT_6_M6,
-    to: MINOR_VIIDIM_SLASH_2,
-};
+pub static EDGE_MINOR_IV_SLASH_FLAT_6_M6_TO_MINOR_VIIDIM_SLASH_2: ProgressionEdge =
+    ProgressionEdge {
+        from: MINOR_IV_SLASH_FLAT_6_M6,
+        to: MINOR_VIIDIM_SLASH_2,
+    };
 
 /// Progression edge: iv/b6 → viidim/2
-pub static EDGE_MINOR_IV_SLASH_FLAT_6_M7_TO_MINOR_VIIDIM_SLASH_2: ProgressionEdge = ProgressionEdge {
-    from: MINOR_IV_SLASH_FLAT_6_M7,
-    to: MINOR_VIIDIM_SLASH_2,
-};
+pub static EDGE_MINOR_IV_SLASH_FLAT_6_M7_TO_MINOR_VIIDIM_SLASH_2: ProgressionEdge =
+    ProgressionEdge {
+        from: MINOR_IV_SLASH_FLAT_6_M7,
+        to: MINOR_VIIDIM_SLASH_2,
+    };
 
 /// Progression edge: iv → bII/4
 pub static EDGE_MINOR_IV_TO_MINOR_FLAT_II_SLASH_4: ProgressionEdge = ProgressionEdge {
@@ -2370,16 +2511,10 @@ pub static EDGE_MINOR_VIM7FLAT_5_TO_II_FLAT_9: ProgressionEdge = ProgressionEdge
 };
 
 /// Progression edge: II → V
-pub static EDGE_II_TO_V: ProgressionEdge = ProgressionEdge {
-    from: II,
-    to: V,
-};
+pub static EDGE_II_TO_V: ProgressionEdge = ProgressionEdge { from: II, to: V };
 
 /// Progression edge: II → V
-pub static EDGE_II_TO_V_7: ProgressionEdge = ProgressionEdge {
-    from: II,
-    to: V_7,
-};
+pub static EDGE_II_TO_V_7: ProgressionEdge = ProgressionEdge { from: II, to: V_7 };
 
 /// Progression edge: II → V
 pub static EDGE_II_TO_V_FLAT_9: ProgressionEdge = ProgressionEdge {
@@ -2400,10 +2535,7 @@ pub static EDGE_II_TO_V_SUS4: ProgressionEdge = ProgressionEdge {
 };
 
 /// Progression edge: II → V
-pub static EDGE_II_7_TO_V: ProgressionEdge = ProgressionEdge {
-    from: II_7,
-    to: V,
-};
+pub static EDGE_II_7_TO_V: ProgressionEdge = ProgressionEdge { from: II_7, to: V };
 
 /// Progression edge: II → V
 pub static EDGE_II_7_TO_V_7: ProgressionEdge = ProgressionEdge {
@@ -2766,16 +2898,18 @@ pub static EDGE_MINOR_FLAT_III_FLAT_9_TO_MINOR_IV_SLASH_FLAT_6: ProgressionEdge 
 };
 
 /// Progression edge: bIII → iv/b6
-pub static EDGE_MINOR_FLAT_III_FLAT_9_TO_MINOR_IV_SLASH_FLAT_6_M6: ProgressionEdge = ProgressionEdge {
-    from: MINOR_FLAT_III_FLAT_9,
-    to: MINOR_IV_SLASH_FLAT_6_M6,
-};
+pub static EDGE_MINOR_FLAT_III_FLAT_9_TO_MINOR_IV_SLASH_FLAT_6_M6: ProgressionEdge =
+    ProgressionEdge {
+        from: MINOR_FLAT_III_FLAT_9,
+        to: MINOR_IV_SLASH_FLAT_6_M6,
+    };
 
 /// Progression edge: bIII → iv/b6
-pub static EDGE_MINOR_FLAT_III_FLAT_9_TO_MINOR_IV_SLASH_FLAT_6_M7: ProgressionEdge = ProgressionEdge {
-    from: MINOR_FLAT_III_FLAT_9,
-    to: MINOR_IV_SLASH_FLAT_6_M7,
-};
+pub static EDGE_MINOR_FLAT_III_FLAT_9_TO_MINOR_IV_SLASH_FLAT_6_M7: ProgressionEdge =
+    ProgressionEdge {
+        from: MINOR_FLAT_III_FLAT_9,
+        to: MINOR_IV_SLASH_FLAT_6_M7,
+    };
 
 /// Progression edge: bviim7b5 → bIII
 pub static EDGE_MINOR_FLAT_VIIM7FLAT_5_TO_MINOR_FLAT_III: ProgressionEdge = ProgressionEdge {
@@ -2796,10 +2930,11 @@ pub static EDGE_MINOR_FLAT_VIIM7FLAT_5_TO_MINOR_FLAT_III_9: ProgressionEdge = Pr
 };
 
 /// Progression edge: bviim7b5 → bIII
-pub static EDGE_MINOR_FLAT_VIIM7FLAT_5_TO_MINOR_FLAT_III_FLAT_9: ProgressionEdge = ProgressionEdge {
-    from: MINOR_FLAT_VIIM7FLAT_5,
-    to: MINOR_FLAT_III_FLAT_9,
-};
+pub static EDGE_MINOR_FLAT_VIIM7FLAT_5_TO_MINOR_FLAT_III_FLAT_9: ProgressionEdge =
+    ProgressionEdge {
+        from: MINOR_FLAT_VIIM7FLAT_5,
+        to: MINOR_FLAT_III_FLAT_9,
+    };
 
 /// Progression edge: iidim → ivm7
 pub static EDGE_MINOR_IIDIM_TO_MINOR_IVM7: ProgressionEdge = ProgressionEdge {
@@ -2844,7 +2979,7 @@ pub static EDGE_MINOR_SIVDIM7_TO_MINOR_I_SLASH_5: ProgressionEdge = ProgressionE
 };
 
 /// Complete registry of all progression chords for minor keys
-/// 
+///
 /// Contains 49 chord variants across all harmonic functions.
 /// Used internally for graph traversal and chord lookup operations.
 pub static ALL_NODES: &[&RomanChord] = &[
@@ -2900,7 +3035,7 @@ pub static ALL_NODES: &[&RomanChord] = &[
 ];
 
 /// Complete registry of all progression edges for minor keys
-/// 
+///
 /// Contains 361 harmonic connections between chord variants.
 /// Each edge represents a musically valid progression with proper voice leading.
 pub static ALL_EDGES: &[&ProgressionEdge] = &[
@@ -3268,7 +3403,7 @@ pub static ALL_EDGES: &[&ProgressionEdge] = &[
 ];
 
 /// NodeType mapping for all progression chords in minor keys
-/// 
+///
 /// Maps each chord to its harmonic role (Primary = stable, Secondary = transitional).
 pub fn get_node_types() -> HashMap<&'static RomanChord, NodeType> {
     let mut map = HashMap::new();
@@ -3323,4 +3458,3 @@ pub fn get_node_types() -> HashMap<&'static RomanChord, NodeType> {
     map.insert(&MINOR_FLAT_VI7, NodeType::Secondary);
     map
 }
-

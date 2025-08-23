@@ -1186,12 +1186,15 @@ impl Chord {
     /// let config = VoicingConfig::new()
     ///     .style(VoicingStyle::Open)
     ///     .range_from("C3".parse().unwrap(), "C6".parse().unwrap());
-    /// 
+    ///
     /// let voiced = chord.voice(&config).unwrap();
     /// assert_eq!(voiced.chord, chord);
     /// assert_eq!(voiced.info.style, VoicingStyle::Open);
     /// ```
-    pub fn voice(&self, config: &super::VoicingConfig) -> Result<super::VoicedChord, super::VoicingError> {
+    pub fn voice(
+        &self,
+        config: &super::VoicingConfig,
+    ) -> Result<super::VoicedChord, super::VoicingError> {
         let voicer = super::Voicer::new(config.clone());
         voicer.voice_chord(self)
     }
@@ -1208,11 +1211,14 @@ impl Chord {
     ///
     /// let chord = Chord::major(note!("C"));
     /// let voiced = chord.voice_closed("C4".parse().unwrap()).unwrap();
-    /// 
+    ///
     /// assert!(voiced.is_closed());
     /// assert_eq!(voiced.bass_pitch().unwrap().name, note!("C"));
     /// ```
-    pub fn voice_closed(&self, bass_pitch: super::Pitch) -> Result<super::VoicedChord, super::VoicingError> {
+    pub fn voice_closed(
+        &self,
+        bass_pitch: super::Pitch,
+    ) -> Result<super::VoicedChord, super::VoicingError> {
         let config = super::VoicingConfig::new()
             .style(super::VoicingStyle::Closed)
             .bass_pitch(bass_pitch);
@@ -1231,11 +1237,14 @@ impl Chord {
     ///
     /// let chord = Chord::major(note!("C"));
     /// let voiced = chord.voice_open("C3".parse().unwrap()).unwrap();
-    /// 
+    ///
     /// // Open voicings typically span more than an octave
     /// assert!(voiced.span_semitones() > 12 || voiced.pitches.len() <= 2);
     /// ```
-    pub fn voice_open(&self, bass_pitch: super::Pitch) -> Result<super::VoicedChord, super::VoicingError> {
+    pub fn voice_open(
+        &self,
+        bass_pitch: super::Pitch,
+    ) -> Result<super::VoicedChord, super::VoicingError> {
         let config = super::VoicingConfig::new()
             .style(super::VoicingStyle::Open)
             .bass_pitch(bass_pitch);
@@ -1255,10 +1264,13 @@ impl Chord {
     ///
     /// let chord = Chord::major_7th(note!("C")); // Works best with 4+ notes  
     /// let voiced = chord.voice_drop2("C4".parse().unwrap()).unwrap();
-    /// 
+    ///
     /// assert_eq!(voiced.info.style, chordy::VoicingStyle::Drop2);
     /// ```
-    pub fn voice_drop2(&self, bass_pitch: super::Pitch) -> Result<super::VoicedChord, super::VoicingError> {
+    pub fn voice_drop2(
+        &self,
+        bass_pitch: super::Pitch,
+    ) -> Result<super::VoicedChord, super::VoicingError> {
         let config = super::VoicingConfig::new()
             .style(super::VoicingStyle::Drop2)
             .bass_pitch(bass_pitch);
@@ -1278,10 +1290,13 @@ impl Chord {
     ///
     /// let chord = Chord::dominant_7th(note!("G")); // Works best with 4+ notes
     /// let voiced = chord.voice_drop3("G3".parse().unwrap()).unwrap();
-    /// 
+    ///
     /// assert_eq!(voiced.info.style, chordy::VoicingStyle::Drop3);
     /// ```
-    pub fn voice_drop3(&self, bass_pitch: super::Pitch) -> Result<super::VoicedChord, super::VoicingError> {
+    pub fn voice_drop3(
+        &self,
+        bass_pitch: super::Pitch,
+    ) -> Result<super::VoicedChord, super::VoicingError> {
         let config = super::VoicingConfig::new()
             .style(super::VoicingStyle::Drop3)
             .bass_pitch(bass_pitch);
@@ -1305,14 +1320,19 @@ impl Chord {
     ///     Interval::MAJOR_THIRD,  // Minimum spacing
     ///     Interval::PERFECT_FIFTH // Maximum spacing
     /// ).unwrap();
-    /// 
+    ///
     /// // All adjacent intervals should be between major 3rd and perfect 5th
     /// let intervals = voiced.voice_intervals();
     /// for &interval in &intervals {
     ///     assert!(interval >= 4 && interval <= 7);
     /// }
     /// ```
-    pub fn voice_spread(&self, bass_pitch: super::Pitch, min_interval: super::Interval, max_interval: super::Interval) -> Result<super::VoicedChord, super::VoicingError> {
+    pub fn voice_spread(
+        &self,
+        bass_pitch: super::Pitch,
+        min_interval: super::Interval,
+        max_interval: super::Interval,
+    ) -> Result<super::VoicedChord, super::VoicingError> {
         let config = super::VoicingConfig::new()
             .style(super::VoicingStyle::spread(min_interval, max_interval))
             .bass_pitch(bass_pitch);
@@ -1331,7 +1351,7 @@ impl Chord {
     ///
     /// let chord = Chord::major(note!("C"));
     /// let voiced = chord.voice_for_piano().unwrap();
-    /// 
+    ///
     /// assert_eq!(voiced.info.range, chordy::PitchRange::piano());
     /// ```
     pub fn voice_for_piano(&self) -> Result<super::VoicedChord, super::VoicingError> {
@@ -1351,7 +1371,7 @@ impl Chord {
     ///
     /// let chord = Chord::major(note!("C"));
     /// let voiced = chord.voice_for_guitar().unwrap();
-    /// 
+    ///
     /// assert_eq!(voiced.info.range, chordy::PitchRange::guitar());
     /// ```
     pub fn voice_for_guitar(&self) -> Result<super::VoicedChord, super::VoicingError> {
@@ -1371,7 +1391,7 @@ impl Chord {
     ///
     /// let chord = Chord::major(note!("C"));
     /// let voiced = chord.voice_for_vocals().unwrap();
-    /// 
+    ///
     /// assert_eq!(voiced.info.range, chordy::PitchRange::vocal());
     /// ```
     pub fn voice_for_vocals(&self) -> Result<super::VoicedChord, super::VoicingError> {

@@ -103,9 +103,7 @@ pub const GUITAR_SHAPE_15: GuitarShape = GuitarShape {
 
 /// E minor shape (partial)
 /// Pattern: 2-2
-pub const GUITAR_SHAPE_16: GuitarShape = GuitarShape {
-    positions: &[2, 2],
-};
+pub const GUITAR_SHAPE_16: GuitarShape = GuitarShape { positions: &[2, 2] };
 
 /// Amaj7 shape
 /// Pattern: 2-1-2
@@ -157,15 +155,11 @@ pub const GUITAR_SHAPE_24: GuitarShape = GuitarShape {
 
 /// Power chord/dyad
 /// Pattern: 1-1
-pub const GUITAR_SHAPE_25: GuitarShape = GuitarShape {
-    positions: &[1, 1],
-};
+pub const GUITAR_SHAPE_25: GuitarShape = GuitarShape { positions: &[1, 1] };
 
 /// Dyad variation
 /// Pattern: 2-1
-pub const GUITAR_SHAPE_26: GuitarShape = GuitarShape {
-    positions: &[2, 1],
-};
+pub const GUITAR_SHAPE_26: GuitarShape = GuitarShape { positions: &[2, 1] };
 
 /// All guitar chord shapes (27 total)
 pub static ALL_GUITAR_SHAPES: &[&'static GuitarShape] = &[

@@ -73,7 +73,7 @@ fn main() {
 
     // Generate chord progression database
     generate_chord_progressions();
-    
+
     // Generate guitar shapes
     generate_guitar_shapes();
 }
@@ -1215,7 +1215,6 @@ fn parse_csv_line(line: &str) -> Vec<String> {
     fields
 }
 
-
 fn generate_guitar_shapes() {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let shapes_path = Path::new(&manifest_dir).join("data/guitar_shapes.shapes");
@@ -1246,10 +1245,8 @@ fn generate_guitar_shapes() {
         if let Some(shape_part) = line.split('#').next() {
             let shape_part = shape_part.trim();
             if !shape_part.is_empty() {
-                let positions: Result<Vec<u8>, _> = shape_part
-                    .split('-')
-                    .map(|s| s.parse::<u8>())
-                    .collect();
+                let positions: Result<Vec<u8>, _> =
+                    shape_part.split('-').map(|s| s.parse::<u8>()).collect();
 
                 match positions {
                     Ok(pos) if !pos.is_empty() => {
@@ -1268,7 +1265,10 @@ fn generate_guitar_shapes() {
                         ));
                         generated.push_str(&format!(
                             "    positions: &[{}],\n",
-                            pos.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(", ")
+                            pos.iter()
+                                .map(|n| n.to_string())
+                                .collect::<Vec<_>>()
+                                .join(", ")
                         ));
                         generated.push_str("};\n\n");
 
