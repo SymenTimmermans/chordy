@@ -94,7 +94,7 @@ guitar_voicing_test!(
 guitar_voicing_test!(
     test_b7_guitar_voicing,
     Chord::dominant_7th(note!("B")),
-    "B2,D♯3,A3,B3"
+    "B2,D♯3,A3,B3,F#4"
 );
 
 guitar_voicing_test!(
@@ -107,6 +107,12 @@ guitar_voicing_test!(
     test_d7_guitar_voicing,
     Chord::dominant_7th(note!("D")),
     "D3,A3,C4,F#4"
+);
+
+guitar_voicing_test!(
+    test_g7_guitar_voicing,
+    Chord::dominant_7th(note!("G")),
+    "G2,B2,D3,G3,B3,F4"
 );
 
 // Additional common chord voicings
@@ -157,6 +163,30 @@ guitar_voicing_test!(
     test_c_major_over_g,
     Chord::major(note!("C")).with_slash_bass(note!("G")),
     "G2,C3,E3,G3,C4,E4"
+);
+
+guitar_voicing_test!(
+    test_d_major_over_f_sharp,
+    Chord::major(note!("D")).with_slash_bass(note!("F♯")),
+    "F#2,A2,D3,A3,D4,F#4"
+);
+
+guitar_voicing_test!(
+    test_e_minor_over_b,
+    Chord::minor(note!("E")).with_slash_bass(note!("B")),
+    "B2,E3,G3,B3,E4"
+);
+
+guitar_voicing_test!(
+    test_a_minor_over_c,
+    Chord::minor(note!("A")).with_slash_bass(note!("C")),
+    "C3,E3,A3,C4,E4"
+);
+
+guitar_voicing_test!(
+    test_g_major_over_b,
+    Chord::major(note!("G")).with_slash_bass(note!("B")),
+    "B2,D3,G3,B3,G4"
 );
 
 #[test]

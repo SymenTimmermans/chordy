@@ -21,8 +21,6 @@
 //!
 //! if let Some((fingering, _score)) = voicings.first() {
 //!     let pitches = fingering.to_pitches(&GuitarTuning::standard());
-//!     println!("C major fingering: {}", fingering);
-//!     println!("Produces pitches: {:?}", pitches);
 //! }
 //! ```
 
@@ -473,11 +471,9 @@ impl IntervalFirstGuitarFinder {
     /// Get the unique notes required for this chord
     fn get_chord_notes(&self, chord: &Chord) -> Vec<NoteName> {
         let root = chord.root();
-        let intervals = chord.intervals();
+        let mut notes = vec![root];
 
-        let mut notes = vec![root]; // Start with root
-
-        for interval in intervals {
+        for interval in chord.intervals() {
             let note = root + *interval;
             if !notes.contains(&note) {
                 notes.push(note);
@@ -489,22 +485,11 @@ impl IntervalFirstGuitarFinder {
 
     /// Check if a note is a chord tone, considering enharmonic equivalents
     fn is_chord_tone(&self, note: &NoteName, required_notes: &[NoteName]) -> bool {
-        // Direct match first
-        if required_notes.contains(note) {
-            return true;
-        }
-
-        // Check enharmonic equivalents using the built-in method
-        for required_note in required_notes {
-            if note.is_enharmonic_with(required_note) {
-                return true;
-            }
-        }
-
-        false
+        required_notes.contains(note) || 
+        required_notes.iter().any(|req| note.is_enharmonic_with(req))
     }
 
-    /// Find ALL valid combinations of notes on the given strings
+    /// Find all valid combinations of notes on the given strings
     fn find_all_combinations(
         &self,
         required_notes: &[NoteName],
@@ -514,8 +499,6 @@ impl IntervalFirstGuitarFinder {
         bass_pos: (u8, u8),
     ) -> Vec<GuitarFingering> {
         let mut all_fingerings = Vec::new();
-
-        // Generate all possible combinations
         self.try_all_combinations(
             required_notes,
             strings,
@@ -526,7 +509,6 @@ impl IntervalFirstGuitarFinder {
             [StringState::Muted; 6],
             &mut all_fingerings,
         );
-
         all_fingerings
     }
 
@@ -555,51 +537,9 @@ impl IntervalFirstGuitarFinder {
         // Base case: we've assigned all strings
         if string_index >= strings.len() {
             if let Ok(fingering) = GuitarFingering::new(current_frets, bass_string) {
-                let pitches = fingering.to_pitches(&self.tuning);
-                let unique_notes: HashSet<NoteName> = pitches.iter().map(|p| p.name).collect();
-
-                // Debug G minor chord coverage
-                if bass_pos.0 == 0 && bass_pos.1 == 3 {
-                    println!("        Pitches: {:?}", pitches);
-                    println!("        Notes: {:?}", unique_notes);
-                    println!("        Required: {:?}", required_notes);
+                if self.is_valid_voicing(&fingering, required_notes) {
+                    all_fingerings.push(fingering);
                 }
-
-                // FIRST: Check chord tone coverage - don't waste time on incomplete voicings
-                let coverage = required_notes
-                    .iter()
-                    .filter(|&required_note| {
-                        // Check if any note in unique_notes is enharmonically equivalent to this required note
-                        unique_notes.iter().any(|&actual_note| {
-                            actual_note == *required_note
-                                || actual_note.is_enharmonic_with(required_note)
-                        })
-                    })
-                    .count();
-                let coverage_percentage = coverage as f32 / required_notes.len() as f32;
-
-                // For guitar voicings, require at least 75% coverage of chord tones
-                if coverage_percentage < 0.75 {
-                    return; // Skip pattern extraction for incomplete chord voicings
-                }
-
-                // SECOND: Validate that muted strings are only on the outside
-                if !self.has_valid_muting_pattern(&fingering) {
-                    return;
-                }
-
-                // THIRD: Validate that fret span is playable (max 4 frets for fretted notes)
-                if !self.has_playable_fret_span(&fingering) {
-                    return;
-                }
-
-                // FOURTH: Only accept voicings that match known shapes (exact or with open extensions)
-                if !self.matches_known_shape(&fingering) {
-                    return;
-                }
-
-                // All validations passed - add to results
-                all_fingerings.push(fingering);
             }
             return;
         }
@@ -690,31 +630,64 @@ impl IntervalFirstGuitarFinder {
         max_fret - min_fret <= 4
     }
 
-    /// Check if any known shape matches the fingering (including partial matches with open strings)
+    /// Validate that a voicing is playable and contains sufficient chord tones
+    fn is_valid_voicing(&self, fingering: &GuitarFingering, required_notes: &[NoteName]) -> bool {
+        // Check chord tone coverage
+        let pitches = fingering.to_pitches(&self.tuning);
+        let unique_notes: HashSet<NoteName> = pitches.iter().map(|p| p.name).collect();
+        
+        let coverage = required_notes
+            .iter()
+            .filter(|&required_note| {
+                unique_notes.iter().any(|&actual_note| {
+                    actual_note == *required_note || actual_note.is_enharmonic_with(required_note)
+                })
+            })
+            .count();
+        let coverage_percentage = coverage as f32 / required_notes.len() as f32;
+        
+        // Require at least 75% chord tone coverage
+        if coverage_percentage < 0.95 {
+            // println!(
+            //     "Rejected fingering {} due to insufficient chord tone coverage: {:.2}%",
+            //     fingering,
+            //     coverage_percentage * 100.0
+            // );
+            return false;
+        }
+
+        // Check that muted strings are only on the outside
+        if !self.has_valid_muting_pattern(fingering) {
+            return false;
+        }
+
+        // Check that fret span is playable
+        if !self.has_playable_fret_span(fingering) {
+            return false;
+        }
+
+        // Check if it matches a known shape
+        self.matches_known_shape(fingering)
+    }
+
+    /// Check if any known shape matches the fingering
     fn matches_known_shape(&self, fingering: &GuitarFingering) -> bool {
         let extracted_shape = self.extract_shape_from_fingering(fingering);
-        println!("      Extracted pattern: {:?}", extracted_shape);
 
-        // First try exact matches
-        for (i, shape) in self.shapes.iter().enumerate() {
+        // Try exact matches first
+        for shape in self.shapes {
             if shape.matches_fingering(&extracted_shape) {
-                println!("      Matches shape {}: {:?} (exact)", i, shape.positions);
                 return true;
             }
         }
 
-        // Then try partial matches with open strings added
-        for (i, shape) in self.shapes.iter().enumerate() {
+        // Try matches with open string extensions
+        for shape in self.shapes {
             if self.matches_shape_with_open_extensions(&extracted_shape, shape) {
-                println!(
-                    "      Matches shape {}: {:?} (with open extensions)",
-                    i, shape.positions
-                );
                 return true;
             }
         }
-
-        println!("      No shape matches");
+        
         false
     }
 
@@ -725,44 +698,24 @@ impl IntervalFirstGuitarFinder {
         shape: &GuitarShape,
     ) -> bool {
         let shape_positions = shape.positions;
+        let shape_len = shape_positions.len();
+        let pattern_len = extracted_pattern.len();
 
-        // Case 1: Shape is a prefix of the extracted pattern (open strings added at the end)
-        if extracted_pattern.len() >= shape_positions.len() {
-            let prefix = &extracted_pattern[0..shape_positions.len()];
-            if self.patterns_match(prefix, shape_positions) {
-                // Check if the remaining positions are all open (0)
-                let suffix = &extracted_pattern[shape_positions.len()..];
-                if suffix.iter().all(|&pos| pos == 0) {
-                    return true;
-                }
-            }
+        if pattern_len < shape_len {
+            return false;
         }
 
-        // Case 2: Shape is a suffix of the extracted pattern (open strings added at the beginning)
-        if extracted_pattern.len() >= shape_positions.len() {
-            let start_offset = extracted_pattern.len() - shape_positions.len();
-            let suffix = &extracted_pattern[start_offset..];
-            if self.patterns_match(suffix, shape_positions) {
-                // Check if the prefix positions are all open (0)
-                let prefix = &extracted_pattern[0..start_offset];
-                if prefix.iter().all(|&pos| pos == 0) {
+        // Try all possible alignments of the shape within the pattern
+        for start in 0..=(pattern_len - shape_len) {
+            let segment = &extracted_pattern[start..start + shape_len];
+            
+            if self.patterns_match(segment, shape_positions) {
+                // Check that all positions outside the shape are open (0)
+                let prefix_open = extracted_pattern[0..start].iter().all(|&pos| pos == 0);
+                let suffix_open = extracted_pattern[start + shape_len..].iter().all(|&pos| pos == 0);
+                
+                if prefix_open && suffix_open {
                     return true;
-                }
-            }
-        }
-
-        // Case 3: Shape is contained within the extracted pattern (open strings at both ends)
-        if extracted_pattern.len() > shape_positions.len() {
-            for start in 0..=(extracted_pattern.len() - shape_positions.len()) {
-                let substring = &extracted_pattern[start..start + shape_positions.len()];
-                if self.patterns_match(substring, shape_positions) {
-                    // Check if prefix and suffix are all open strings
-                    let prefix = &extracted_pattern[0..start];
-                    let suffix = &extracted_pattern[start + shape_positions.len()..];
-
-                    if prefix.iter().all(|&pos| pos == 0) && suffix.iter().all(|&pos| pos == 0) {
-                        return true;
-                    }
                 }
             }
         }
@@ -772,250 +725,106 @@ impl IntervalFirstGuitarFinder {
 
     /// Helper to check if two patterns match (accounting for movable shapes)
     fn patterns_match(&self, pattern1: &[u8], pattern2: &[u8]) -> bool {
-        if pattern1.len() != pattern2.len() {
-            return false;
-        }
-
-        // For exact matching (what we had before)
-        if pattern1 == pattern2 {
-            return true;
-        }
-
-        // For movable shape matching - normalize both patterns and compare
-        let normalized1 = self.normalize_pattern(pattern1);
-        let normalized2 = self.normalize_pattern(pattern2);
-
-        normalized1 == normalized2
+        pattern1.len() == pattern2.len() && (
+            pattern1 == pattern2 || 
+            self.normalize_pattern(pattern1) == self.normalize_pattern(pattern2)
+        )
     }
 
     /// Normalize a pattern by subtracting the minimum non-zero fret number
-    /// This converts absolute fret positions to relative shapes
-    /// Example: [3,5,5,3,3,3] -> [1,3,3,1,1,1]
     fn normalize_pattern(&self, pattern: &[u8]) -> Vec<u8> {
-        // Find minimum non-zero fret number
-        let min_fret = pattern
-            .iter()
-            .filter(|&&fret| fret > 0)
-            .min()
-            .copied()
-            .unwrap_or(0);
-
-        // If all frets are 0 (open strings), return as-is
+        let min_fret = pattern.iter().filter(|&&f| f > 0).min().copied().unwrap_or(0);
+        
         if min_fret == 0 {
-            return pattern.to_vec();
+            pattern.to_vec()
+        } else {
+            pattern.iter().map(|&f| if f == 0 { 0 } else { f - min_fret + 1 }).collect()
         }
-
-        // Normalize by subtracting the minimum fret
-        pattern
-            .iter()
-            .map(|&fret| if fret == 0 { 0 } else { fret - min_fret + 1 })
-            .collect()
     }
 
     /// Extract the shape pattern from a fingering
     fn extract_shape_from_fingering(&self, fingering: &GuitarFingering) -> Vec<u8> {
-        fingering
-            .frets
-            .iter()
-            .filter_map(|state| match state {
-                StringState::Fretted(f) => Some(*f),
-                StringState::Open => Some(0),
-                StringState::Muted => None,
-            })
-            .collect()
+        fingering.frets.iter().filter_map(|state| match state {
+            StringState::Fretted(f) => Some(*f),
+            StringState::Open => Some(0),
+            StringState::Muted => None,
+        }).collect()
     }
 
     /// Find guitar voicings using interval-first approach
     pub fn find_voicings(&self, chord: &Chord) -> Vec<(GuitarFingering, f32)> {
-        let mut all_voicings = Vec::new();
         let bass_note = chord.bass_note();
-
-        println!("=== Finding voicings for {} ===", chord);
-        println!("Bass note: {}", bass_note);
-        println!("Required notes: {:?}", self.get_chord_notes(chord));
-        println!("Loaded shapes: {} patterns", self.shapes.len());
-        for (i, shape) in self.shapes.iter().enumerate() {
-            println!("  Shape {}: {:?}", i, shape.positions);
-        }
-
-        // Step 1: Find where we can play the bass note
         let bass_positions = self.find_bass_positions(bass_note);
-        println!("Bass positions found: {:?}", bass_positions);
+        let mut all_voicings = Vec::new();
 
         for bass_pos in bass_positions {
-            println!(
-                "Trying bass position: string {}, fret {}",
-                bass_pos.0, bass_pos.1
-            );
-
-            // Step 2: Find ways to voice the rest of the chord
             let candidates = self.find_chord_candidates(chord, bass_pos);
-            println!("  Candidates found: {}", candidates.len());
-
-            for (i, candidate) in candidates.iter().enumerate() {
-                // Step 3: Check if it matches a known shape (for now, accept all)
-                let shape_match = self.matches_known_shape(candidate);
-                let shape_info = if shape_match {
-                    " (matches known shape)".to_string()
-                } else {
-                    " (algorithmic)".to_string()
-                };
-
+            
+            for candidate in candidates {
                 if candidate.root_pitch(&self.tuning).is_some() {
-                    let score = self.calculate_score_for_chord(chord, bass_pos, candidate);
-                    let pitches = candidate.to_pitches(&self.tuning);
-
-                    println!("  Candidate {}: {:?}{}", i + 1, candidate, shape_info);
-                    println!("    Score: {:.2}", score);
-                    println!("    Pitches: {:?}", pitches);
-                    println!(
-                        "    Notes: {:?}",
-                        pitches.iter().map(|p| p.name).collect::<Vec<_>>()
-                    );
-
-                    all_voicings.push((candidate.clone(), score));
+                    let score = self.calculate_score_for_chord(chord, bass_pos, &candidate);
+                    all_voicings.push((candidate, score));
                 }
             }
         }
 
         // Sort by score and return top results
         all_voicings.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
-
-        if !all_voicings.is_empty() {
-            println!("=== BEST VOICING ===");
-            let (best_fingering, best_score) = &all_voicings[0];
-            let best_pitches = best_fingering.to_pitches(&self.tuning);
-            let shape_match = self.matches_known_shape(best_fingering);
-
-            println!("Best fingering: {:?}", best_fingering);
-            println!("Score: {:.2}", best_score);
-            println!(
-                "Shape match: {}",
-                if shape_match {
-                    "YES"
-                } else {
-                    "NO (algorithmic)"
-                }
-            );
-            println!("Pitches: {:?}", best_pitches);
-            println!(
-                "Notes: {:?}",
-                best_pitches.iter().map(|p| p.name).collect::<Vec<_>>()
-            );
-
-            if shape_match {
-                let extracted_shape = self.extract_shape_from_fingering(best_fingering);
-                println!("Extracted pattern: {:?}", extracted_shape);
-            }
-        }
-
         all_voicings.truncate(10);
         all_voicings
     }
 
-    /// Calculate score for a voicing with chord context (lower is better)
+    /// Calculate score for a voicing (lower is better)
     fn calculate_score_for_chord(
         &self,
-        chord: &Chord,
+        _chord: &Chord,
         _bass_pos: (u8, u8),
         fingering: &GuitarFingering,
     ) -> f32 {
-        let mut score = 0.0;
-        let required_notes = self.get_chord_notes(chord);
-
-        // Get the pitches to analyze chord tone coverage
         let pitches = fingering.to_pitches(&self.tuning);
-        let _unique_notes: HashSet<_> = pitches.iter().map(|p| p.name).collect();
-
-        // Calculate chord tone coverage (ensure we have all chord tones)
-        let coverage = required_notes
-            .iter()
-            .filter(|&note| self.is_chord_tone(note, &required_notes))
-            .count();
-        let coverage_percentage = coverage as f32 / required_notes.len() as f32;
-
-        // Require complete chord tone coverage - if missing critical tones, heavily penalize
-        if coverage_percentage < 1.0 {
-            score += 10.0; // Very bad - missing chord tones
-        }
-
-        // PRIORITY 1: Easiest to play / simplest shape
-        score += self.calculate_playability_score(fingering) * 10.0;
-
-        // PRIORITY 2: Lowest on the neck
-        score += self.calculate_neck_position_score(fingering) * 5.0;
-
-        // PRIORITY 3: Contains the most notes
-        score -= pitches.len() as f32 * 1.0; // More notes = lower score (better)
-
-        score
+        
+        // Prioritize: 1) Low position 2) More pitches 3) Playability
+        // Balance between fullness and playability
+        let pitch_bonus = -(pitches.len() as f32) * 10.0; // Favor more notes (fuller sound)
+        let playability_penalty = self.calculate_playability_score(fingering) * 4.0;
+        let position_penalty = self.calculate_neck_position_score(fingering) * 12.0; // Strongly favor lower positions
+        
+        pitch_bonus + playability_penalty + position_penalty
     }
 
     /// Calculate playability score (lower is easier to play)
     fn calculate_playability_score(&self, fingering: &GuitarFingering) -> f32 {
-        let mut score = 0.0;
-
-        // Count open strings (0.0 penalty each - easiest)
-        let open_count = fingering
-            .frets
-            .iter()
-            .filter(|s| matches!(s, StringState::Open))
-            .count();
-
-        // Count fretted strings and their complexity
-        let fretted_positions: Vec<u8> = fingering
-            .frets
-            .iter()
-            .filter_map(|state| match state {
-                StringState::Fretted(f) => Some(*f),
-                _ => None,
-            })
+        let open_count = fingering.frets.iter().filter(|s| matches!(s, StringState::Open)).count();
+        let muted_count = fingering.frets.iter().filter(|s| matches!(s, StringState::Muted)).count();
+        let fretted_count = fingering.frets.iter().filter(|s| matches!(s, StringState::Fretted(_))).count();
+        
+        let fretted_positions: Vec<u8> = fingering.frets.iter()
+            .filter_map(|s| match s { StringState::Fretted(f) => Some(*f), _ => None })
             .collect();
 
         if fretted_positions.is_empty() {
-            return 0.0; // All open strings - perfect!
+            return 0.0; // All open strings - perfect playability
         }
 
-        // Heavily favor voicings with open strings
-        score += (6 - open_count) as f32 * 0.5;
-
-        // Penalty for fret span (barre chords are harder)
-        if !fretted_positions.is_empty() {
-            let min_fret = *fretted_positions.iter().min().unwrap();
-            let max_fret = *fretted_positions.iter().max().unwrap();
-            let span = max_fret - min_fret;
-            score += span as f32 * 0.3; // Penalty for wide spans
-        }
-
-        // Count muted strings (adds complexity)
-        let muted_count = fingering
-            .frets
-            .iter()
-            .filter(|s| matches!(s, StringState::Muted))
-            .count();
-        score += muted_count as f32 * 0.2;
-
-        score
+        let fret_span = fretted_positions.iter().max().unwrap() - fretted_positions.iter().min().unwrap();
+        
+        // Prioritize fret span over number of fingers
+        // A 4-fret span is much harder than 4 fingers in a 1-fret span
+        let span_penalty = fret_span as f32 * 2.0;  // Fret span is most important
+        let finger_penalty = (fretted_count as f32 - 1.0).max(0.0) * 0.3; // Additional fingers are less important
+        let muted_penalty = muted_count as f32 * 0.1; // Muted strings are slightly harder
+        let open_bonus = -(open_count as f32 * 0.8); // Open strings are much better (increased from 0.2)
+        
+        span_penalty + finger_penalty + muted_penalty + open_bonus
     }
 
     /// Calculate neck position score (lower frets are better)
     fn calculate_neck_position_score(&self, fingering: &GuitarFingering) -> f32 {
-        let fretted_positions: Vec<u8> = fingering
-            .frets
-            .iter()
-            .filter_map(|state| match state {
-                StringState::Fretted(f) => Some(*f),
-                _ => None,
-            })
-            .collect();
-
-        if fretted_positions.is_empty() {
-            return 0.0; // All open - perfect position
-        }
-
-        // Use minimum fret as position indicator - heavily favor low positions
-        let min_fret = *fretted_positions.iter().min().unwrap();
-        min_fret as f32 * 0.1 // Each fret higher adds penalty
+        fingering.frets.iter()
+            .filter_map(|s| match s { StringState::Fretted(f) => Some(*f), _ => None })
+            .min()
+            .map(|min_fret| min_fret as f32 * 0.1)
+            .unwrap_or(0.0)
     }
 }
 
@@ -1024,6 +833,9 @@ pub fn voice_guitar_chord(chord: &Chord, range: PitchRange) -> Result<VoicedChor
     // Use the new interval-first approach directly
     let finder = IntervalFirstGuitarFinder::new();
     let voicings = finder.find_voicings(chord);
+
+    for voicing in &voicings {
+    }
 
     if voicings.is_empty() {
         return Err(VoicingError::UnsupportedStyle);

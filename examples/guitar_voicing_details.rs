@@ -4,6 +4,74 @@
 //! information from the chordy library's voicing results.
 
 use chordy::prelude::*;
+use chordy::{GuitarFingering, StringState};
+
+/// Generate an ASCII chord diagram for guitar fingering
+fn generate_chord_diagram(fingering: &GuitarFingering, chord_name: &str) -> String {
+    let mut diagram = String::new();
+    
+    // Get the fret range to display
+    let fretted_positions: Vec<u8> = fingering.frets.iter()
+        .filter_map(|s| match s { StringState::Fretted(f) => Some(*f), _ => None })
+        .collect();
+    
+    let (start_fret, end_fret) = if fretted_positions.is_empty() {
+        (0, 4) // Show first 4 frets for open chords
+    } else {
+        let min_fret = *fretted_positions.iter().min().unwrap();
+        let max_fret = *fretted_positions.iter().max().unwrap();
+        
+        if min_fret == 0 {
+            (0, (max_fret + 1).max(4)) // Include open strings, show at least 4 frets
+        } else {
+            // For barre chords, show from min_fret to max_fret + 1
+            (min_fret.saturating_sub(1).max(1), max_fret + 1)
+        }
+    };
+    
+    diagram.push_str(&format!("    {} Guitar Chord Diagram\n", chord_name));
+    
+    // String names (from high E to low E for standard display)
+    let string_names = ["e", "B", "G", "D", "A", "E"];
+    
+    // Draw each string (from high E to low E)
+    for string_idx in (0..6).rev() {
+        let string_name = string_names[5 - string_idx];
+        
+        // Handle different string states at the nut
+        match &fingering.frets[string_idx] {
+            StringState::Muted => {
+                diagram.push_str(&format!("{} x||", string_name));
+            }
+            StringState::Open => {
+                diagram.push_str(&format!("{} O||", string_name));
+            }
+            StringState::Fretted(_) => {
+                diagram.push_str(&format!("{} -||", string_name));
+            }
+        }
+        
+        // Draw frets
+        for fret in start_fret..=end_fret {
+            match &fingering.frets[string_idx] {
+                StringState::Muted => diagram.push_str("---|"),
+                StringState::Open => diagram.push_str("---|"),
+                StringState::Fretted(f) if *f == fret => diagram.push_str("-O-|"),
+                _ => diagram.push_str("---|"),
+            }
+        }
+        
+        diagram.push('\n');
+    }
+    
+    // Add fret numbers at bottom - align with fret positions
+    diagram.push_str("     ");  // Align with string start position
+    for fret in start_fret..=end_fret {
+        diagram.push_str(&format!("{:^4}", fret));  // Center fret number in 4-char width to match "---|" spacing
+    }
+    
+    diagram
+}
 
 fn main() {
     println!("=== Guitar Voicing Details Example ===\n");
@@ -70,8 +138,11 @@ fn main() {
                         println!("  Open chord");
                     }
                     
+                    // Display ASCII chord diagram
+                    println!("\n{}", generate_chord_diagram(&fingering, name));
+                    
                     // Example: Generate chord diagram data
-                    println!("  Chord diagram data:");
+                    println!("\n  Chord diagram data:");
                     println!("    Frets: {:?}", fingering.frets);
                     println!("    Root: String {}", fingering.root_string);
                     
@@ -97,6 +168,10 @@ fn main() {
     println!("  Has details: {}", guitar_voiced.has_voicing_details());
     println!("  Is guitar voicing: {}", guitar_voiced.is_guitar_voicing());
     println!("  Fingering: {:?}", guitar_voiced.guitar_fingering());
+    
+    if let Some(fingering) = guitar_voiced.guitar_fingering() {
+        println!("\n{}", generate_chord_diagram(&fingering, "C Major"));
+    }
     
     // Piano voicing (no fingering details)
     let piano_voiced = c_major.voice_closed("C4".parse().unwrap()).unwrap();
