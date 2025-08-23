@@ -33,7 +33,7 @@ use crate::{
 };
 use std::{collections::HashSet, fmt, str::FromStr};
 
-use super::{VoicingError, VoicedChord, VoicingInfo, VoicingStyle, PitchRange};
+use super::{VoicingError, VoicedChord, VoicingInfo, VoicingStyle, VoicingDetails, PitchRange};
 
 /// Simple guitar shape representing finger positions
 /// 0 = open string (doesn't move), 1+ = fretted positions (move together)
@@ -1034,7 +1034,13 @@ pub fn voice_guitar_chord(chord: &Chord, range: PitchRange) -> Result<VoicedChor
     let tuning = GuitarTuning::standard(); // Use standard tuning for now
     let pitches = best_fingering.to_pitches(&tuning);
 
-    let info = VoicingInfo::new(VoicingStyle::Guitar, range, 0);
+    // Create voicing details with the guitar fingering information
+    let details = VoicingDetails::Guitar {
+        fingering: best_fingering.clone(),
+        tuning: tuning.clone(),
+    };
+
+    let info = VoicingInfo::new_with_details(VoicingStyle::Guitar, range, 0, details);
     Ok(VoicedChord::new(*chord, pitches, info))
 }
 

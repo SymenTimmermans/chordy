@@ -47,6 +47,26 @@ pub use guitar::{
     GuitarFingering, GuitarShape, GuitarTuning, IntervalFirstGuitarFinder, StringState,
 };
 
+/// Instrument-specific voicing details that provide additional metadata
+/// about how a chord is physically realized on different instruments
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum VoicingDetails {
+    /// Guitar-specific voicing information including fretboard fingering
+    Guitar {
+        /// The fingering pattern used to voice this chord
+        fingering: GuitarFingering,
+        /// The tuning used (standard, drop-D, etc.)
+        tuning: GuitarTuning,
+    },
+    /// Piano-specific voicing information (future extension point)
+    Piano {
+        /// Hand positions, pedaling, etc. (placeholder for future implementation)
+        hand_position: String, // TODO: Replace with proper piano voicing metadata
+    },
+    /// Generic voicing with no instrument-specific details
+    Generic,
+}
+
 /// Defines the range of pitches available for voicing
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct PitchRange {
@@ -274,6 +294,8 @@ pub struct VoicingInfo {
     pub inversion: u8,
     /// Total voice movement from previous chord (if applicable)
     pub movement: Option<i32>,
+    /// Instrument-specific voicing details (fingerings, hand positions, etc.)
+    pub details: Option<VoicingDetails>,
 }
 
 impl VoicingInfo {
@@ -284,12 +306,35 @@ impl VoicingInfo {
             range,
             inversion,
             movement: None,
+            details: None,
+        }
+    }
+
+    /// Create new voicing metadata with instrument-specific details
+    pub fn new_with_details(
+        style: VoicingStyle,
+        range: PitchRange,
+        inversion: u8,
+        details: VoicingDetails,
+    ) -> Self {
+        Self {
+            style,
+            range,
+            inversion,
+            movement: None,
+            details: Some(details),
         }
     }
 
     /// Set the voice movement amount
     pub fn with_movement(mut self, movement: i32) -> Self {
         self.movement = Some(movement);
+        self
+    }
+
+    /// Set the voicing details
+    pub fn with_details(mut self, details: VoicingDetails) -> Self {
+        self.details = Some(details);
         self
     }
 }
@@ -364,6 +409,35 @@ impl VoicedChord {
             .windows(2)
             .map(|window| (window[1].midi_number() - window[0].midi_number()) as i32)
             .collect()
+    }
+
+    /// Get the guitar fingering if this is a guitar voicing
+    pub fn guitar_fingering(&self) -> Option<&GuitarFingering> {
+        match &self.info.details {
+            Some(VoicingDetails::Guitar { fingering, .. }) => Some(fingering),
+            _ => None,
+        }
+    }
+
+    /// Get the guitar tuning if this is a guitar voicing
+    pub fn guitar_tuning(&self) -> Option<&GuitarTuning> {
+        match &self.info.details {
+            Some(VoicingDetails::Guitar { tuning, .. }) => Some(tuning),
+            _ => None,
+        }
+    }
+
+    /// Check if this voicing has instrument-specific details
+    pub fn has_voicing_details(&self) -> bool {
+        self.info.details.is_some()
+    }
+
+    /// Check if this is a guitar voicing with fingering information
+    pub fn is_guitar_voicing(&self) -> bool {
+        matches!(
+            self.info.details,
+            Some(VoicingDetails::Guitar { .. })
+        )
     }
 }
 
