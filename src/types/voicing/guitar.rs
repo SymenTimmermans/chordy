@@ -670,20 +670,34 @@ impl IntervalFirstGuitarFinder {
         self.matches_known_shape(fingering)
     }
 
+
     /// Check if any known shape matches the fingering
     fn matches_known_shape(&self, fingering: &GuitarFingering) -> bool {
-        let extracted_shape = self.extract_shape_from_fingering(fingering);
+        // Try both extraction methods for compatibility
+        let full_pattern = self.extract_shape_from_fingering(fingering); // Includes muted as 255
+        let filtered_pattern = fingering.frets.iter().filter_map(|state| match state {
+            StringState::Fretted(f) => Some(*f),
+            StringState::Open => Some(0),
+            StringState::Muted => None,
+        }).collect::<Vec<u8>>(); // Original method - filters out muted
 
-        // Try exact matches first
+        // Try exact matches with full pattern (for muted string shapes)
         for shape in self.shapes {
-            if shape.matches_fingering(&extracted_shape) {
+            if shape.matches_fingering(&full_pattern) {
                 return true;
             }
         }
 
-        // Try matches with open string extensions
+        // Try exact matches with filtered pattern (for traditional shapes)
         for shape in self.shapes {
-            if self.matches_shape_with_open_extensions(&extracted_shape, shape) {
+            if shape.matches_fingering(&filtered_pattern) {
+                return true;
+            }
+        }
+
+        // Try matches with open string extensions for filtered pattern
+        for shape in self.shapes {
+            if self.matches_shape_with_open_extensions(&filtered_pattern, shape) {
                 return true;
             }
         }
@@ -744,10 +758,10 @@ impl IntervalFirstGuitarFinder {
 
     /// Extract the shape pattern from a fingering
     fn extract_shape_from_fingering(&self, fingering: &GuitarFingering) -> Vec<u8> {
-        fingering.frets.iter().filter_map(|state| match state {
-            StringState::Fretted(f) => Some(*f),
-            StringState::Open => Some(0),
-            StringState::Muted => None,
+        fingering.frets.iter().map(|state| match state {
+            StringState::Fretted(f) => *f,
+            StringState::Open => 0,
+            StringState::Muted => 255, // Include muted strings in pattern matching
         }).collect()
     }
 
@@ -826,6 +840,7 @@ impl IntervalFirstGuitarFinder {
             .map(|min_fret| min_fret as f32 * 0.1)
             .unwrap_or(0.0)
     }
+
 }
 
 /// Voice a chord using guitar fingering patterns within the main Voicer engine

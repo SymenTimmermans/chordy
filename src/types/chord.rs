@@ -997,7 +997,12 @@ impl Chord {
     /// // Creates smooth B→C bass motion
     /// ```
     pub fn with_slash_bass(mut self, bass: NoteName) -> Self {
-        self.bass = Some((bass, BassType::Slash));
+        // If bass note is the same as root, it's just root position, not a slash chord
+        if bass == self.root {
+            self.bass = None;
+        } else {
+            self.bass = Some((bass, BassType::Slash));
+        }
         self
     }
 

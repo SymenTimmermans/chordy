@@ -1241,12 +1241,20 @@ fn generate_guitar_shapes() {
             continue;
         }
 
-        // Parse shape format: "1-3-3-2-1-1    # F major barre"
+        // Parse shape format: "1-3-3-2-1-1    # F major barre" or "2-X-0-2-3-2    # D/F# with muted A"
         if let Some(shape_part) = line.split('#').next() {
             let shape_part = shape_part.trim();
             if !shape_part.is_empty() {
-                let positions: Result<Vec<u8>, _> =
-                    shape_part.split('-').map(|s| s.parse::<u8>()).collect();
+                let positions: Result<Vec<u8>, _> = shape_part
+                    .split('-')
+                    .map(|s| {
+                        if s.trim() == "X" {
+                            Ok(255u8) // Use 255 as muted string marker
+                        } else {
+                            s.parse::<u8>()
+                        }
+                    })
+                    .collect();
 
                 match positions {
                     Ok(pos) if !pos.is_empty() => {

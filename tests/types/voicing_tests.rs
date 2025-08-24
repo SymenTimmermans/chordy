@@ -189,6 +189,31 @@ guitar_voicing_test!(
     "B2,D3,G3,B3,G4"
 );
 
+// Discovered from testing
+guitar_voicing_test!(
+    test_gmaj7,
+    Chord::major_7th(note!("G")),
+    "G2,B2,D3,G3,B3,F#4"
+);
+
+guitar_voicing_test!(
+    test_e_minor_over_g,
+    Chord::minor(note!("E")).with_slash_bass(note!("G")),
+    "G2,B2,E3,G3,B3,E4"
+);
+
+guitar_voicing_test!(
+    test_f_6_voicing,
+    Chord::major(note!("F")).with_interval(Interval::MAJOR_SIXTH),
+    "F2,A2,D3,A3,C4"
+);
+
+guitar_voicing_test!(
+    test_b_flat_major,
+    Chord::major(note!("B♭")),
+    "B♭2,F3,B♭3,D4,F4"
+);
+
 #[test]
 fn test_cm_over_e_slash_chord() {
     use chordy::IntervalFirstGuitarFinder;

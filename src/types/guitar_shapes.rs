@@ -107,139 +107,157 @@ pub const GUITAR_SHAPE_16: GuitarShape = GuitarShape {
     positions: &[3, 2, 0, 0, 1, 3],
 };
 
+/// G maj7 shape
+/// Pattern: 3-2-0-0-0-2
+pub const GUITAR_SHAPE_17: GuitarShape = GuitarShape {
+    positions: &[3, 2, 0, 0, 0, 2],
+};
+
 /// G dominant shape
 /// Pattern: 3-2-0-0-0-1
-pub const GUITAR_SHAPE_17: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_18: GuitarShape = GuitarShape {
     positions: &[3, 2, 0, 0, 0, 1],
 };
 
 /// A major (partial)
 /// Pattern: 1-1-1
-pub const GUITAR_SHAPE_18: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_19: GuitarShape = GuitarShape {
     positions: &[1, 1, 1],
 };
 
 /// A minor (partial)
 /// Pattern: 2-2-1
-pub const GUITAR_SHAPE_19: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_20: GuitarShape = GuitarShape {
     positions: &[2, 2, 1],
 };
 
 /// E minor shape (partial)
 /// Pattern: 2-2
-pub const GUITAR_SHAPE_20: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_21: GuitarShape = GuitarShape {
     positions: &[2, 2],
 };
 
 /// Amaj7 shape
 /// Pattern: 2-1-2
-pub const GUITAR_SHAPE_21: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_22: GuitarShape = GuitarShape {
     positions: &[2, 1, 2],
 };
 
 /// D major (partial)
 /// Pattern: 1-2-1
-pub const GUITAR_SHAPE_22: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_23: GuitarShape = GuitarShape {
     positions: &[1, 2, 1],
 };
 
 /// D minor (partial)
 /// Pattern: 2-3-1
-pub const GUITAR_SHAPE_23: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_24: GuitarShape = GuitarShape {
     positions: &[2, 3, 1],
 };
 
 /// F shape
 /// Pattern: 3-3-2-1
-pub const GUITAR_SHAPE_24: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_25: GuitarShape = GuitarShape {
     positions: &[3, 3, 2, 1],
 };
 
 /// E7 shape
 /// Pattern: 2-0-1
-pub const GUITAR_SHAPE_25: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_26: GuitarShape = GuitarShape {
     positions: &[2, 0, 1],
 };
 
 /// A7 shape
 /// Pattern: 2-0-2
-pub const GUITAR_SHAPE_26: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_27: GuitarShape = GuitarShape {
     positions: &[2, 0, 2],
 };
 
 /// C7 shape
 /// Pattern: 3-2-3-1
-pub const GUITAR_SHAPE_27: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_28: GuitarShape = GuitarShape {
     positions: &[3, 2, 3, 1],
 };
 
 /// B7 shape
 /// Pattern: 2-1-2-0-2
-pub const GUITAR_SHAPE_28: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_29: GuitarShape = GuitarShape {
     positions: &[2, 1, 2, 0, 2],
 };
 
 /// D / F
 /// Pattern: 2-0-0-2-3-2
-pub const GUITAR_SHAPE_29: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_30: GuitarShape = GuitarShape {
     positions: &[2, 0, 0, 2, 3, 2],
 };
 
 /// Am / C shape
 /// Pattern: 3-2-2-1
-pub const GUITAR_SHAPE_30: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_31: GuitarShape = GuitarShape {
     positions: &[3, 2, 2, 1],
 };
 
 /// Hendrix shape
 /// Pattern: 2-1-2-3
-pub const GUITAR_SHAPE_31: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_32: GuitarShape = GuitarShape {
     positions: &[2, 1, 2, 3],
 };
 
 /// Dim7 shape
 /// Pattern: 2-3-1-3
-pub const GUITAR_SHAPE_32: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_33: GuitarShape = GuitarShape {
     positions: &[2, 3, 1, 3],
 };
 
 /// min7b5 on A string, dim7 on d string
 /// Pattern: 1-2-1-2
-pub const GUITAR_SHAPE_33: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_34: GuitarShape = GuitarShape {
     positions: &[1, 2, 1, 2],
 };
 
 /// E7 variant
 /// Pattern: 2-0-1-3
-pub const GUITAR_SHAPE_34: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_35: GuitarShape = GuitarShape {
     positions: &[2, 0, 1, 3],
 };
 
 /// C add 9
 /// Pattern: 3-2-0-3
-pub const GUITAR_SHAPE_35: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_36: GuitarShape = GuitarShape {
     positions: &[3, 2, 0, 3],
+};
+
+/// Em / G
+/// Pattern: 3-2-2
+pub const GUITAR_SHAPE_37: GuitarShape = GuitarShape {
+    positions: &[3, 2, 2],
+};
+
+/// Used for F6
+/// Pattern: 1-0-0-2-1
+pub const GUITAR_SHAPE_38: GuitarShape = GuitarShape {
+    positions: &[1, 0, 0, 2, 1],
 };
 
 /// Jazz shape
 /// Pattern: 3-2-1
-pub const GUITAR_SHAPE_36: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_39: GuitarShape = GuitarShape {
     positions: &[3, 2, 1],
 };
 
 /// Power chord/dyad
 /// Pattern: 1-1
-pub const GUITAR_SHAPE_37: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_40: GuitarShape = GuitarShape {
     positions: &[1, 1],
 };
 
 /// Dyad variation
 /// Pattern: 2-1
-pub const GUITAR_SHAPE_38: GuitarShape = GuitarShape {
+pub const GUITAR_SHAPE_41: GuitarShape = GuitarShape {
     positions: &[2, 1],
 };
 
-/// All guitar chord shapes (39 total)
+/// All guitar chord shapes (42 total)
 pub static ALL_GUITAR_SHAPES: &[&'static GuitarShape] = &[
     &GUITAR_SHAPE_0,
     &GUITAR_SHAPE_1,
@@ -280,7 +298,10 @@ pub static ALL_GUITAR_SHAPES: &[&'static GuitarShape] = &[
     &GUITAR_SHAPE_36,
     &GUITAR_SHAPE_37,
     &GUITAR_SHAPE_38,
+    &GUITAR_SHAPE_39,
+    &GUITAR_SHAPE_40,
+    &GUITAR_SHAPE_41,
 ];
 
 /// Number of guitar shapes available
-pub const GUITAR_SHAPE_COUNT: usize = 39;
+pub const GUITAR_SHAPE_COUNT: usize = 42;
