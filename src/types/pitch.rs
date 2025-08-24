@@ -8,7 +8,7 @@ use crate::transposition::{ChromaticTransposer, Transposer};
 use super::{Accidental, Letter, NoteName};
 
 /// A specific pitch with both note name and octave
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Pitch {
     /// The note name (letter + accidental)
     pub name: NoteName,
@@ -94,6 +94,13 @@ impl Pitch {
 impl fmt::Display for Pitch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}{}", self.name, self.octave)
+    }
+}
+
+/// impl debug that just returns the display format
+impl fmt::Debug for Pitch {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self)
     }
 }
 

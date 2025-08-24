@@ -34,3 +34,11 @@ pub use progression::{
     ChordProgressionOptions, ChordRef, NodeType, ProgressionEdge, ProgressionGraph,
     ProgressionOptions, ProgressionStrength,
 };
+
+mod voicing;
+pub use voicing::{
+    GuitarFingering, GuitarTuning, IntervalFirstGuitarFinder, PitchRange, StringState, VoicedChord,
+    Voicer, VoicingConfig, VoicingDetails, VoicingError, VoicingInfo, VoicingStyle,
+};
+
+pub mod guitar_shapes;
