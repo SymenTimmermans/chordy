@@ -475,3 +475,170 @@ fn test_interval_cents() {
     // practical music intervals. These theoretical intervals are not commonly used
     // in standard music practice.
 }
+
+#[test]
+fn test_pitch_harmonic() {
+    // Test C2 fundamental
+    let c2 = Pitch::new(Letter::C, Accidental::Natural, 2);
+
+    // 1st harmonic = fundamental
+    assert_eq!(c2.harmonic(1), c2);
+
+    // 2nd harmonic = octave above
+    assert_eq!(c2.harmonic(2), pitch!("C3"));
+
+    // 3rd harmonic = perfect fifth above (G3)
+    assert_eq!(c2.harmonic(3), pitch!("G3"));
+
+    // 4th harmonic = two octaves above
+    assert_eq!(c2.harmonic(4), pitch!("C4"));
+
+    // 5th harmonic = major third above (E4)
+    assert_eq!(c2.harmonic(5), pitch!("E4"));
+
+    // 6th harmonic = perfect fifth above (G4)
+    assert_eq!(c2.harmonic(6), pitch!("G4"));
+
+    // 7th harmonic = minor seventh above (Bb4/A#4)
+    let seventh_harmonic = c2.harmonic(7);
+    assert!(seventh_harmonic.is_enharmonic_with(&pitch!("Bb4")));
+
+    // 8th harmonic = three octaves above
+    assert_eq!(c2.harmonic(8), pitch!("C5"));
+
+    // Test A4 fundamental
+    let a4 = Pitch::new(Letter::A, Accidental::Natural, 4);
+
+    // 2nd harmonic = octave above
+    assert_eq!(a4.harmonic(2), pitch!("A5"));
+
+    // 3rd harmonic = perfect fifth above (E6)
+    assert_eq!(a4.harmonic(3), pitch!("E6"));
+}
+
+#[test]
+fn test_pitch_harmonics() {
+    let c2 = Pitch::new(Letter::C, Accidental::Natural, 2);
+
+    // Test harmonics up to 8
+    let harmonics = c2.harmonics(8);
+    assert_eq!(harmonics.len(), 8);
+
+    // Verify the harmonic series: [C2, C3, G3, C4, E4, G4, Bb4/A#4, C5]
+    assert_eq!(harmonics[0], pitch!("C2")); // 1st harmonic
+    assert_eq!(harmonics[1], pitch!("C3")); // 2nd harmonic
+    assert_eq!(harmonics[2], pitch!("G3")); // 3rd harmonic
+    assert_eq!(harmonics[3], pitch!("C4")); // 4th harmonic
+    assert_eq!(harmonics[4], pitch!("E4")); // 5th harmonic
+    assert_eq!(harmonics[5], pitch!("G4")); // 6th harmonic
+    assert!(harmonics[6].is_enharmonic_with(&pitch!("Bb4"))); // 7th harmonic
+    assert_eq!(harmonics[7], pitch!("C5")); // 8th harmonic
+
+    // Test empty harmonics
+    let empty = c2.harmonics(0);
+    assert!(empty.is_empty());
+
+    // Test single harmonic
+    let single = c2.harmonics(1);
+    assert_eq!(single.len(), 1);
+    assert_eq!(single[0], c2);
+}
+
+#[test]
+fn test_pitch_subharmonic() {
+    // Test C4 fundamental
+    let c4 = Pitch::new(Letter::C, Accidental::Natural, 4);
+
+    // 1st subharmonic = fundamental
+    assert_eq!(c4.subharmonic(1), c4);
+
+    // 2nd subharmonic = octave below
+    assert_eq!(c4.subharmonic(2), pitch!("C3"));
+
+    // 3rd subharmonic = major third below (F2)
+    assert_eq!(c4.subharmonic(3), pitch!("F2"));
+
+    // 4th subharmonic = two octaves below
+    assert_eq!(c4.subharmonic(4), pitch!("C2"));
+
+    // 5th subharmonic = major third below (G#1)
+    assert_eq!(c4.subharmonic(5), pitch!("G#1"));
+
+    // Test A4 fundamental
+    let a4 = Pitch::new(Letter::A, Accidental::Natural, 4);
+
+    // 2nd subharmonic = octave below
+    assert_eq!(a4.subharmonic(2), pitch!("A3"));
+
+    // 3rd subharmonic = perfect fifth below (D3)
+    assert_eq!(a4.subharmonic(3), pitch!("D3"));
+}
+
+#[test]
+fn test_pitch_fundamental_of_harmonic() {
+    // Test finding fundamental from G3 (3rd harmonic of C2)
+    let g3 = Pitch::new(Letter::G, Accidental::Natural, 3);
+    let fundamental = g3.fundamental_of_harmonic(3);
+    assert_eq!(fundamental, pitch!("C2"));
+
+    // Test finding fundamental from C5 (8th harmonic of C2)
+    let c5 = Pitch::new(Letter::C, Accidental::Natural, 5);
+    let fundamental = c5.fundamental_of_harmonic(8);
+    assert_eq!(fundamental, pitch!("C2"));
+
+    // Test finding fundamental from E4 (5th harmonic of C2)
+    let e4 = Pitch::new(Letter::E, Accidental::Natural, 4);
+    let fundamental = e4.fundamental_of_harmonic(5);
+    assert_eq!(fundamental, pitch!("C2"));
+
+    // Test finding fundamental from Bb4 (7th harmonic of C2)
+    let bb4 = Pitch::new(Letter::B, Accidental::Flat, 4);
+    let fundamental = bb4.fundamental_of_harmonic(7);
+    assert_eq!(fundamental, pitch!("C2"));
+
+    // Test finding fundamental from A5 (2nd harmonic of A4)
+    let a5 = Pitch::new(Letter::A, Accidental::Natural, 5);
+    let fundamental = a5.fundamental_of_harmonic(2);
+    assert_eq!(fundamental, pitch!("A4"));
+
+    // Test finding fundamental from E6 (3rd harmonic of A4)
+    let e6 = Pitch::new(Letter::E, Accidental::Natural, 6);
+    let fundamental = e6.fundamental_of_harmonic(3);
+    assert_eq!(fundamental, pitch!("A4"));
+}
+
+#[test]
+#[should_panic(expected = "Harmonic number must be positive")]
+fn test_pitch_harmonic_zero_panics() {
+    let c2 = Pitch::new(Letter::C, Accidental::Natural, 2);
+    c2.harmonic(0);
+}
+
+#[test]
+#[should_panic(expected = "Subharmonic number must be positive")]
+fn test_pitch_subharmonic_zero_panics() {
+    let c4 = Pitch::new(Letter::C, Accidental::Natural, 4);
+    c4.subharmonic(0);
+}
+
+#[test]
+#[should_panic(expected = "Harmonic number must be positive")]
+fn test_pitch_fundamental_of_harmonic_zero_panics() {
+    let g3 = Pitch::new(Letter::G, Accidental::Natural, 3);
+    g3.fundamental_of_harmonic(0);
+}
+
+#[test]
+fn test_harmonic_series_relationship() {
+    // Test that harmonic and fundamental_of_harmonic are inverse operations
+    let c2 = Pitch::new(Letter::C, Accidental::Natural, 2);
+
+    for n in 1..=8 {
+        let harmonic = c2.harmonic(n);
+        let recovered_fundamental = harmonic.fundamental_of_harmonic(n);
+
+        // The recovered fundamental should be enharmonically equivalent to the original
+        assert!(recovered_fundamental.is_enharmonic_with(&c2),
+                "Failed for harmonic {}: {} -> {} -> {}", n, c2, harmonic, recovered_fundamental);
+    }
+}

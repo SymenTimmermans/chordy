@@ -57,8 +57,11 @@ impl Pitch {
         // Convert from standard MIDI to this system's MIDI (add 12 semitones)
         let midi_number = standard_midi_number + 12;
 
+        // Clamp MIDI number to valid range [0, 127]
+        let clamped_midi = midi_number.clamp(0, 127) as u8;
+
         // Convert MIDI number to pitch
-        Self::from_midi_number(midi_number as u8)
+        Self::from_midi_number(clamped_midi)
     }
 
     /// Converts this pitch to its frequency in Hz using equal temperament tuning.
@@ -334,10 +337,10 @@ impl Pitch {
     /// ```
     /// use chordy::Pitch;
     ///
-    /// let a440 = Pitch::new(chordy::Letter::A, chordy::Accidental::Natural, 4);
-    /// let a442 = Pitch::from_frequency(442.0);
-    /// let cents_diff = a442.cents_from(&a440);
-    /// assert!((cents_diff - 7.85).abs() < 0.1); // A442 is about 7.85 cents sharp of A440
+    /// let a4 = Pitch::new(chordy::Letter::A, chordy::Accidental::Natural, 4);
+    /// let a_sharp4 = Pitch::new(chordy::Letter::A, chordy::Accidental::Sharp, 4);
+    /// let cents_diff = a_sharp4.cents_from(&a4);
+    /// assert!((cents_diff - 100.0).abs() < 0.01); // A#4 is 100 cents above A4
     /// ```
     pub fn cents_from(&self, other: &Pitch) -> f32 {
         let f1 = self.to_frequency();
@@ -365,6 +368,128 @@ impl Pitch {
         let current_freq = self.to_frequency();
         let new_freq = current_freq * 2.0f32.powf(cents / 1200.0);
         Pitch::from_frequency(new_freq)
+    }
+
+    /// Returns the nth harmonic of this pitch.
+    ///
+    /// The harmonic series is a fundamental concept in acoustics where each harmonic
+    /// has a frequency that is an integer multiple of the fundamental frequency.
+    /// This method returns the closest equal-tempered pitch to the exact harmonic frequency.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Pitch;
+    ///
+    /// let c2 = Pitch::new(chordy::Letter::C, chordy::Accidental::Natural, 2);
+    /// let second_harmonic = c2.harmonic(2);
+    /// assert_eq!(second_harmonic.to_string(), "C3"); // Octave above
+    ///
+    /// let third_harmonic = c2.harmonic(3);
+    /// assert_eq!(third_harmonic.to_string(), "G3"); // Perfect fifth above
+    /// ```
+    pub fn harmonic(&self, n: usize) -> Pitch {
+        if n == 0 {
+            panic!("Harmonic number must be positive (n >= 1)");
+        }
+        let fundamental_freq = self.to_frequency();
+        let harmonic_freq = fundamental_freq * n as f32;
+
+        // Ensure frequency is not too high for MIDI conversion
+        // MIDI note 127 (G8) has frequency ~12543.85 Hz
+        if harmonic_freq > 12500.0 {
+            panic!("Harmonic frequency {} Hz is above maximum supported frequency (12500 Hz)", harmonic_freq);
+        }
+
+        Pitch::from_frequency(harmonic_freq)
+    }
+
+    /// Returns a vector of harmonics up to the nth harmonic.
+    ///
+    /// This includes the fundamental (harmonic 1) through the specified harmonic.
+    /// The harmonics are returned in order from lowest to highest frequency.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Pitch;
+    ///
+    /// let c2 = Pitch::new(chordy::Letter::C, chordy::Accidental::Natural, 2);
+    /// let harmonics = c2.harmonics(8);
+    /// // Returns: [C2, C3, G3, C4, E4, G4, Bb4, C5]
+    /// assert_eq!(harmonics.len(), 8);
+    /// assert_eq!(harmonics[0].to_string(), "C2"); // Fundamental
+    /// assert_eq!(harmonics[1].to_string(), "C3"); // 2nd harmonic (octave)
+    /// assert_eq!(harmonics[2].to_string(), "G3"); // 3rd harmonic (perfect fifth)
+    /// ```
+    pub fn harmonics(&self, up_to: usize) -> Vec<Pitch> {
+        if up_to == 0 {
+            return Vec::new();
+        }
+        (1..=up_to).map(|n| self.harmonic(n)).collect()
+    }
+
+    /// Returns the nth subharmonic of this pitch.
+    ///
+    /// Subharmonics are the inverse of harmonics - they have frequencies that are
+    /// integer divisions of the fundamental frequency. The nth subharmonic has
+    /// frequency = fundamental_frequency / n.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Pitch;
+    ///
+    /// let c4 = Pitch::new(chordy::Letter::C, chordy::Accidental::Natural, 4);
+    /// let first_subharmonic = c4.subharmonic(2);
+    /// assert_eq!(first_subharmonic.to_string(), "C3"); // Octave below
+    ///
+    /// let second_subharmonic = c4.subharmonic(3);
+    /// assert_eq!(second_subharmonic.to_string(), "F2"); // Major third below
+    /// ```
+    pub fn subharmonic(&self, n: usize) -> Pitch {
+        if n == 0 {
+            panic!("Subharmonic number must be positive (n >= 1)");
+        }
+        let fundamental_freq = self.to_frequency();
+        let subharmonic_freq = fundamental_freq / n as f32;
+
+        // Ensure frequency is not too low for MIDI conversion
+        // MIDI note 0 (C-2) has frequency ~8.18 Hz
+        if subharmonic_freq < 8.0 {
+            panic!("Subharmonic frequency {} Hz is below minimum supported frequency (8 Hz)", subharmonic_freq);
+        }
+
+        Pitch::from_frequency(subharmonic_freq)
+    }
+
+    /// Given a pitch that is the nth harmonic of some fundamental,
+    /// returns the fundamental pitch.
+    ///
+    /// This is useful for fundamental frequency detection from overtones.
+    /// The method works by dividing the frequency by n and finding the closest
+    /// equal-tempered pitch.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Pitch;
+    ///
+    /// let g3 = Pitch::new(chordy::Letter::G, chordy::Accidental::Natural, 3);
+    /// let fundamental = g3.fundamental_of_harmonic(3);
+    /// assert_eq!(fundamental.to_string(), "C2"); // G3 is the 3rd harmonic of C2
+    ///
+    /// let c5 = Pitch::new(chordy::Letter::C, chordy::Accidental::Natural, 5);
+    /// let fundamental = c5.fundamental_of_harmonic(8);
+    /// assert_eq!(fundamental.to_string(), "C2"); // C5 is the 8th harmonic of C2
+    /// ```
+    pub fn fundamental_of_harmonic(&self, n: usize) -> Pitch {
+        if n == 0 {
+            panic!("Harmonic number must be positive (n >= 1)");
+        }
+        let harmonic_freq = self.to_frequency();
+        let fundamental_freq = harmonic_freq / n as f32;
+        Pitch::from_frequency(fundamental_freq)
     }
 }
 
