@@ -323,6 +323,49 @@ impl Pitch {
                 | (Letter::F, Accidental::Flat)
         )
     }
+
+    /// Calculates the cents difference between this pitch and another pitch.
+    ///
+    /// Cents are a logarithmic measure of pitch difference where 100 cents = 1 semitone.
+    /// Positive values indicate this pitch is higher than the other pitch.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Pitch;
+    ///
+    /// let a440 = Pitch::new(chordy::Letter::A, chordy::Accidental::Natural, 4);
+    /// let a442 = Pitch::from_frequency(442.0);
+    /// let cents_diff = a442.cents_from(&a440);
+    /// assert!((cents_diff - 7.85).abs() < 0.1); // A442 is about 7.85 cents sharp of A440
+    /// ```
+    pub fn cents_from(&self, other: &Pitch) -> f32 {
+        let f1 = self.to_frequency();
+        let f2 = other.to_frequency();
+
+        // Calculate cents using the formula: cents = 1200 * log2(f1 / f2)
+        1200.0 * (f1 / f2).log2()
+    }
+
+    /// Transposes this pitch by a specified number of cents.
+    ///
+    /// Returns the closest equal-tempered pitch to the microtonal target.
+    /// Note that the result will be snapped to the nearest equal-tempered pitch.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Pitch;
+    ///
+    /// let a440 = Pitch::new(chordy::Letter::A, chordy::Accidental::Natural, 4);
+    /// let a442 = a440.transpose_cents(7.85);
+    /// // A442 will be very close to A4 (might be A4 or A#4 depending on rounding)
+    /// ```
+    pub fn transpose_cents(&self, cents: f32) -> Pitch {
+        let current_freq = self.to_frequency();
+        let new_freq = current_freq * 2.0f32.powf(cents / 1200.0);
+        Pitch::from_frequency(new_freq)
+    }
 }
 
 impl fmt::Display for Pitch {

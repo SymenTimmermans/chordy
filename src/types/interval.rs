@@ -171,6 +171,26 @@ impl Interval {
         (((self.fifths * 7 % 12) + 12) % 12) + self.octaves * 12
     }
 
+    /// The number of cents this interval spans.
+    ///
+    /// Cents are a logarithmic measure of pitch difference where 100 cents = 1 semitone.
+    /// This method provides an exact conversion from semitones to cents.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Interval;
+    ///
+    /// let octave = Interval::OCTAVE;
+    /// assert_eq!(octave.cents(), 1200.0);
+    ///
+    /// let semitone = Interval::MINOR_SECOND;
+    /// assert_eq!(semitone.cents(), 100.0);
+    /// ```
+    pub fn cents(&self) -> f32 {
+        self.semitones() as f32 * 100.0
+    }
+
     /// Returns a new interval that represents the class of this interval, setting octaves to 0.
     pub fn interval_class(&self) -> Self {
         Self { fifths: self.fifths, octaves: 0 }

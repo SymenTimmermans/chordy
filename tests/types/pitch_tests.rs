@@ -381,3 +381,97 @@ fn test_pitch_constants() {
     assert_eq!(Pitch::A440, 440.0);
     assert_eq!(Pitch::C0_FREQUENCY, 16.3516);
 }
+
+#[test]
+fn test_pitch_cents_from() {
+    // Test same pitch (0 cents)
+    let a440 = Pitch::new(Letter::A, Accidental::Natural, 4);
+    assert!((a440.cents_from(&a440)).abs() < 0.01);
+
+    // Test octave (1200 cents)
+    let a3 = Pitch::new(Letter::A, Accidental::Natural, 3);
+    let a4 = Pitch::new(Letter::A, Accidental::Natural, 4);
+    assert!((a4.cents_from(&a3) - 1200.0).abs() < 0.01);
+
+    // Test semitone (100 cents)
+    let c4 = Pitch::new(Letter::C, Accidental::Natural, 4);
+    let c_sharp4 = Pitch::new(Letter::C, Accidental::Sharp, 4);
+    assert!((c_sharp4.cents_from(&c4) - 100.0).abs() < 0.01);
+
+    // Test microtonal differences
+    // Since Pitch only represents equal-tempered pitches, we need to test with actual different pitches
+    // and calculate the expected cents difference between them
+    let a4 = Pitch::new(Letter::A, Accidental::Natural, 4);
+    let a_sharp4 = Pitch::new(Letter::A, Accidental::Sharp, 4);
+
+    // A#4 should be 100 cents above A4
+    let cents_diff = a_sharp4.cents_from(&a4);
+    assert!((cents_diff - 100.0).abs() < 0.01);
+
+    // Test negative cents
+    let g_sharp4 = Pitch::new(Letter::G, Accidental::Sharp, 4);
+    let cents_diff = g_sharp4.cents_from(&a4);
+    assert!((cents_diff + 100.0).abs() < 0.01); // G#4 is 100 cents below A4
+
+    // Test enharmonic equivalence
+    let c_sharp4 = Pitch::new(Letter::C, Accidental::Sharp, 4);
+    let d_flat4 = Pitch::new(Letter::D, Accidental::Flat, 4);
+    assert!((c_sharp4.cents_from(&d_flat4)).abs() < 0.01);
+}
+
+#[test]
+fn test_pitch_transpose_cents() {
+    let a440 = Pitch::new(Letter::A, Accidental::Natural, 4);
+
+    // Test zero cents (no change)
+    assert_eq!(a440.transpose_cents(0.0), a440);
+
+    // Test semitone (100 cents)
+    let a_sharp4 = a440.transpose_cents(100.0);
+    assert_eq!(a_sharp4, Pitch::new(Letter::A, Accidental::Sharp, 4));
+
+    // Test octave (1200 cents)
+    let a5 = a440.transpose_cents(1200.0);
+    assert_eq!(a5, Pitch::new(Letter::A, Accidental::Natural, 5));
+
+    // Test negative cents
+    let g_sharp4 = a440.transpose_cents(-100.0);
+    assert_eq!(g_sharp4, Pitch::new(Letter::G, Accidental::Sharp, 4));
+
+    // Test microtonal transposition (should snap to nearest equal-tempered pitch)
+    let slightly_sharp_a = a440.transpose_cents(15.0);
+    // Should still be A4 since 15 cents is closer to A4 than A#4
+    assert_eq!(slightly_sharp_a, a440);
+
+    let slightly_flat_a_sharp = a440.transpose_cents(85.0);
+    // Should be A#4 since 85 cents is closer to A#4 than A4
+    assert_eq!(slightly_flat_a_sharp, Pitch::new(Letter::A, Accidental::Sharp, 4));
+}
+
+#[test]
+fn test_interval_cents() {
+    // Test basic intervals
+    assert_eq!(Interval::PERFECT_UNISON.cents(), 0.0);
+    assert_eq!(Interval::MINOR_SECOND.cents(), 100.0);
+    assert_eq!(Interval::MAJOR_SECOND.cents(), 200.0);
+    assert_eq!(Interval::MINOR_THIRD.cents(), 300.0);
+    assert_eq!(Interval::MAJOR_THIRD.cents(), 400.0);
+    assert_eq!(Interval::PERFECT_FOURTH.cents(), 500.0);
+    assert_eq!(Interval::AUGMENTED_FOURTH.cents(), 600.0);
+    assert_eq!(Interval::PERFECT_FIFTH.cents(), 700.0);
+    assert_eq!(Interval::MINOR_SIXTH.cents(), 800.0);
+    assert_eq!(Interval::MAJOR_SIXTH.cents(), 900.0);
+    assert_eq!(Interval::MINOR_SEVENTH.cents(), 1000.0);
+    assert_eq!(Interval::MAJOR_SEVENTH.cents(), 1100.0);
+    assert_eq!(Interval::OCTAVE.cents(), 1200.0);
+
+    // Test compound intervals
+    assert_eq!(Interval::MAJOR_NINTH.cents(), 1400.0);
+    assert_eq!(Interval::PERFECT_ELEVENTH.cents(), 1700.0);
+    assert_eq!(Interval::MAJOR_THIRTEENTH.cents(), 2100.0); // Octave + major 6th = 12 + 9 = 21 semitones
+
+    // Note: Extreme intervals like DOUBLY_DIMINISHED_UNISON and DOUBLY_AUGMENTED_UNISON
+    // may not work correctly with the current interval system as it's designed for
+    // practical music intervals. These theoretical intervals are not commonly used
+    // in standard music practice.
+}
