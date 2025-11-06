@@ -186,9 +186,9 @@ pub const GUITAR_SHAPE_29: GuitarShape = GuitarShape {
 };
 
 /// D / F
-/// Pattern: 2-0-0-2-3-2
+/// Pattern: 2-X-0-2-3-2
 pub const GUITAR_SHAPE_30: GuitarShape = GuitarShape {
-    positions: &[2, 0, 0, 2, 3, 2],
+    positions: &[2, 255, 0, 2, 3, 2],
 };
 
 /// Am / C shape

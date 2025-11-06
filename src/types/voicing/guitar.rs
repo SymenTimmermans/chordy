@@ -432,7 +432,7 @@ impl IntervalFirstGuitarFinder {
             // Check each fret position up to 12th fret
             for fret in 0u8..=12u8 {
                 let fretted_pitch = open_pitch + (fret as i8);
-                if fretted_pitch.name == bass_note {
+                if fretted_pitch.name == bass_note || fretted_pitch.name.is_enharmonic_with(&bass_note) {
                     positions.push((string, fret));
                 }
             }
@@ -688,7 +688,7 @@ impl IntervalFirstGuitarFinder {
             }
         }
 
-        // Try exact matches with filtered pattern (for traditional shapes)
+        // Try exact matches with filtered pattern (for traditional shapes)  
         for shape in self.shapes {
             if shape.matches_fingering(&filtered_pattern) {
                 return true;
@@ -801,7 +801,7 @@ impl IntervalFirstGuitarFinder {
         // Balance between fullness and playability
         let pitch_bonus = -(pitches.len() as f32) * 10.0; // Favor more notes (fuller sound)
         let playability_penalty = self.calculate_playability_score(fingering) * 4.0;
-        let position_penalty = self.calculate_neck_position_score(fingering) * 12.0; // Strongly favor lower positions
+        let position_penalty = self.calculate_neck_position_score(fingering) * 20.0; // Strongly favor lower positions
         
         pitch_bonus + playability_penalty + position_penalty
     }
@@ -843,14 +843,27 @@ impl IntervalFirstGuitarFinder {
 
 }
 
+/// Respell pitches to match the chord's root note enharmonic preference
+fn respell_pitches_for_chord(pitches: Vec<Pitch>, chord: &Chord) -> Vec<Pitch> {
+    let root_note = chord.root();
+    pitches
+        .into_iter()
+        .map(|pitch| {
+            // If this pitch is enharmonically equivalent to the chord root, use the chord root's spelling
+            if pitch.name.is_enharmonic_with(&root_note) {
+                Pitch { name: root_note, octave: pitch.octave }
+            } else {
+                pitch
+            }
+        })
+        .collect()
+}
+
 /// Voice a chord using guitar fingering patterns within the main Voicer engine
 pub fn voice_guitar_chord(chord: &Chord, range: PitchRange) -> Result<VoicedChord, VoicingError> {
     // Use the new interval-first approach directly
     let finder = IntervalFirstGuitarFinder::new();
     let voicings = finder.find_voicings(chord);
-
-    for voicing in &voicings {
-    }
 
     if voicings.is_empty() {
         return Err(VoicingError::UnsupportedStyle);
@@ -859,7 +872,10 @@ pub fn voice_guitar_chord(chord: &Chord, range: PitchRange) -> Result<VoicedChor
     // Use the best voicing (first in the sorted list)
     let (best_fingering, _score) = &voicings[0];
     let tuning = GuitarTuning::standard(); // Use standard tuning for now
-    let pitches = best_fingering.to_pitches(&tuning);
+    let raw_pitches = best_fingering.to_pitches(&tuning);
+    
+    // Respell pitches to match chord's enharmonic preferences
+    let pitches = respell_pitches_for_chord(raw_pitches, chord);
 
     // Create voicing details with the guitar fingering information
     let details = VoicingDetails::Guitar {
