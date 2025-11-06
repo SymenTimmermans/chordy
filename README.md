@@ -33,6 +33,7 @@ assert_ne!(c_sharp, d_flat); // Different note names
 - **Chord Progression Analysis**: Built-in progression maps with jazz harmony support
 - **Roman Numeral Analysis**: Complete system for harmonic analysis and chord functions
 - **Chord Identification**: Advanced chord naming with proper jazz conventions
+- **Frequency Ratio Analysis**: Support for equal temperament, just intonation, and Pythagorean tuning
 - **Zero Dependencies**: Pure Rust implementation with no external dependencies
 - **WebAssembly Compatible**: Use in browsers without modification
 - **Theoretically Sound**: Built with accuracy and musical principles as the highest priority
@@ -81,6 +82,28 @@ let c_sharp = Pitch::new(Letter::C, Accidental::Sharp, 4);
 let e_sharp = c_sharp.transpose(4);
 assert_eq!(e_sharp.name.letter(), Letter::E);
 assert_eq!(e_sharp.name.accidental(), Accidental::Sharp);
+```
+
+### Frequency Ratios and Tuning Systems
+
+```rust
+use chordy::Interval;
+
+// Equal temperament ratios
+let fifth = Interval::PERFECT_FIFTH;
+assert!((fifth.frequency_ratio() - 1.4983).abs() < 0.001);
+
+// Just intonation (pure integer ratios)
+let (num, den) = fifth.just_intonation_ratio();
+assert_eq!((num, den), (3, 2)); // Perfect 3:2 ratio
+
+// Pythagorean tuning
+let (num, den) = fifth.pythagorean_ratio();
+assert_eq!((num, den), (3, 2)); // Pure fifth
+
+// Identify intervals from frequency ratios
+let interval = Interval::from_ratio(1.5).unwrap();
+assert_eq!(interval, Interval::PERFECT_FIFTH);
 ```
 
 ### Scales and Chords

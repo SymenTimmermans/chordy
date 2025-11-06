@@ -154,6 +154,21 @@ impl Interval {
     pub fn with_fifths(fifths: i8) -> Self {
         Self { fifths, octaves: 0 }
     }
+
+    /// Simplify a fraction to its lowest terms
+    fn simplify_fraction(numerator: u32, denominator: u32) -> (u32, u32) {
+        let gcd = Self::gcd(numerator, denominator);
+        (numerator / gcd, denominator / gcd)
+    }
+
+    /// Calculate greatest common divisor using Euclidean algorithm
+    fn gcd(a: u32, b: u32) -> u32 {
+        if b == 0 {
+            a
+        } else {
+            Self::gcd(b, a % b)
+        }
+    }
     
     /// These intervals are used to represent the "distance" between two pitches.
     pub fn fifths(&self) -> i8 {
@@ -264,6 +279,168 @@ impl Interval {
         *self == Self::MAJOR_SEVENTH ||
         *self == Self::AUGMENTED_SEVENTH ||
         *self == Self::DOUBLY_AUGMENTED_SEVENTH
+    }
+
+    /// Returns the frequency ratio for this interval in equal temperament tuning.
+    ///
+    /// In equal temperament, each semitone represents a frequency ratio of 2^(1/12).
+    /// This method calculates the exact ratio for the interval's semitone distance.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Interval;
+    ///
+    /// let octave = Interval::OCTAVE;
+    /// assert!((octave.frequency_ratio() - 2.0).abs() < 0.001); // 2:1 ratio
+    ///
+    /// let fifth = Interval::PERFECT_FIFTH;
+    /// assert!((fifth.frequency_ratio() - 1.4983).abs() < 0.001); // ~1.4983:1
+    /// ```
+    pub fn frequency_ratio(&self) -> f32 {
+        2.0f32.powf(self.semitones() as f32 / 12.0)
+    }
+
+    /// Returns the frequency ratio for this interval in just intonation tuning.
+    ///
+    /// Just intonation uses simple integer ratios that sound pure and consonant.
+    /// Returns a tuple (numerator, denominator) representing the ratio n:d.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Interval;
+    ///
+    /// let fifth = Interval::PERFECT_FIFTH;
+    /// assert_eq!(fifth.just_intonation_ratio(), (3, 2)); // Perfect 3:2 ratio
+    ///
+    /// let octave = Interval::OCTAVE;
+    /// assert_eq!(octave.just_intonation_ratio(), (2, 1)); // Perfect 2:1 ratio
+    /// ```
+    pub fn just_intonation_ratio(&self) -> (u32, u32) {
+        match *self {
+            Self::PERFECT_UNISON => (1, 1),
+            Self::MINOR_SECOND => (16, 15),
+            Self::MAJOR_SECOND => (9, 8),
+            Self::MINOR_THIRD => (6, 5),
+            Self::MAJOR_THIRD => (5, 4),
+            Self::PERFECT_FOURTH => (4, 3),
+            Self::AUGMENTED_FOURTH | Self::DIMINISHED_FIFTH => (45, 32), // Tritone
+            Self::PERFECT_FIFTH => (3, 2),
+            Self::MINOR_SIXTH => (8, 5),
+            Self::MAJOR_SIXTH => (5, 3),
+            Self::MINOR_SEVENTH => (9, 5),
+            Self::MAJOR_SEVENTH => (15, 8),
+            Self::OCTAVE => (2, 1),
+            _ => {
+                // For compound intervals, multiply by octave ratios
+                let base_interval = Self::new(self.fifths, 0);
+                let (num, den) = base_interval.just_intonation_ratio();
+                let octave_factor = 2u32.pow(self.octaves as u32);
+                Self::simplify_fraction(num * octave_factor, den)
+            }
+        }
+    }
+
+    /// Returns the frequency ratio for this interval in Pythagorean tuning.
+    ///
+    /// Pythagorean tuning uses pure fifths (3:2 ratios) to derive all intervals.
+    /// Returns a tuple (numerator, denominator) representing the ratio n:d.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Interval;
+    ///
+    /// let fifth = Interval::PERFECT_FIFTH;
+    /// assert_eq!(fifth.pythagorean_ratio(), (3, 2)); // Pure 3:2 ratio
+    ///
+    /// let major_third = Interval::MAJOR_THIRD;
+    /// assert_eq!(major_third.pythagorean_ratio(), (81, 64)); // 81:64 ratio
+    /// ```
+    pub fn pythagorean_ratio(&self) -> (u32, u32) {
+        match *self {
+            Self::PERFECT_UNISON => (1, 1),
+            Self::MINOR_SECOND => (256, 243), // Pythagorean limma
+            Self::MAJOR_SECOND => (9, 8),     // Pythagorean whole tone
+            Self::MINOR_THIRD => (32, 27),
+            Self::MAJOR_THIRD => (81, 64),
+            Self::PERFECT_FOURTH => (4, 3),
+            Self::AUGMENTED_FOURTH | Self::DIMINISHED_FIFTH => (729, 512), // Pythagorean tritone
+            Self::PERFECT_FIFTH => (3, 2),
+            Self::MINOR_SIXTH => (128, 81),
+            Self::MAJOR_SIXTH => (27, 16),
+            Self::MINOR_SEVENTH => (16, 9),
+            Self::MAJOR_SEVENTH => (243, 128),
+            Self::OCTAVE => (2, 1),
+            _ => {
+                // For compound intervals, multiply by octave ratios
+                let base_interval = Self::new(self.fifths, 0);
+                let (num, den) = base_interval.pythagorean_ratio();
+                let octave_factor = 2u32.pow(self.octaves as u32);
+                Self::simplify_fraction(num * octave_factor, den)
+            }
+        }
+    }
+
+    /// Attempts to identify an interval from a frequency ratio.
+    ///
+    /// This method compares the given ratio to known interval ratios in equal temperament,
+    /// just intonation, and Pythagorean tuning, and returns the closest match.
+    /// Returns None if no interval matches within a reasonable tolerance.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Interval;
+    ///
+    /// let ratio = 1.5;
+    /// let interval = Interval::from_ratio(ratio);
+    /// assert_eq!(interval, Some(Interval::PERFECT_FIFTH));
+    ///
+    /// let ratio = 2.0;
+    /// let interval = Interval::from_ratio(ratio);
+    /// assert_eq!(interval, Some(Interval::OCTAVE));
+    /// ```
+    pub fn from_ratio(ratio: f32) -> Option<Interval> {
+        // Common intervals to check (up to 2 octaves)
+        let intervals = [
+            Self::PERFECT_UNISON,
+            Self::MINOR_SECOND,
+            Self::MAJOR_SECOND,
+            Self::MINOR_THIRD,
+            Self::MAJOR_THIRD,
+            Self::PERFECT_FOURTH,
+            Self::AUGMENTED_FOURTH,
+            Self::DIMINISHED_FIFTH,
+            Self::PERFECT_FIFTH,
+            Self::MINOR_SIXTH,
+            Self::MAJOR_SIXTH,
+            Self::MINOR_SEVENTH,
+            Self::MAJOR_SEVENTH,
+            Self::OCTAVE,
+            Self::MINOR_NINTH,
+            Self::MAJOR_NINTH,
+            Self::MINOR_TENTH,
+            Self::MAJOR_TENTH,
+            Self::PERFECT_ELEVENTH,
+            Self::PERFECT_TWELFTH,
+            Self::MINOR_THIRTEENTH,
+            Self::MAJOR_THIRTEENTH,
+            Self::MINOR_FOURTEENTH,
+            Self::MAJOR_FOURTEENTH,
+        ];
+
+        let tolerance = 0.05; // 5% tolerance for ratio matching
+
+        for interval in intervals {
+            let interval_ratio = interval.frequency_ratio();
+            if (ratio - interval_ratio).abs() / interval_ratio < tolerance {
+                return Some(interval);
+            }
+        }
+
+        None
     }
 }
 
