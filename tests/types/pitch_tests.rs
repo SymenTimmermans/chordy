@@ -208,3 +208,85 @@ fn test_pitch_transpose() {
                                                          //
     assert_eq!(pitch!("G#4").transpose(-2), pitch!("F#4")); // G#-F# not Gb
 }
+
+#[test]
+fn test_pitch_frequency_conversion() {
+    // Test standard concert pitch
+    let a4 = Pitch::new(Letter::A, Accidental::Natural, 4);
+    assert!((a4.to_frequency() - 440.0).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(440.0), a4);
+
+    // Test C4 (middle C)
+    let c4 = Pitch::new(Letter::C, Accidental::Natural, 4);
+    assert!((c4.to_frequency() - 261.63).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(261.63), c4);
+
+    // Test G4
+    let g4 = Pitch::new(Letter::G, Accidental::Natural, 4);
+    assert!((g4.to_frequency() - 392.0).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(392.0), g4);
+
+    // Test E4
+    let e4 = Pitch::new(Letter::E, Accidental::Natural, 4);
+    assert!((e4.to_frequency() - 329.63).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(329.63), e4);
+
+    // Test A3 (octave below A4)
+    let a3 = Pitch::new(Letter::A, Accidental::Natural, 3);
+    assert!((a3.to_frequency() - 220.0).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(220.0), a3);
+
+    // Test A5 (octave above A4)
+    let a5 = Pitch::new(Letter::A, Accidental::Natural, 5);
+    assert!((a5.to_frequency() - 880.0).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(880.0), a5);
+
+    // Test sharp notes
+    let c_sharp4 = Pitch::new(Letter::C, Accidental::Sharp, 4);
+    assert!((c_sharp4.to_frequency() - 277.18).abs() < 0.01);
+    // Note: from_frequency may return either C♯4 or D♭4 due to enharmonic equivalence
+    let freq_pitch = Pitch::from_frequency(277.18);
+    assert!(freq_pitch.is_enharmonic_with(&c_sharp4));
+
+    // Test flat notes
+    let d_flat4 = Pitch::new(Letter::D, Accidental::Flat, 4);
+    assert!((d_flat4.to_frequency() - 277.18).abs() < 0.01);
+    assert!(freq_pitch.is_enharmonic_with(&d_flat4));
+
+    // Test enharmonic equivalence in frequency space
+    assert!(c_sharp4.is_enharmonic_with(&d_flat4));
+    assert!((c_sharp4.to_frequency() - d_flat4.to_frequency()).abs() < 0.01);
+
+    // Test extreme frequencies
+    let c0 = Pitch::new(Letter::C, Accidental::Natural, 0);
+    assert!((c0.to_frequency() - 16.35).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(16.35), c0);
+
+    let c8 = Pitch::new(Letter::C, Accidental::Natural, 8);
+    assert!((c8.to_frequency() - 4186.01).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(4186.01), c8);
+}
+
+#[test]
+fn test_pitch_midi_conversion() {
+    // Test standard MIDI notes
+    assert_eq!(Pitch::from_midi_number(60), pitch!("C3"));
+    assert_eq!(Pitch::from_midi_number(69), pitch!("A3"));
+    assert_eq!(Pitch::from_midi_number(72), pitch!("C4"));
+
+    // Test that MIDI conversion is consistent with existing midi_number method
+    for midi in 0..=127 {
+        let pitch = Pitch::from_midi_number(midi);
+        assert_eq!(pitch.midi_number(), midi, "MIDI conversion failed for note {}", midi);
+    }
+
+    // Test edge cases
+    assert_eq!(Pitch::from_midi_number(0), pitch!("C-2"));
+    assert_eq!(Pitch::from_midi_number(127), pitch!("G8"));
+}
+
+#[test]
+fn test_pitch_constants() {
+    assert_eq!(Pitch::A440, 440.0);
+    assert_eq!(Pitch::C0_FREQUENCY, 16.3516);
+}

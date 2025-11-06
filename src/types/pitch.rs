@@ -25,6 +25,104 @@ impl Pitch {
         }
     }
 
+    /// The standard concert pitch frequency for A4 in Hz.
+    pub const A440: f32 = 440.0;
+
+    /// The frequency of C0 (MIDI note 0) in scientific pitch notation.
+    pub const C0_FREQUENCY: f32 = 16.3516;
+
+    /// Converts a frequency in Hz to the closest `Pitch` using equal temperament tuning.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Pitch;
+    ///
+    /// let pitch = Pitch::from_frequency(440.0);
+    /// assert_eq!(pitch.to_string(), "A4");
+    ///
+    /// let pitch = Pitch::from_frequency(261.63);
+    /// assert_eq!(pitch.to_string(), "C4");
+    /// ```
+    pub fn from_frequency(hz: f32) -> Self {
+        // Calculate the number of semitones from A4
+        // In this system, A4 has MIDI number 69 (base_midi_number=9 + (4+2)*12 = 9+72=81)
+        // Wait, let me recalculate: A4 = base_midi_number=9 + ((4+2)*12) = 9 + 72 = 81
+        // But standard MIDI A4 is 69, so there's a 12 semitone difference
+
+        // Calculate the number of semitones from A4 using standard MIDI
+        let semitones_from_a4 = 12.0 * (hz / Self::A440).log2();
+        let standard_midi_number = (semitones_from_a4 + 69.0).round() as i8;
+
+        // Convert from standard MIDI to this system's MIDI (add 12 semitones)
+        let midi_number = standard_midi_number + 12;
+
+        // Convert MIDI number to pitch
+        Self::from_midi_number(midi_number)
+    }
+
+    /// Converts this pitch to its frequency in Hz using equal temperament tuning.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Pitch;
+    ///
+    /// let pitch = Pitch::new(chordy::Letter::A, chordy::Accidental::Natural, 4);
+    /// assert!((pitch.to_frequency() - 440.0).abs() < 0.01);
+    ///
+    /// let pitch = Pitch::new(chordy::Letter::C, chordy::Accidental::Natural, 4);
+    /// assert!((pitch.to_frequency() - 261.63).abs() < 0.01);
+    /// ```
+    pub fn to_frequency(&self) -> f32 {
+        // Convert from this system's MIDI to standard MIDI (subtract 12 semitones)
+        let standard_midi_number = self.midi_number() as f32 - 12.0;
+
+        // Calculate the number of semitones from A4 (standard MIDI note 69)
+        let semitones_from_a4 = standard_midi_number - 69.0;
+        Self::A440 * 2.0f32.powf(semitones_from_a4 / 12.0)
+    }
+
+    /// Creates a `Pitch` from a MIDI note number.
+    ///
+    /// MIDI note numbers start at 0 for C-2 and go up to 127 for G8.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Pitch;
+    ///
+    /// let pitch = Pitch::from_midi_number(60);
+    /// assert_eq!(pitch.to_string(), "C3");
+    ///
+    /// let pitch = Pitch::from_midi_number(69);
+    /// assert_eq!(pitch.to_string(), "A3");
+    /// ```
+    pub fn from_midi_number(midi_number: i8) -> Self {
+        // MIDI note 0 is C-2
+        let octave = (midi_number / 12) - 2;
+        let note_index = midi_number % 12;
+
+        // Map note index to letter and accidental
+        let (letter, accidental) = match note_index {
+            0 => (Letter::C, Accidental::Natural),
+            1 => (Letter::C, Accidental::Sharp),
+            2 => (Letter::D, Accidental::Natural),
+            3 => (Letter::D, Accidental::Sharp),
+            4 => (Letter::E, Accidental::Natural),
+            5 => (Letter::F, Accidental::Natural),
+            6 => (Letter::F, Accidental::Sharp),
+            7 => (Letter::G, Accidental::Natural),
+            8 => (Letter::G, Accidental::Sharp),
+            9 => (Letter::A, Accidental::Natural),
+            10 => (Letter::A, Accidental::Sharp),
+            11 => (Letter::B, Accidental::Natural),
+            _ => unreachable!(),
+        };
+
+        Pitch::new(letter, accidental, octave)
+    }
+
     /// Returns the full MIDI note number for this pitch.
     /// Starting from C-2 (MIDI note 0).
     ///
