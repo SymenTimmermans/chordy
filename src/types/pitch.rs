@@ -7,6 +7,26 @@ use crate::transposition::{ChromaticTransposer, Transposer};
 
 use super::{Accidental, Key, Letter, NoteName};
 
+/// Strategies for choosing enharmonic spellings when converting MIDI to pitches
+///
+/// These strategies help determine which enharmonic spelling to use when multiple
+/// options exist for the same pitch (e.g., C♯ vs D♭).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum SpellingStrategy {
+    /// Prefer sharp spellings for black keys (C♯, D♯, F♯, G♯, A♯)
+    PreferSharps,
+    /// Prefer flat spellings for black keys (D♭, E♭, G♭, A♭, B♭)
+    PreferFlats,
+    /// Prefer natural spellings where possible, avoiding accidentals
+    PreferNaturals,
+    /// Use key context to determine appropriate spelling
+    KeyContext(Key),
+    /// Use directional chromatic spelling (ascending: sharps, descending: flats)
+    DirectionalChromatic { ascending: bool },
+    /// Minimize the total number of accidentals in a sequence
+    MinimizeAccidentals,
+}
+
 /// A specific pitch with both note name and octave
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Pitch {
@@ -262,6 +282,189 @@ impl Pitch {
         Pitch::new(letter, accidental, octave)
     }
 
+    /// Creates a `Pitch` from a MIDI note number using a specific spelling strategy.
+    ///
+    /// MIDI note numbers start at 0 for C-2 and go up to 127 for G8.
+    /// This method uses the specified strategy to choose enharmonic spellings.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Pitch, SpellingStrategy};
+    ///
+    /// // Prefer sharps
+    /// let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::PreferSharps);
+    /// #[cfg(not(feature = "utf8_symbols"))]
+    /// assert_eq!(pitch.to_string(), "C#3");
+    /// #[cfg(feature = "utf8_symbols")]
+    /// assert_eq!(pitch.to_string(), "C♯3");
+    ///
+    /// // Prefer flats
+    /// let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::PreferFlats);
+    /// #[cfg(not(feature = "utf8_symbols"))]
+    /// assert_eq!(pitch.to_string(), "Db3");
+    /// #[cfg(feature = "utf8_symbols")]
+    /// assert_eq!(pitch.to_string(), "D♭3");
+    ///
+    /// // Directional chromatic (ascending)
+    /// let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::DirectionalChromatic { ascending: true });
+    /// #[cfg(not(feature = "utf8_symbols"))]
+    /// assert_eq!(pitch.to_string(), "C#3");
+    /// #[cfg(feature = "utf8_symbols")]
+    /// assert_eq!(pitch.to_string(), "C♯3");
+    ///
+    /// // Directional chromatic (descending)
+    /// let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::DirectionalChromatic { ascending: false });
+    /// #[cfg(not(feature = "utf8_symbols"))]
+    /// assert_eq!(pitch.to_string(), "Db3");
+    /// #[cfg(feature = "utf8_symbols")]
+    /// assert_eq!(pitch.to_string(), "D♭3");
+    /// ```
+    pub fn from_midi_with_strategy(midi_number: u8, strategy: SpellingStrategy) -> Self {
+        // MIDI note 0 is C-2
+        let octave = (midi_number as i8 / 12) - 2;
+        let note_index = midi_number % 12;
+
+        // Apply the specified spelling strategy
+        let (letter, accidental) = match strategy {
+            SpellingStrategy::PreferSharps => Self::spell_with_sharps(note_index),
+            SpellingStrategy::PreferFlats => Self::spell_with_flats(note_index),
+            SpellingStrategy::PreferNaturals => Self::spell_with_naturals(note_index),
+            SpellingStrategy::KeyContext(key) => Self::spell_with_key_context(note_index, &key),
+            SpellingStrategy::DirectionalChromatic { ascending } => {
+                if ascending {
+                    Self::spell_with_sharps(note_index)
+                } else {
+                    Self::spell_with_flats(note_index)
+                }
+            }
+            SpellingStrategy::MinimizeAccidentals => {
+                // Default to sharps for MinimizeAccidentals (simplest implementation)
+                // In a real implementation, this would analyze surrounding context
+                Self::spell_with_sharps(note_index)
+            }
+        };
+
+        Pitch::new(letter, accidental, octave)
+    }
+
+    /// Helper method: spell with sharps (default strategy)
+    fn spell_with_sharps(note_index: u8) -> (Letter, Accidental) {
+        match note_index {
+            0 => (Letter::C, Accidental::Natural),
+            1 => (Letter::C, Accidental::Sharp),
+            2 => (Letter::D, Accidental::Natural),
+            3 => (Letter::D, Accidental::Sharp),
+            4 => (Letter::E, Accidental::Natural),
+            5 => (Letter::F, Accidental::Natural),
+            6 => (Letter::F, Accidental::Sharp),
+            7 => (Letter::G, Accidental::Natural),
+            8 => (Letter::G, Accidental::Sharp),
+            9 => (Letter::A, Accidental::Natural),
+            10 => (Letter::A, Accidental::Sharp),
+            11 => (Letter::B, Accidental::Natural),
+            _ => unreachable!(),
+        }
+    }
+
+    /// Helper method: spell with flats
+    fn spell_with_flats(note_index: u8) -> (Letter, Accidental) {
+        match note_index {
+            0 => (Letter::C, Accidental::Natural),
+            1 => (Letter::D, Accidental::Flat),
+            2 => (Letter::D, Accidental::Natural),
+            3 => (Letter::E, Accidental::Flat),
+            4 => (Letter::E, Accidental::Natural),
+            5 => (Letter::F, Accidental::Natural),
+            6 => (Letter::G, Accidental::Flat),
+            7 => (Letter::G, Accidental::Natural),
+            8 => (Letter::A, Accidental::Flat),
+            9 => (Letter::A, Accidental::Natural),
+            10 => (Letter::B, Accidental::Flat),
+            11 => (Letter::B, Accidental::Natural),
+            _ => unreachable!(),
+        }
+    }
+
+    /// Helper method: spell with naturals where possible
+    /// This strategy avoids accidentals by using enharmonic equivalents
+    fn spell_with_naturals(note_index: u8) -> (Letter, Accidental) {
+        match note_index {
+            0 => (Letter::C, Accidental::Natural),
+            1 => (Letter::C, Accidental::Sharp), // No natural equivalent
+            2 => (Letter::D, Accidental::Natural),
+            3 => (Letter::D, Accidental::Sharp), // No natural equivalent
+            4 => (Letter::E, Accidental::Natural),
+            5 => (Letter::F, Accidental::Natural),
+            6 => (Letter::F, Accidental::Sharp), // No natural equivalent
+            7 => (Letter::G, Accidental::Natural),
+            8 => (Letter::G, Accidental::Sharp), // No natural equivalent
+            9 => (Letter::A, Accidental::Natural),
+            10 => (Letter::A, Accidental::Sharp), // No natural equivalent
+            11 => (Letter::B, Accidental::Natural),
+            _ => unreachable!(),
+        }
+    }
+
+    /// Helper method: spell with key context
+    fn spell_with_key_context(note_index: u8, key: &Key) -> (Letter, Accidental) {
+        // Get the key's accidental preference (positive for sharps, negative for flats)
+        let key_accidentals = key.accidentals();
+
+        // Map note index to letter and accidental based on key preference
+        // For natural keys (0 accidentals), default to sharps to be consistent with from_midi_number
+        match note_index {
+            0 => (Letter::C, Accidental::Natural),
+            1 => {
+                // C#/Db
+                if key_accidentals >= 0 {
+                    (Letter::C, Accidental::Sharp)
+                } else {
+                    (Letter::D, Accidental::Flat)
+                }
+            }
+            2 => (Letter::D, Accidental::Natural),
+            3 => {
+                // D#/Eb
+                if key_accidentals >= 0 {
+                    (Letter::D, Accidental::Sharp)
+                } else {
+                    (Letter::E, Accidental::Flat)
+                }
+            }
+            4 => (Letter::E, Accidental::Natural),
+            5 => (Letter::F, Accidental::Natural),
+            6 => {
+                // F#/Gb
+                if key_accidentals >= 0 {
+                    (Letter::F, Accidental::Sharp)
+                } else {
+                    (Letter::G, Accidental::Flat)
+                }
+            }
+            7 => (Letter::G, Accidental::Natural),
+            8 => {
+                // G#/Ab
+                if key_accidentals >= 0 {
+                    (Letter::G, Accidental::Sharp)
+                } else {
+                    (Letter::A, Accidental::Flat)
+                }
+            }
+            9 => (Letter::A, Accidental::Natural),
+            10 => {
+                // A#/Bb
+                if key_accidentals >= 0 {
+                    (Letter::A, Accidental::Sharp)
+                } else {
+                    (Letter::B, Accidental::Flat)
+                }
+            }
+            11 => (Letter::B, Accidental::Natural),
+            _ => unreachable!(),
+        }
+    }
+
     /// Returns the full MIDI note number for this pitch.
     /// Starting from C-2 (MIDI note 0).
     ///
@@ -490,6 +693,104 @@ impl Pitch {
         let harmonic_freq = self.to_frequency();
         let fundamental_freq = harmonic_freq / n as f32;
         Pitch::from_frequency(fundamental_freq)
+    }
+
+    /// Determines if this pitch is exactly the nth harmonic of the given fundamental.
+    ///
+    /// Returns `Some(n)` if this pitch matches the nth harmonic of the fundamental
+    /// within a small tolerance (accounting for equal temperament), or `None` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Pitch;
+    ///
+    /// let c2 = Pitch::new(chordy::Letter::C, chordy::Accidental::Natural, 2);
+    /// let c3 = Pitch::new(chordy::Letter::C, chordy::Accidental::Natural, 3);
+    /// let g3 = Pitch::new(chordy::Letter::G, chordy::Accidental::Natural, 3);
+    ///
+    /// // C3 is the 2nd harmonic of C2
+    /// assert_eq!(c3.is_harmonic_of(&c2), Some(2));
+    ///
+    /// // G3 is the 3rd harmonic of C2
+    /// assert_eq!(g3.is_harmonic_of(&c2), Some(3));
+    ///
+    /// // A4 is not a harmonic of C2
+    /// let a4 = Pitch::new(chordy::Letter::A, chordy::Accidental::Natural, 4);
+    /// assert_eq!(a4.is_harmonic_of(&c2), None);
+    /// ```
+    pub fn is_harmonic_of(&self, fundamental: &Pitch) -> Option<usize> {
+        let fundamental_freq = fundamental.to_frequency();
+        let this_freq = self.to_frequency();
+
+        // Calculate the harmonic ratio
+        let ratio = this_freq / fundamental_freq;
+
+        // Check if ratio is close to an integer within tolerance
+        // We use a tolerance of 13% to account for equal temperament deviations
+        // Equal temperament doesn't perfectly match the harmonic series, especially
+        // for higher harmonics like the 7th harmonic which has ~12.7% deviation
+        let tolerance = 0.13;
+        let n_float = ratio;
+        let n_rounded = n_float.round();
+
+        if (n_float - n_rounded).abs() < tolerance && n_rounded >= 1.0 {
+            let n = n_rounded as usize;
+            // Verify that the harmonic actually matches the expected pitch
+            let expected_harmonic = fundamental.harmonic(n);
+            if self.is_enharmonic_with(&expected_harmonic) {
+                return Some(n);
+            }
+        }
+
+        None
+    }
+
+    /// Finds the nearest harmonic of the given fundamental to this pitch.
+    ///
+    /// Returns a tuple `(harmonic_number, cents_deviation)` where:
+    /// - `harmonic_number` is the harmonic number (1 = fundamental, 2 = octave, etc.)
+    /// - `cents_deviation` is the deviation in cents from the exact harmonic frequency
+    ///
+    /// A positive cents deviation means this pitch is higher than the exact harmonic,
+    /// while negative means it's lower.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Pitch;
+    ///
+    /// let c2 = Pitch::new(chordy::Letter::C, chordy::Accidental::Natural, 2);
+    /// let c3 = Pitch::new(chordy::Letter::C, chordy::Accidental::Natural, 3);
+    /// let (harmonic, cents) = c3.nearest_harmonic(&c2);
+    /// assert_eq!(harmonic, 2); // C3 is the 2nd harmonic of C2
+    /// assert!((cents - 0.0).abs() < 0.1); // Should be very close to 0 cents
+    ///
+    /// // Test with a slightly detuned pitch
+    /// let slightly_sharp_c3 = c3.transpose_cents(15.0);
+    /// let (harmonic, cents) = slightly_sharp_c3.nearest_harmonic(&c2);
+    /// assert_eq!(harmonic, 2);
+    /// assert!((cents - 15.0).abs() < 1.0); // Should be about 15 cents sharp
+    /// ```
+    pub fn nearest_harmonic(&self, fundamental: &Pitch) -> (usize, f32) {
+        let fundamental_freq = fundamental.to_frequency();
+        let this_freq = self.to_frequency();
+
+        // Calculate the harmonic ratio
+        let ratio = this_freq / fundamental_freq;
+
+        // Find the nearest integer harmonic number
+        let n_float = ratio;
+        let n_rounded = n_float.round();
+        let n = n_rounded.max(1.0) as usize;
+
+        // Calculate the exact frequency of the nth harmonic
+        let exact_harmonic_freq = fundamental_freq * n as f32;
+
+        // Calculate cents deviation from the exact harmonic
+        let cents_deviation = 1200.0 * (this_freq / exact_harmonic_freq).log2();
+
+        (n, cents_deviation)
     }
 }
 
