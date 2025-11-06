@@ -5,7 +5,7 @@ use std::str::FromStr;
 use crate::error::ParseError;
 use crate::transposition::{ChromaticTransposer, Transposer};
 
-use super::{Accidental, Letter, NoteName};
+use super::{Accidental, Key, Letter, NoteName};
 
 /// A specific pitch with both note name and octave
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
@@ -58,7 +58,7 @@ impl Pitch {
         let midi_number = standard_midi_number + 12;
 
         // Convert MIDI number to pitch
-        Self::from_midi_number(midi_number)
+        Self::from_midi_number(midi_number as u8)
     }
 
     /// Converts this pitch to its frequency in Hz using equal temperament tuning.
@@ -86,6 +86,7 @@ impl Pitch {
     /// Creates a `Pitch` from a MIDI note number.
     ///
     /// MIDI note numbers start at 0 for C-2 and go up to 127 for G8.
+    /// This method uses sharps for black keys by default.
     ///
     /// # Examples
     ///
@@ -98,12 +99,12 @@ impl Pitch {
     /// let pitch = Pitch::from_midi_number(69);
     /// assert_eq!(pitch.to_string(), "A3");
     /// ```
-    pub fn from_midi_number(midi_number: i8) -> Self {
+    pub fn from_midi_number(midi_number: u8) -> Self {
         // MIDI note 0 is C-2
-        let octave = (midi_number / 12) - 2;
+        let octave = (midi_number as i8 / 12) - 2;
         let note_index = midi_number % 12;
 
-        // Map note index to letter and accidental
+        // Map note index to letter and accidental (using sharps by default)
         let (letter, accidental) = match note_index {
             0 => (Letter::C, Accidental::Natural),
             1 => (Letter::C, Accidental::Sharp),
@@ -116,6 +117,141 @@ impl Pitch {
             8 => (Letter::G, Accidental::Sharp),
             9 => (Letter::A, Accidental::Natural),
             10 => (Letter::A, Accidental::Sharp),
+            11 => (Letter::B, Accidental::Natural),
+            _ => unreachable!(),
+        };
+
+        Pitch::new(letter, accidental, octave)
+    }
+
+    /// Creates a `Pitch` from a MIDI note number, preferring flats over sharps for black keys.
+    ///
+    /// MIDI note numbers start at 0 for C-2 and go up to 127 for G8.
+    /// This method uses flats instead of sharps for black keys where possible.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::Pitch;
+    ///
+    /// let pitch = Pitch::from_midi_number_prefer_flats(61);
+    /// #[cfg(not(feature = "utf8_symbols"))]
+    /// assert_eq!(pitch.to_string(), "Db3");
+    /// #[cfg(feature = "utf8_symbols")]
+    /// assert_eq!(pitch.to_string(), "D♭3");
+    ///
+    /// let pitch = Pitch::from_midi_number_prefer_flats(66);
+    /// #[cfg(not(feature = "utf8_symbols"))]
+    /// assert_eq!(pitch.to_string(), "Gb3");
+    /// #[cfg(feature = "utf8_symbols")]
+    /// assert_eq!(pitch.to_string(), "G♭3");
+    /// ```
+    pub fn from_midi_number_prefer_flats(midi_number: u8) -> Self {
+        // MIDI note 0 is C-2
+        let octave = (midi_number as i8 / 12) - 2;
+        let note_index = midi_number % 12;
+
+        // Map note index to letter and accidental (using flats where possible)
+        let (letter, accidental) = match note_index {
+            0 => (Letter::C, Accidental::Natural),
+            1 => (Letter::D, Accidental::Flat),
+            2 => (Letter::D, Accidental::Natural),
+            3 => (Letter::E, Accidental::Flat),
+            4 => (Letter::E, Accidental::Natural),
+            5 => (Letter::F, Accidental::Natural),
+            6 => (Letter::G, Accidental::Flat),
+            7 => (Letter::G, Accidental::Natural),
+            8 => (Letter::A, Accidental::Flat),
+            9 => (Letter::A, Accidental::Natural),
+            10 => (Letter::B, Accidental::Flat),
+            11 => (Letter::B, Accidental::Natural),
+            _ => unreachable!(),
+        };
+
+        Pitch::new(letter, accidental, octave)
+    }
+
+    /// Creates a `Pitch` from a MIDI note number with key-aware enharmonic spelling.
+    ///
+    /// MIDI note numbers start at 0 for C-2 and go up to 127 for G8.
+    /// This method chooses the enharmonic spelling that best fits the given key.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Pitch, Key};
+    ///
+    /// let key = Key::Major(chordy::note!("G"));
+    /// let pitch = Pitch::from_midi_number_in_key(66, &key);
+    /// #[cfg(not(feature = "utf8_symbols"))]
+    /// assert_eq!(pitch.to_string(), "F#3"); // F# fits better in G major than Gb
+    /// #[cfg(feature = "utf8_symbols")]
+    /// assert_eq!(pitch.to_string(), "F♯3"); // F♯ fits better in G major than G♭
+    ///
+    /// let key = Key::Major(chordy::note!("F"));
+    /// let pitch = Pitch::from_midi_number_in_key(66, &key);
+    /// #[cfg(not(feature = "utf8_symbols"))]
+    /// assert_eq!(pitch.to_string(), "Gb3"); // Gb fits better in F major than F#
+    /// #[cfg(feature = "utf8_symbols")]
+    /// assert_eq!(pitch.to_string(), "G♭3"); // G♭ fits better in F major than F♯
+    /// ```
+    pub fn from_midi_number_in_key(midi_number: u8, key: &Key) -> Self {
+        // MIDI note 0 is C-2
+        let octave = (midi_number as i8 / 12) - 2;
+        let note_index = midi_number % 12;
+
+        // Get the key's accidental preference (positive for sharps, negative for flats)
+        let key_accidentals = key.accidentals();
+
+        // Map note index to letter and accidental based on key preference
+        // For natural keys (0 accidentals), default to sharps to be consistent with from_midi_number
+        let (letter, accidental) = match note_index {
+            0 => (Letter::C, Accidental::Natural),
+            1 => {
+                // C#/Db
+                if key_accidentals >= 0 {
+                    (Letter::C, Accidental::Sharp)
+                } else {
+                    (Letter::D, Accidental::Flat)
+                }
+            }
+            2 => (Letter::D, Accidental::Natural),
+            3 => {
+                // D#/Eb
+                if key_accidentals >= 0 {
+                    (Letter::D, Accidental::Sharp)
+                } else {
+                    (Letter::E, Accidental::Flat)
+                }
+            }
+            4 => (Letter::E, Accidental::Natural),
+            5 => (Letter::F, Accidental::Natural),
+            6 => {
+                // F#/Gb
+                if key_accidentals >= 0 {
+                    (Letter::F, Accidental::Sharp)
+                } else {
+                    (Letter::G, Accidental::Flat)
+                }
+            }
+            7 => (Letter::G, Accidental::Natural),
+            8 => {
+                // G#/Ab
+                if key_accidentals >= 0 {
+                    (Letter::G, Accidental::Sharp)
+                } else {
+                    (Letter::A, Accidental::Flat)
+                }
+            }
+            9 => (Letter::A, Accidental::Natural),
+            10 => {
+                // A#/Bb
+                if key_accidentals >= 0 {
+                    (Letter::A, Accidental::Sharp)
+                } else {
+                    (Letter::B, Accidental::Flat)
+                }
+            }
             11 => (Letter::B, Accidental::Natural),
             _ => unreachable!(),
         };

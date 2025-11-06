@@ -277,12 +277,103 @@ fn test_pitch_midi_conversion() {
     // Test that MIDI conversion is consistent with existing midi_number method
     for midi in 0..=127 {
         let pitch = Pitch::from_midi_number(midi);
-        assert_eq!(pitch.midi_number(), midi, "MIDI conversion failed for note {}", midi);
+        assert_eq!(pitch.midi_number(), midi as i8, "MIDI conversion failed for note {}", midi);
     }
 
     // Test edge cases
     assert_eq!(Pitch::from_midi_number(0), pitch!("C-2"));
     assert_eq!(Pitch::from_midi_number(127), pitch!("G8"));
+}
+
+#[test]
+fn test_pitch_midi_prefer_flats() {
+    // Test black keys with flat preference
+    assert_eq!(Pitch::from_midi_number_prefer_flats(61), pitch!("Db3")); // C#3 -> Db3
+    assert_eq!(Pitch::from_midi_number_prefer_flats(63), pitch!("Eb3")); // D#3 -> Eb3
+    assert_eq!(Pitch::from_midi_number_prefer_flats(66), pitch!("Gb3")); // F#3 -> Gb3
+    assert_eq!(Pitch::from_midi_number_prefer_flats(68), pitch!("Ab3")); // G#3 -> Ab3
+    assert_eq!(Pitch::from_midi_number_prefer_flats(70), pitch!("Bb3")); // A#3 -> Bb3
+
+    // Test white keys (should be the same as default)
+    assert_eq!(Pitch::from_midi_number_prefer_flats(60), pitch!("C3"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(62), pitch!("D3"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(64), pitch!("E3"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(65), pitch!("F3"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(67), pitch!("G3"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(69), pitch!("A3"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(71), pitch!("B3"));
+
+    // Test that all MIDI conversions are enharmonically equivalent
+    for midi in 0..=127 {
+        let pitch_default = Pitch::from_midi_number(midi);
+        let pitch_flat = Pitch::from_midi_number_prefer_flats(midi);
+        assert!(pitch_default.is_enharmonic_with(&pitch_flat),
+                "MIDI note {}: {} and {} are not enharmonic", midi, pitch_default, pitch_flat);
+    }
+}
+
+#[test]
+fn test_pitch_midi_in_key() {
+    use chordy::Key;
+
+    // Test sharp keys
+    let g_major = Key::Major(chordy::note!("G")); // 1 sharp
+    let d_major = Key::Major(chordy::note!("D")); // 2 sharps
+    let a_major = Key::Major(chordy::note!("A")); // 3 sharps
+
+    // In sharp keys, black keys should use sharps
+    assert_eq!(Pitch::from_midi_number_in_key(61, &g_major), pitch!("C#3")); // C# not Db
+    assert_eq!(Pitch::from_midi_number_in_key(66, &g_major), pitch!("F#3")); // F# not Gb
+    assert_eq!(Pitch::from_midi_number_in_key(68, &g_major), pitch!("G#3")); // G# not Ab
+
+    // Test flat keys
+    let f_major = Key::Major(chordy::note!("F")); // 1 flat
+    let bb_major = Key::Major(chordy::note!("Bb")); // 2 flats
+    let eb_major = Key::Major(chordy::note!("Eb")); // 3 flats
+
+    // In flat keys, black keys should use flats
+    assert_eq!(Pitch::from_midi_number_in_key(61, &f_major), pitch!("Db3")); // Db not C#
+    assert_eq!(Pitch::from_midi_number_in_key(66, &f_major), pitch!("Gb3")); // Gb not F#
+    assert_eq!(Pitch::from_midi_number_in_key(70, &f_major), pitch!("Bb3")); // Bb not A#
+
+    // Test natural keys (C major, A minor)
+    let c_major = Key::Major(chordy::note!("C")); // 0 sharps/flats
+    let a_minor = Key::Minor(chordy::note!("A")); // 0 sharps/flats
+
+    // In natural keys, default to sharps (consistent with from_midi_number)
+    assert_eq!(Pitch::from_midi_number_in_key(61, &c_major), pitch!("C#3"));
+    assert_eq!(Pitch::from_midi_number_in_key(66, &c_major), pitch!("F#3"));
+    assert_eq!(Pitch::from_midi_number_in_key(61, &a_minor), pitch!("C#3"));
+    assert_eq!(Pitch::from_midi_number_in_key(66, &a_minor), pitch!("F#3"));
+
+    // Test that all MIDI conversions are enharmonically equivalent
+    for midi in 0..=127 {
+        let pitch_default = Pitch::from_midi_number(midi);
+        let pitch_in_key = Pitch::from_midi_number_in_key(midi, &c_major);
+        assert!(pitch_default.is_enharmonic_with(&pitch_in_key),
+                "MIDI note {}: {} and {} are not enharmonic", midi, pitch_default, pitch_in_key);
+    }
+}
+
+#[test]
+fn test_pitch_midi_enharmonic_equivalence() {
+    // Test that all MIDI construction methods produce enharmonically equivalent results
+    use chordy::Key;
+
+    let c_major = Key::Major(chordy::note!("C"));
+
+    for midi in 0..=127 {
+        let pitch1 = Pitch::from_midi_number(midi);
+        let pitch2 = Pitch::from_midi_number_prefer_flats(midi);
+        let pitch3 = Pitch::from_midi_number_in_key(midi, &c_major);
+
+        assert!(pitch1.is_enharmonic_with(&pitch2),
+                "MIDI note {}: {} and {} are not enharmonic", midi, pitch1, pitch2);
+        assert!(pitch1.is_enharmonic_with(&pitch3),
+                "MIDI note {}: {} and {} are not enharmonic", midi, pitch1, pitch3);
+        assert!(pitch2.is_enharmonic_with(&pitch3),
+                "MIDI note {}: {} and {} are not enharmonic", midi, pitch2, pitch3);
+    }
 }
 
 #[test]
