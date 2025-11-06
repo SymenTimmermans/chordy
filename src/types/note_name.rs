@@ -22,7 +22,7 @@ use crate::traits::Torsor;
 /// assert!(c_sharp.is_enharmonic_with(&d_flat));
 /// assert_ne!(c_sharp, d_flat); // Different note names
 /// ```
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct NoteName(i8);
 
 impl NoteName {
