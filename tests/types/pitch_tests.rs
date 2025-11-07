@@ -21,13 +21,13 @@ fn test_pitch_creation() {
 
 #[test]
 fn test_midi_number() {
-    assert_eq!(pitch!("B#2").midi_number(), 60);
-    assert_eq!(pitch!("C3").midi_number(), 60);
-    assert_eq!(pitch!("G#5").midi_number(), 92);
-    assert_eq!(pitch!("Ab-1").midi_number(), 20);
-    assert_eq!(pitch!("Cbb3").midi_number(), 58);
-    assert_eq!(pitch!("Dbb3").midi_number(), 60);
-    assert_eq!(pitch!("Dbb4").midi_number(), 72);
+    assert_eq!(pitch!("B#3").midi_number(), 60);
+    assert_eq!(pitch!("C4").midi_number(), 60);
+    assert_eq!(pitch!("G#5").midi_number(), 80);
+    assert_eq!(pitch!("Ab0").midi_number(), 20);
+    assert_eq!(pitch!("Cbb4").midi_number(), 58);
+    assert_eq!(pitch!("Dbb4").midi_number(), 60);
+    assert_eq!(pitch!("Dbb5").midi_number(), 72);
 }
 
 #[test]
@@ -270,9 +270,9 @@ fn test_pitch_frequency_conversion() {
 #[test]
 fn test_pitch_midi_conversion() {
     // Test standard MIDI notes
-    assert_eq!(Pitch::from_midi_number(60), pitch!("C3"));
-    assert_eq!(Pitch::from_midi_number(69), pitch!("A3"));
-    assert_eq!(Pitch::from_midi_number(72), pitch!("C4"));
+    assert_eq!(Pitch::from_midi_number(60), pitch!("C4"));
+    assert_eq!(Pitch::from_midi_number(69), pitch!("A4"));
+    assert_eq!(Pitch::from_midi_number(72), pitch!("C5"));
 
     // Test that MIDI conversion is consistent with existing midi_number method
     for midi in 0..=127 {
@@ -281,27 +281,27 @@ fn test_pitch_midi_conversion() {
     }
 
     // Test edge cases
-    assert_eq!(Pitch::from_midi_number(0), pitch!("C-2"));
-    assert_eq!(Pitch::from_midi_number(127), pitch!("G8"));
+    assert_eq!(Pitch::from_midi_number(0), pitch!("C-1"));
+    assert_eq!(Pitch::from_midi_number(127), pitch!("G9"));
 }
 
 #[test]
 fn test_pitch_midi_prefer_flats() {
     // Test black keys with flat preference
-    assert_eq!(Pitch::from_midi_number_prefer_flats(61), pitch!("Db3")); // C#3 -> Db3
-    assert_eq!(Pitch::from_midi_number_prefer_flats(63), pitch!("Eb3")); // D#3 -> Eb3
-    assert_eq!(Pitch::from_midi_number_prefer_flats(66), pitch!("Gb3")); // F#3 -> Gb3
-    assert_eq!(Pitch::from_midi_number_prefer_flats(68), pitch!("Ab3")); // G#3 -> Ab3
-    assert_eq!(Pitch::from_midi_number_prefer_flats(70), pitch!("Bb3")); // A#3 -> Bb3
+    assert_eq!(Pitch::from_midi_number_prefer_flats(61), pitch!("Db4")); // C#4 -> Db4
+    assert_eq!(Pitch::from_midi_number_prefer_flats(63), pitch!("Eb4")); // D#4 -> Eb4
+    assert_eq!(Pitch::from_midi_number_prefer_flats(66), pitch!("Gb4")); // F#4 -> Gb4
+    assert_eq!(Pitch::from_midi_number_prefer_flats(68), pitch!("Ab4")); // G#4 -> Ab4
+    assert_eq!(Pitch::from_midi_number_prefer_flats(70), pitch!("Bb4")); // A#4 -> Bb4
 
     // Test white keys (should be the same as default)
-    assert_eq!(Pitch::from_midi_number_prefer_flats(60), pitch!("C3"));
-    assert_eq!(Pitch::from_midi_number_prefer_flats(62), pitch!("D3"));
-    assert_eq!(Pitch::from_midi_number_prefer_flats(64), pitch!("E3"));
-    assert_eq!(Pitch::from_midi_number_prefer_flats(65), pitch!("F3"));
-    assert_eq!(Pitch::from_midi_number_prefer_flats(67), pitch!("G3"));
-    assert_eq!(Pitch::from_midi_number_prefer_flats(69), pitch!("A3"));
-    assert_eq!(Pitch::from_midi_number_prefer_flats(71), pitch!("B3"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(60), pitch!("C4"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(62), pitch!("D4"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(64), pitch!("E4"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(65), pitch!("F4"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(67), pitch!("G4"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(69), pitch!("A4"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(71), pitch!("B4"));
 
     // Test that all MIDI conversions are enharmonically equivalent
     for midi in 0..=127 {
@@ -322,9 +322,9 @@ fn test_pitch_midi_in_key() {
     let a_major = Key::Major(chordy::note!("A")); // 3 sharps
 
     // In sharp keys, black keys should use sharps
-    assert_eq!(Pitch::from_midi_number_in_key(61, &g_major), pitch!("C#3")); // C# not Db
-    assert_eq!(Pitch::from_midi_number_in_key(66, &g_major), pitch!("F#3")); // F# not Gb
-    assert_eq!(Pitch::from_midi_number_in_key(68, &g_major), pitch!("G#3")); // G# not Ab
+    assert_eq!(Pitch::from_midi_number_in_key(61, &g_major), pitch!("C#4")); // C# not Db
+    assert_eq!(Pitch::from_midi_number_in_key(66, &g_major), pitch!("F#4")); // F# not Gb
+    assert_eq!(Pitch::from_midi_number_in_key(68, &g_major), pitch!("G#4")); // G# not Ab
 
     // Test flat keys
     let f_major = Key::Major(chordy::note!("F")); // 1 flat
@@ -332,19 +332,19 @@ fn test_pitch_midi_in_key() {
     let eb_major = Key::Major(chordy::note!("Eb")); // 3 flats
 
     // In flat keys, black keys should use flats
-    assert_eq!(Pitch::from_midi_number_in_key(61, &f_major), pitch!("Db3")); // Db not C#
-    assert_eq!(Pitch::from_midi_number_in_key(66, &f_major), pitch!("Gb3")); // Gb not F#
-    assert_eq!(Pitch::from_midi_number_in_key(70, &f_major), pitch!("Bb3")); // Bb not A#
+    assert_eq!(Pitch::from_midi_number_in_key(61, &f_major), pitch!("Db4")); // Db not C#
+    assert_eq!(Pitch::from_midi_number_in_key(66, &f_major), pitch!("Gb4")); // Gb not F#
+    assert_eq!(Pitch::from_midi_number_in_key(70, &f_major), pitch!("Bb4")); // Bb not A#
 
     // Test natural keys (C major, A minor)
     let c_major = Key::Major(chordy::note!("C")); // 0 sharps/flats
     let a_minor = Key::Minor(chordy::note!("A")); // 0 sharps/flats
 
     // In natural keys, default to sharps (consistent with from_midi_number)
-    assert_eq!(Pitch::from_midi_number_in_key(61, &c_major), pitch!("C#3"));
-    assert_eq!(Pitch::from_midi_number_in_key(66, &c_major), pitch!("F#3"));
-    assert_eq!(Pitch::from_midi_number_in_key(61, &a_minor), pitch!("C#3"));
-    assert_eq!(Pitch::from_midi_number_in_key(66, &a_minor), pitch!("F#3"));
+    assert_eq!(Pitch::from_midi_number_in_key(61, &c_major), pitch!("C#4"));
+    assert_eq!(Pitch::from_midi_number_in_key(66, &c_major), pitch!("F#4"));
+    assert_eq!(Pitch::from_midi_number_in_key(61, &a_minor), pitch!("C#4"));
+    assert_eq!(Pitch::from_midi_number_in_key(66, &a_minor), pitch!("F#4"));
 
     // Test that all MIDI conversions are enharmonically equivalent
     for midi in 0..=127 {
@@ -647,52 +647,52 @@ fn test_harmonic_series_relationship() {
 fn test_spelling_strategy_prefer_sharps() {
     use chordy::SpellingStrategy;
 
-    // MIDI note 61 = C#3/Db3
+    // MIDI note 61 = C#4/Db4
     let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::PreferSharps);
     #[cfg(feature = "utf8_symbols")]
-    assert_eq!(pitch.to_string(), "C♯3");
+    assert_eq!(pitch.to_string(), "C♯4");
     #[cfg(not(feature = "utf8_symbols"))]
-    assert_eq!(pitch.to_string(), "C#3");
+    assert_eq!(pitch.to_string(), "C#4");
 
-    // MIDI note 66 = F#3/Gb3
+    // MIDI note 66 = F#4/Gb4
     let pitch = Pitch::from_midi_with_strategy(66, SpellingStrategy::PreferSharps);
     #[cfg(feature = "utf8_symbols")]
-    assert_eq!(pitch.to_string(), "F♯3");
+    assert_eq!(pitch.to_string(), "F♯4");
     #[cfg(not(feature = "utf8_symbols"))]
-    assert_eq!(pitch.to_string(), "F#3");
+    assert_eq!(pitch.to_string(), "F#4");
 
-    // MIDI note 70 = A#3/Bb3
+    // MIDI note 70 = A#4/Bb4
     let pitch = Pitch::from_midi_with_strategy(70, SpellingStrategy::PreferSharps);
     #[cfg(feature = "utf8_symbols")]
-    assert_eq!(pitch.to_string(), "A♯3");
+    assert_eq!(pitch.to_string(), "A♯4");
     #[cfg(not(feature = "utf8_symbols"))]
-    assert_eq!(pitch.to_string(), "A#3");
+    assert_eq!(pitch.to_string(), "A#4");
 }
 
 #[test]
 fn test_spelling_strategy_prefer_flats() {
     use chordy::SpellingStrategy;
 
-    // MIDI note 61 = C#3/Db3
+    // MIDI note 61 = C#4/Db4
     let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::PreferFlats);
     #[cfg(feature = "utf8_symbols")]
-    assert_eq!(pitch.to_string(), "D♭3");
+    assert_eq!(pitch.to_string(), "D♭4");
     #[cfg(not(feature = "utf8_symbols"))]
-    assert_eq!(pitch.to_string(), "Db3");
+    assert_eq!(pitch.to_string(), "Db4");
 
-    // MIDI note 66 = F#3/Gb3
+    // MIDI note 66 = F#4/Gb4
     let pitch = Pitch::from_midi_with_strategy(66, SpellingStrategy::PreferFlats);
     #[cfg(feature = "utf8_symbols")]
-    assert_eq!(pitch.to_string(), "G♭3");
+    assert_eq!(pitch.to_string(), "G♭4");
     #[cfg(not(feature = "utf8_symbols"))]
-    assert_eq!(pitch.to_string(), "Gb3");
+    assert_eq!(pitch.to_string(), "Gb4");
 
-    // MIDI note 70 = A#3/Bb3
+    // MIDI note 70 = A#4/Bb4
     let pitch = Pitch::from_midi_with_strategy(70, SpellingStrategy::PreferFlats);
     #[cfg(feature = "utf8_symbols")]
-    assert_eq!(pitch.to_string(), "B♭3");
+    assert_eq!(pitch.to_string(), "B♭4");
     #[cfg(not(feature = "utf8_symbols"))]
-    assert_eq!(pitch.to_string(), "Bb3");
+    assert_eq!(pitch.to_string(), "Bb4");
 }
 
 #[test]
@@ -702,16 +702,16 @@ fn test_spelling_strategy_directional_chromatic() {
     // Ascending chromatic motion should use sharps
     let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::DirectionalChromatic { ascending: true });
     #[cfg(feature = "utf8_symbols")]
-    assert_eq!(pitch.to_string(), "C♯3");
+    assert_eq!(pitch.to_string(), "C♯4");
     #[cfg(not(feature = "utf8_symbols"))]
-    assert_eq!(pitch.to_string(), "C#3");
+    assert_eq!(pitch.to_string(), "C#4");
 
     // Descending chromatic motion should use flats
     let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::DirectionalChromatic { ascending: false });
     #[cfg(feature = "utf8_symbols")]
-    assert_eq!(pitch.to_string(), "D♭3");
+    assert_eq!(pitch.to_string(), "D♭4");
     #[cfg(not(feature = "utf8_symbols"))]
-    assert_eq!(pitch.to_string(), "Db3");
+    assert_eq!(pitch.to_string(), "Db4");
 }
 
 #[test]
@@ -722,25 +722,25 @@ fn test_spelling_strategy_key_context() {
     let g_major = Key::Major(chordy::note!("G"));
     let pitch = Pitch::from_midi_with_strategy(66, SpellingStrategy::KeyContext(g_major));
     #[cfg(feature = "utf8_symbols")]
-    assert_eq!(pitch.to_string(), "F♯3"); // F# fits G major
+    assert_eq!(pitch.to_string(), "F♯4"); // F# fits G major
     #[cfg(not(feature = "utf8_symbols"))]
-    assert_eq!(pitch.to_string(), "F#3");
+    assert_eq!(pitch.to_string(), "F#4");
 
     // F major (1 flat) should prefer flats
     let f_major = Key::Major(chordy::note!("F"));
     let pitch = Pitch::from_midi_with_strategy(66, SpellingStrategy::KeyContext(f_major));
     #[cfg(feature = "utf8_symbols")]
-    assert_eq!(pitch.to_string(), "G♭3"); // Gb fits F major
+    assert_eq!(pitch.to_string(), "G♭4"); // Gb fits F major
     #[cfg(not(feature = "utf8_symbols"))]
-    assert_eq!(pitch.to_string(), "Gb3");
+    assert_eq!(pitch.to_string(), "Gb4");
 
     // C major (no accidentals) defaults to sharps
     let c_major = Key::Major(chordy::note!("C"));
     let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::KeyContext(c_major));
     #[cfg(feature = "utf8_symbols")]
-    assert_eq!(pitch.to_string(), "C♯3");
+    assert_eq!(pitch.to_string(), "C♯4");
     #[cfg(not(feature = "utf8_symbols"))]
-    assert_eq!(pitch.to_string(), "C#3");
+    assert_eq!(pitch.to_string(), "C#4");
 }
 
 #[test]
@@ -749,17 +749,17 @@ fn test_spelling_strategy_prefer_naturals() {
 
     // Test that naturals are used where possible
     let pitch = Pitch::from_midi_with_strategy(60, SpellingStrategy::PreferNaturals);
-    assert_eq!(pitch.to_string(), "C3"); // Natural C
+    assert_eq!(pitch.to_string(), "C4"); // Natural C
 
     let pitch = Pitch::from_midi_with_strategy(62, SpellingStrategy::PreferNaturals);
-    assert_eq!(pitch.to_string(), "D3"); // Natural D
+    assert_eq!(pitch.to_string(), "D4"); // Natural D
 
     // Black keys still use accidentals (no natural equivalent)
     let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::PreferNaturals);
     #[cfg(feature = "utf8_symbols")]
-    assert_eq!(pitch.to_string(), "C♯3");
+    assert_eq!(pitch.to_string(), "C♯4");
     #[cfg(not(feature = "utf8_symbols"))]
-    assert_eq!(pitch.to_string(), "C#3");
+    assert_eq!(pitch.to_string(), "C#4");
 }
 
 #[test]
@@ -770,9 +770,9 @@ fn test_spelling_strategy_minimize_accidentals() {
     // In a real implementation, this would analyze context
     let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::MinimizeAccidentals);
     #[cfg(feature = "utf8_symbols")]
-    assert_eq!(pitch.to_string(), "C♯3");
+    assert_eq!(pitch.to_string(), "C♯4");
     #[cfg(not(feature = "utf8_symbols"))]
-    assert_eq!(pitch.to_string(), "C#3");
+    assert_eq!(pitch.to_string(), "C#4");
 }
 
 #[test]

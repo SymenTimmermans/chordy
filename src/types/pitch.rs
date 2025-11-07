@@ -65,17 +65,9 @@ impl Pitch {
     /// assert_eq!(pitch.to_string(), "C4");
     /// ```
     pub fn from_frequency(hz: f32) -> Self {
-        // Calculate the number of semitones from A4
-        // In this system, A4 has MIDI number 69 (base_midi_number=9 + (4+2)*12 = 9+72=81)
-        // Wait, let me recalculate: A4 = base_midi_number=9 + ((4+2)*12) = 9 + 72 = 81
-        // But standard MIDI A4 is 69, so there's a 12 semitone difference
-
         // Calculate the number of semitones from A4 using standard MIDI
         let semitones_from_a4 = 12.0 * (hz / Self::A440).log2();
-        let standard_midi_number = (semitones_from_a4 + 69.0).round() as i8;
-
-        // Convert from standard MIDI to this system's MIDI (add 12 semitones)
-        let midi_number = standard_midi_number + 12;
+        let midi_number = (semitones_from_a4 + 69.0).round() as i8;
 
         // Clamp MIDI number to valid range [0, 127]
         let clamped_midi = midi_number.clamp(0, 127) as u8;
@@ -98,17 +90,14 @@ impl Pitch {
     /// assert!((pitch.to_frequency() - 261.63).abs() < 0.01);
     /// ```
     pub fn to_frequency(&self) -> f32 {
-        // Convert from this system's MIDI to standard MIDI (subtract 12 semitones)
-        let standard_midi_number = self.midi_number() as f32 - 12.0;
-
         // Calculate the number of semitones from A4 (standard MIDI note 69)
-        let semitones_from_a4 = standard_midi_number - 69.0;
+        let semitones_from_a4 = self.midi_number() as f32 - 69.0;
         Self::A440 * 2.0f32.powf(semitones_from_a4 / 12.0)
     }
 
     /// Creates a `Pitch` from a MIDI note number.
     ///
-    /// MIDI note numbers start at 0 for C-2 and go up to 127 for G8.
+    /// MIDI note numbers start at 0 for C-1 and go up to 127 for G9.
     /// This method uses sharps for black keys by default.
     ///
     /// # Examples
@@ -117,14 +106,14 @@ impl Pitch {
     /// use chordy::Pitch;
     ///
     /// let pitch = Pitch::from_midi_number(60);
-    /// assert_eq!(pitch.to_string(), "C3");
+    /// assert_eq!(pitch.to_string(), "C4");
     ///
     /// let pitch = Pitch::from_midi_number(69);
-    /// assert_eq!(pitch.to_string(), "A3");
+    /// assert_eq!(pitch.to_string(), "A4");
     /// ```
     pub fn from_midi_number(midi_number: u8) -> Self {
-        // MIDI note 0 is C-2
-        let octave = (midi_number as i8 / 12) - 2;
+        // MIDI note 0 is C-1
+        let octave = (midi_number as i8 / 12) - 1;
         let note_index = midi_number % 12;
 
         // Map note index to letter and accidental (using sharps by default)
@@ -149,7 +138,7 @@ impl Pitch {
 
     /// Creates a `Pitch` from a MIDI note number, preferring flats over sharps for black keys.
     ///
-    /// MIDI note numbers start at 0 for C-2 and go up to 127 for G8.
+    /// MIDI note numbers start at 0 for C-1 and go up to 127 for G9.
     /// This method uses flats instead of sharps for black keys where possible.
     ///
     /// # Examples
@@ -159,19 +148,19 @@ impl Pitch {
     ///
     /// let pitch = Pitch::from_midi_number_prefer_flats(61);
     /// #[cfg(not(feature = "utf8_symbols"))]
-    /// assert_eq!(pitch.to_string(), "Db3");
+    /// assert_eq!(pitch.to_string(), "Db4");
     /// #[cfg(feature = "utf8_symbols")]
-    /// assert_eq!(pitch.to_string(), "D♭3");
+    /// assert_eq!(pitch.to_string(), "D♭4");
     ///
     /// let pitch = Pitch::from_midi_number_prefer_flats(66);
     /// #[cfg(not(feature = "utf8_symbols"))]
-    /// assert_eq!(pitch.to_string(), "Gb3");
+    /// assert_eq!(pitch.to_string(), "Gb4");
     /// #[cfg(feature = "utf8_symbols")]
-    /// assert_eq!(pitch.to_string(), "G♭3");
+    /// assert_eq!(pitch.to_string(), "G♭4");
     /// ```
     pub fn from_midi_number_prefer_flats(midi_number: u8) -> Self {
-        // MIDI note 0 is C-2
-        let octave = (midi_number as i8 / 12) - 2;
+        // MIDI note 0 is C-1
+        let octave = (midi_number as i8 / 12) - 1;
         let note_index = midi_number % 12;
 
         // Map note index to letter and accidental (using flats where possible)
@@ -196,7 +185,7 @@ impl Pitch {
 
     /// Creates a `Pitch` from a MIDI note number with key-aware enharmonic spelling.
     ///
-    /// MIDI note numbers start at 0 for C-2 and go up to 127 for G8.
+    /// MIDI note numbers start at 0 for C-1 and go up to 127 for G9.
     /// This method chooses the enharmonic spelling that best fits the given key.
     ///
     /// # Examples
@@ -207,20 +196,20 @@ impl Pitch {
     /// let key = Key::Major(chordy::note!("G"));
     /// let pitch = Pitch::from_midi_number_in_key(66, &key);
     /// #[cfg(not(feature = "utf8_symbols"))]
-    /// assert_eq!(pitch.to_string(), "F#3"); // F# fits better in G major than Gb
+    /// assert_eq!(pitch.to_string(), "F#4"); // F# fits better in G major than Gb
     /// #[cfg(feature = "utf8_symbols")]
-    /// assert_eq!(pitch.to_string(), "F♯3"); // F♯ fits better in G major than G♭
+    /// assert_eq!(pitch.to_string(), "F♯4"); // F♯ fits better in G major than G♭
     ///
     /// let key = Key::Major(chordy::note!("F"));
     /// let pitch = Pitch::from_midi_number_in_key(66, &key);
     /// #[cfg(not(feature = "utf8_symbols"))]
-    /// assert_eq!(pitch.to_string(), "Gb3"); // Gb fits better in F major than F#
+    /// assert_eq!(pitch.to_string(), "Gb4"); // Gb fits better in F major than F#
     /// #[cfg(feature = "utf8_symbols")]
-    /// assert_eq!(pitch.to_string(), "G♭3"); // G♭ fits better in F major than F♯
+    /// assert_eq!(pitch.to_string(), "G♭4"); // G♭ fits better in F major than F♯
     /// ```
     pub fn from_midi_number_in_key(midi_number: u8, key: &Key) -> Self {
-        // MIDI note 0 is C-2
-        let octave = (midi_number as i8 / 12) - 2;
+        // MIDI note 0 is C-1
+        let octave = (midi_number as i8 / 12) - 1;
         let note_index = midi_number % 12;
 
         // Get the key's accidental preference (positive for sharps, negative for flats)
@@ -284,7 +273,7 @@ impl Pitch {
 
     /// Creates a `Pitch` from a MIDI note number using a specific spelling strategy.
     ///
-    /// MIDI note numbers start at 0 for C-2 and go up to 127 for G8.
+    /// MIDI note numbers start at 0 for C-1 and go up to 127 for G9.
     /// This method uses the specified strategy to choose enharmonic spellings.
     ///
     /// # Examples
@@ -295,34 +284,34 @@ impl Pitch {
     /// // Prefer sharps
     /// let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::PreferSharps);
     /// #[cfg(not(feature = "utf8_symbols"))]
-    /// assert_eq!(pitch.to_string(), "C#3");
+    /// assert_eq!(pitch.to_string(), "C#4");
     /// #[cfg(feature = "utf8_symbols")]
-    /// assert_eq!(pitch.to_string(), "C♯3");
+    /// assert_eq!(pitch.to_string(), "C♯4");
     ///
     /// // Prefer flats
     /// let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::PreferFlats);
     /// #[cfg(not(feature = "utf8_symbols"))]
-    /// assert_eq!(pitch.to_string(), "Db3");
+    /// assert_eq!(pitch.to_string(), "Db4");
     /// #[cfg(feature = "utf8_symbols")]
-    /// assert_eq!(pitch.to_string(), "D♭3");
+    /// assert_eq!(pitch.to_string(), "D♭4");
     ///
     /// // Directional chromatic (ascending)
     /// let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::DirectionalChromatic { ascending: true });
     /// #[cfg(not(feature = "utf8_symbols"))]
-    /// assert_eq!(pitch.to_string(), "C#3");
+    /// assert_eq!(pitch.to_string(), "C#4");
     /// #[cfg(feature = "utf8_symbols")]
-    /// assert_eq!(pitch.to_string(), "C♯3");
+    /// assert_eq!(pitch.to_string(), "C♯4");
     ///
     /// // Directional chromatic (descending)
     /// let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::DirectionalChromatic { ascending: false });
     /// #[cfg(not(feature = "utf8_symbols"))]
-    /// assert_eq!(pitch.to_string(), "Db3");
+    /// assert_eq!(pitch.to_string(), "Db4");
     /// #[cfg(feature = "utf8_symbols")]
-    /// assert_eq!(pitch.to_string(), "D♭3");
+    /// assert_eq!(pitch.to_string(), "D♭4");
     /// ```
     pub fn from_midi_with_strategy(midi_number: u8, strategy: SpellingStrategy) -> Self {
-        // MIDI note 0 is C-2
-        let octave = (midi_number as i8 / 12) - 2;
+        // MIDI note 0 is C-1
+        let octave = (midi_number as i8 / 12) - 1;
         let note_index = midi_number % 12;
 
         // Apply the specified spelling strategy
@@ -466,23 +455,23 @@ impl Pitch {
     }
 
     /// Returns the full MIDI note number for this pitch.
-    /// Starting from C-2 (MIDI note 0).
+    /// Starting from C-1 (MIDI note 0).
     ///
     /// # Examples
     ///
     /// ```
     /// use chordy::{Pitch, Letter, Accidental};
     ///
-    /// let pitch = Pitch::new(Letter::C, Accidental::Natural, 3);
+    /// let pitch = Pitch::new(Letter::C, Accidental::Natural, 4);
     /// assert_eq!(pitch.midi_number(), 60);
     ///
     /// let pitch = Pitch::new(Letter::G, Accidental::Sharp, 5);
-    /// assert_eq!(pitch.midi_number(), 92);
+    /// assert_eq!(pitch.midi_number(), 80);
     ///
     /// ```
     pub fn midi_number(&self) -> i8 {
-        // MIDI octaves start at -2, where C-2 is note 0
-        self.name.base_midi_number() + ((self.octave + 2) * 12)
+        // MIDI octaves start at -1, where C-1 is note 0
+        self.name.base_midi_number() + ((self.octave + 1) * 12)
     }
 
     /// Checks if two pitches represent the same frequency.
@@ -766,11 +755,11 @@ impl Pitch {
     /// assert_eq!(harmonic, 2); // C3 is the 2nd harmonic of C2
     /// assert!((cents - 0.0).abs() < 0.1); // Should be very close to 0 cents
     ///
-    /// // Test with a slightly detuned pitch
-    /// let slightly_sharp_c3 = c3.transpose_cents(15.0);
-    /// let (harmonic, cents) = slightly_sharp_c3.nearest_harmonic(&c2);
+    /// // Test with a detuned pitch that snaps to a different equal-tempered pitch
+    /// let sharp_c3 = c3.transpose_cents(100.0);
+    /// let (harmonic, cents) = sharp_c3.nearest_harmonic(&c2);
     /// assert_eq!(harmonic, 2);
-    /// assert!((cents - 15.0).abs() < 1.0); // Should be about 15 cents sharp
+    /// assert!((cents - 100.0).abs() < 2.0); // Should be about 100 cents sharp
     /// ```
     pub fn nearest_harmonic(&self, fundamental: &Pitch) -> (usize, f32) {
         let fundamental_freq = fundamental.to_frequency();

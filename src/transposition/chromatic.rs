@@ -18,11 +18,11 @@ impl Transposer for ChromaticTransposer {
 
         for letter in Letter::all() {
             let base_index = letter.base_midi_number();
-            let candidate_octave = (target_midi / 12) - 2;
+            let candidate_octave = (target_midi / 12) - 1;
 
             for accidental in Accidental::all() {
                 let semitone =
-                    base_index + accidental.semitone_offset() + 12 * (candidate_octave + 2);
+                    base_index + accidental.semitone_offset() + 12 * (candidate_octave + 1);
                 let mut pitch_guess = Pitch::new(letter, accidental, candidate_octave);
 
                 let diff = semitone - target_midi;
