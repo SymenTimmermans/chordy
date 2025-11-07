@@ -119,6 +119,13 @@ use crate::{
     error::ParseError,
     note,
     traits::{HasIntervals, HasRoot, Invertible},
+    types::{
+        voicing::{
+            PianoVoicingConfig, PianoVoicingType, VoicedChord, Voicer, VoicingConfig, VoicingError,
+            VoicingStyle,
+        },
+        Key, Pitch, RomanChord, RomanNumeral,
+    },
 };
 
 mod quality;
@@ -636,6 +643,183 @@ impl Chord {
         )
     }
 
+    /// Create a major 9th chord with the given root note
+    pub fn major_9th(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MAJOR_SEVENTH,
+                Interval::MAJOR_NINTH,
+            ],
+        )
+    }
+
+    /// Create a minor 9th chord with the given root note
+    pub fn minor_9th(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MINOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MINOR_SEVENTH,
+                Interval::MAJOR_NINTH,
+            ],
+        )
+    }
+
+    /// Create a dominant 9th chord with the given root note
+    pub fn dominant_9th(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MINOR_SEVENTH,
+                Interval::MAJOR_NINTH,
+            ],
+        )
+    }
+
+    /// Create a minor 11th chord with the given root note
+    pub fn minor_11th(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MINOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MINOR_SEVENTH,
+                Interval::MAJOR_NINTH,
+                Interval::PERFECT_ELEVENTH,
+            ],
+        )
+    }
+
+    /// Create a major 11th chord with the given root note
+    pub fn major_11th(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MAJOR_SEVENTH,
+                Interval::MAJOR_NINTH,
+                Interval::PERFECT_ELEVENTH,
+            ],
+        )
+    }
+
+    /// Create a dominant 11th chord with the given root note
+    pub fn dominant_11th(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MINOR_SEVENTH,
+                Interval::MAJOR_NINTH,
+                Interval::PERFECT_ELEVENTH,
+            ],
+        )
+    }
+
+    /// Create a major 13th chord with the given root note
+    pub fn major_13th(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MAJOR_SEVENTH,
+                Interval::MAJOR_NINTH,
+                Interval::PERFECT_ELEVENTH,
+                Interval::MAJOR_THIRTEENTH,
+            ],
+        )
+    }
+
+    /// Create a minor 13th chord with the given root note
+    pub fn minor_13th(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MINOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MINOR_SEVENTH,
+                Interval::MAJOR_NINTH,
+                Interval::PERFECT_ELEVENTH,
+                Interval::MAJOR_THIRTEENTH,
+            ],
+        )
+    }
+
+    /// Create a dominant 13th chord with the given root note
+    pub fn dominant_13th(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MINOR_SEVENTH,
+                Interval::MAJOR_NINTH,
+                Interval::PERFECT_ELEVENTH,
+                Interval::MAJOR_THIRTEENTH,
+            ],
+        )
+    }
+
+    /// Create a dominant 7th flat 9 chord with the given root note
+    pub fn dominant_7th_flat_9(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MINOR_SEVENTH,
+                Interval::MINOR_NINTH,
+            ],
+        )
+    }
+
+    /// Create a dominant 7th sharp 9 chord with the given root note
+    pub fn dominant_7th_sharp_9(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MINOR_SEVENTH,
+                Interval::AUGMENTED_NINTH,
+            ],
+        )
+    }
+
+    /// Create a dominant 7th flat 13 chord with the given root note
+    pub fn dominant_7th_flat_13(root: NoteName) -> Self {
+        Self::new(
+            root,
+            vec![
+                Interval::PERFECT_UNISON,
+                Interval::MAJOR_THIRD,
+                Interval::PERFECT_FIFTH,
+                Interval::MINOR_SEVENTH,
+                Interval::MINOR_THIRTEENTH,
+            ],
+        )
+    }
+
     // More chord constructors can be added as needed...
 
     /// Return a Harte representation (string) of the chord
@@ -685,15 +869,15 @@ impl Chord {
     }
 
     /// Convert this chord to a roman numeral chord in the given key
-    pub fn to_roman(&self, key: &super::Key) -> Option<super::RomanChord> {
-        use super::RomanNumeral;
+    pub fn to_roman(&self, key: &Key) -> Option<RomanChord> {
+        use RomanNumeral;
 
         // Calculate the interval from the key root to this chord's root
         let interval_from_key = key.root().interval_to(self.root);
 
         let roman_numeral: RomanNumeral = interval_from_key.into();
         let mut roman_chord =
-            super::RomanChord::new(roman_numeral, self.intervals.iter().collect());
+            RomanChord::new(roman_numeral, self.intervals.iter().collect());
 
         // Preserve bass information if present
         if let Some((bass_note, bass_type)) = self.bass {
@@ -720,8 +904,8 @@ impl Chord {
     /// ```
     pub fn analyze_in_key(
         &self,
-        key: &super::Key,
-    ) -> (super::RomanNumeral, Option<super::HarmonicFunction>) {
+        key: &Key,
+    ) -> (RomanNumeral, Option<HarmonicFunction>) {
         let roman = key.analyze_chord(self);
         let function = key.harmonic_function(self);
         (roman, function)
@@ -739,7 +923,7 @@ impl Chord {
     /// let roman = g_chord.roman_in_key(&c_major_key);
     /// assert_eq!(roman, RomanNumeral::V());
     /// ```
-    pub fn roman_in_key(&self, key: &super::Key) -> super::RomanNumeral {
+    pub fn roman_in_key(&self, key: &Key) -> RomanNumeral {
         key.analyze_chord(self)
     }
 
@@ -755,7 +939,7 @@ impl Chord {
     /// let function = g_chord.function_in_key(&c_major_key);
     /// assert_eq!(function, Some(HarmonicFunction::Dominant));
     /// ```
-    pub fn function_in_key(&self, key: &super::Key) -> Option<super::HarmonicFunction> {
+    pub fn function_in_key(&self, key: &Key) -> Option<HarmonicFunction> {
         key.harmonic_function(self)
     }
 
@@ -1145,7 +1329,7 @@ impl Chord {
     /// let pitches = d_minor_7.pitches(3);
     /// // Returns [D3, F3, A3, C4] - note the C crosses to octave 4
     /// ```
-    pub fn pitches(&self, octave: i8) -> Vec<super::Pitch> {
+    pub fn pitches(&self, octave: i8) -> Vec<Pitch> {
         let mut pitches = Vec::new();
         let mut last_midi = None;
 
@@ -1198,9 +1382,9 @@ impl Chord {
     /// ```
     pub fn voice(
         &self,
-        config: &super::VoicingConfig,
-    ) -> Result<super::VoicedChord, super::VoicingError> {
-        let voicer = super::Voicer::new(config.clone());
+        config: &VoicingConfig,
+    ) -> Result<VoicedChord, VoicingError> {
+        let voicer = Voicer::new(config.clone());
         voicer.voice_chord(self)
     }
 
@@ -1222,10 +1406,10 @@ impl Chord {
     /// ```
     pub fn voice_closed(
         &self,
-        bass_pitch: super::Pitch,
-    ) -> Result<super::VoicedChord, super::VoicingError> {
-        let config = super::VoicingConfig::new()
-            .style(super::VoicingStyle::Closed)
+        bass_pitch: Pitch,
+    ) -> Result<VoicedChord, VoicingError> {
+        let config = VoicingConfig::new()
+            .style(VoicingStyle::Closed)
             .bass_pitch(bass_pitch);
         self.voice(&config)
     }
@@ -1248,10 +1432,10 @@ impl Chord {
     /// ```
     pub fn voice_open(
         &self,
-        bass_pitch: super::Pitch,
-    ) -> Result<super::VoicedChord, super::VoicingError> {
-        let config = super::VoicingConfig::new()
-            .style(super::VoicingStyle::Open)
+        bass_pitch: Pitch,
+    ) -> Result<VoicedChord, VoicingError> {
+        let config = VoicingConfig::new()
+            .style(VoicingStyle::Open)
             .bass_pitch(bass_pitch);
         self.voice(&config)
     }
@@ -1274,10 +1458,10 @@ impl Chord {
     /// ```
     pub fn voice_drop2(
         &self,
-        bass_pitch: super::Pitch,
-    ) -> Result<super::VoicedChord, super::VoicingError> {
-        let config = super::VoicingConfig::new()
-            .style(super::VoicingStyle::Drop2)
+        bass_pitch: Pitch,
+    ) -> Result<VoicedChord, VoicingError> {
+        let config = VoicingConfig::new()
+            .style(VoicingStyle::Drop2)
             .bass_pitch(bass_pitch);
         self.voice(&config)
     }
@@ -1300,10 +1484,10 @@ impl Chord {
     /// ```
     pub fn voice_drop3(
         &self,
-        bass_pitch: super::Pitch,
-    ) -> Result<super::VoicedChord, super::VoicingError> {
-        let config = super::VoicingConfig::new()
-            .style(super::VoicingStyle::Drop3)
+        bass_pitch: Pitch,
+    ) -> Result<VoicedChord, VoicingError> {
+        let config = VoicingConfig::new()
+            .style(VoicingStyle::Drop3)
             .bass_pitch(bass_pitch);
         self.voice(&config)
     }
@@ -1334,12 +1518,12 @@ impl Chord {
     /// ```
     pub fn voice_spread(
         &self,
-        bass_pitch: super::Pitch,
-        min_interval: super::Interval,
-        max_interval: super::Interval,
-    ) -> Result<super::VoicedChord, super::VoicingError> {
-        let config = super::VoicingConfig::new()
-            .style(super::VoicingStyle::spread(min_interval, max_interval))
+        bass_pitch: Pitch,
+        min_interval: Interval,
+        max_interval: Interval,
+    ) -> Result<VoicedChord, VoicingError> {
+        let config = VoicingConfig::new()
+            .style(VoicingStyle::spread(min_interval, max_interval))
             .bass_pitch(bass_pitch);
         self.voice(&config)
     }
@@ -1359,9 +1543,145 @@ impl Chord {
     ///
     /// assert_eq!(voiced.info.range, chordy::PitchRange::piano());
     /// ```
-    pub fn voice_for_piano(&self) -> Result<super::VoicedChord, super::VoicingError> {
-        let config = super::VoicingConfig::piano();
+    pub fn voice_for_piano(&self) -> Result<VoicedChord, VoicingError> {
+        let config = VoicingConfig::piano();
         self.voice(&config)
+    }
+
+    /// Voice this chord specifically for piano with ergonomic considerations
+    ///
+    /// Uses piano-specific voicing algorithms that consider hand span,
+    /// finger reach, and other human physical limitations.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let chord = Chord::major(note!("C"));
+    /// let voiced = chord.voice_piano_block().unwrap();
+    ///
+    /// assert!(voiced.is_piano_voicing());
+    /// ```
+    pub fn voice_piano_block(&self) -> Result<VoicedChord, VoicingError> {
+        let config = VoicingConfig::piano();
+        let piano_config = PianoVoicingConfig::classical();
+        Voicer::new(config).voice_piano(self, &piano_config)
+    }
+
+    /// Voice this chord for piano with spread voicing
+    ///
+    /// Creates a spread voicing where notes are distributed across
+    /// multiple octaves for a more open, resonant sound.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let chord = Chord::major(note!("C"));
+    /// let voiced = chord.voice_piano_spread().unwrap();
+    ///
+    /// assert!(voiced.is_piano_voicing());
+    /// assert_eq!(voiced.piano_voicing_type(), Some(&chordy::PianoVoicingType::Spread));
+    /// ```
+    pub fn voice_piano_spread(&self) -> Result<VoicedChord, VoicingError> {
+        let config = VoicingConfig::piano();
+        let mut piano_config = PianoVoicingConfig::classical();
+        piano_config.voicing_type = PianoVoicingType::Spread;
+        Voicer::new(config).voice_piano(self, &piano_config)
+    }
+
+    /// Voice this chord for piano with jazz shell voicing
+    ///
+    /// Creates a shell voicing that emphasizes the root, 3rd, and 7th,
+    /// commonly used in jazz piano for clear harmonic definition.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let chord = Chord::dominant_7th(note!("C"));
+    /// let voiced = chord.voice_piano_jazz().unwrap();
+    ///
+    /// assert!(voiced.is_piano_voicing());
+    /// assert_eq!(voiced.piano_voicing_type(), Some(&chordy::PianoVoicingType::Shell));
+    /// ```
+    pub fn voice_piano_jazz(&self) -> Result<VoicedChord, VoicingError> {
+        let config = VoicingConfig::piano();
+        let piano_config = PianoVoicingConfig::jazz();
+        Voicer::new(config).voice_piano(self, &piano_config)
+    }
+
+    /// Voice this chord for piano with rootless jazz voicing
+    ///
+    /// Creates a rootless voicing that omits the root note, commonly
+    /// used in jazz piano when playing with a bassist.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let chord = Chord::dominant_7th(note!("C"));
+    /// let voiced = chord.voice_piano_rootless().unwrap();
+    ///
+    /// assert!(voiced.is_piano_voicing());
+    /// assert_eq!(voiced.piano_voicing_type(), Some(&chordy::PianoVoicingType::Rootless));
+    /// ```
+    pub fn voice_piano_rootless(&self) -> Result<VoicedChord, VoicingError> {
+        let config = VoicingConfig::piano();
+        let mut piano_config = PianoVoicingConfig::jazz();
+        piano_config.voicing_type = PianoVoicingType::Rootless;
+        Voicer::new(config).voice_piano(self, &piano_config)
+    }
+
+    /// Voice this chord for piano with broken chord pattern
+    ///
+    /// Creates a broken chord voicing suitable for arpeggiated or
+    /// rolled chord patterns.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let chord = Chord::major(note!("C"));
+    /// let voiced = chord.voice_piano_broken().unwrap();
+    ///
+    /// assert!(voiced.is_piano_voicing());
+    /// assert_eq!(voiced.piano_voicing_type(), Some(&chordy::PianoVoicingType::Broken));
+    /// ```
+    pub fn voice_piano_broken(&self) -> Result<VoicedChord, VoicingError> {
+        let config = VoicingConfig::piano();
+        let piano_config = PianoVoicingConfig::broken();
+        Voicer::new(config).voice_piano(self, &piano_config)
+    }
+
+    /// Voice this chord for piano with custom configuration
+    ///
+    /// Provides full control over piano voicing parameters including
+    /// hand position, voicing type, articulation, and hand span constraints.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chordy::{Chord, note};
+    ///
+    /// let chord = Chord::major(note!("C"));
+    /// let piano_config = chordy::PianoVoicingConfig::left_hand();
+    /// let voiced = chord.voice_piano_with_config(&piano_config).unwrap();
+    ///
+    /// assert!(voiced.is_piano_voicing());
+    /// assert_eq!(voiced.piano_hand_position(), Some(&chordy::PianoHandPosition::LeftHand));
+    /// ```
+    pub fn voice_piano_with_config(
+        &self,
+        piano_config: &PianoVoicingConfig,
+    ) -> Result<VoicedChord, VoicingError> {
+        let config = VoicingConfig::piano();
+        Voicer::new(config).voice_piano(self, piano_config)
     }
 
     /// Voice this chord for guitar with default settings
@@ -1379,8 +1699,8 @@ impl Chord {
     ///
     /// assert_eq!(voiced.info.range, chordy::PitchRange::guitar());
     /// ```
-    pub fn voice_for_guitar(&self) -> Result<super::VoicedChord, super::VoicingError> {
-        let config = super::VoicingConfig::guitar();
+    pub fn voice_for_guitar(&self) -> Result<VoicedChord, VoicingError> {
+        let config = VoicingConfig::guitar();
         self.voice(&config)
     }
 
@@ -1399,8 +1719,8 @@ impl Chord {
     ///
     /// assert_eq!(voiced.info.range, chordy::PitchRange::vocal());
     /// ```
-    pub fn voice_for_vocals(&self) -> Result<super::VoicedChord, super::VoicingError> {
-        let config = super::VoicingConfig::vocal();
+    pub fn voice_for_vocals(&self) -> Result<VoicedChord, VoicingError> {
+        let config = VoicingConfig::vocal();
         self.voice(&config)
     }
 }
@@ -1561,3 +1881,4 @@ impl HarmonicFunction {
         scores.max_by_key(|(_, score)| *score).map(|(hf, _)| *hf)
     }
 }
+

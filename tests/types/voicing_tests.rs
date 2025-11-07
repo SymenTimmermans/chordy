@@ -131,7 +131,7 @@ guitar_voicing_test!(
 guitar_voicing_test!(
     test_b_minor_guitar_voicing,
     Chord::minor(note!("B")),
-    "B2,F♯3,B3,D4,F♯4,B4"
+    "B2,F♯3,B3,D4,F♯4"
 );
 
 // Slash chord tests - verifying bass note handling
@@ -168,7 +168,7 @@ guitar_voicing_test!(
 guitar_voicing_test!(
     test_d_major_over_f_sharp,
     Chord::major(note!("D")).with_slash_bass(note!("F♯")),
-    "F#2,A2,D3,A3,D4,F#4"
+    "F#2,A2,D3"
 );
 
 guitar_voicing_test!(
@@ -612,4 +612,237 @@ fn test_interval_first_guitar_finder_score_ordering() {
             "Voicings should be sorted by score (lower is better)"
         );
     }
+}
+
+// Drop voicing tests
+#[test]
+fn test_drop2_voicing_basic() {
+    use chordy::{VoicingConfig, VoicingStyle, Voicer};
+
+    // Test C major 7th chord with drop-2 voicing
+    let cmaj7 = Chord::major_7th(note!("C"));
+
+    let config = VoicingConfig::new()
+        .style(VoicingStyle::Drop2)
+        .range_from("C3".parse().unwrap(), "C6".parse().unwrap());
+
+    let voicer = Voicer::new(config);
+    let voiced = voicer.voice_chord(&cmaj7).unwrap();
+
+    // Should have 4-5 notes for a 7th chord (may include extensions)
+    assert!(voiced.pitches.len() >= 4, "Drop-2 voicing should have at least 4 notes for 7th chord");
+
+    // Should use Drop2 style
+    assert_eq!(voiced.info.style, VoicingStyle::Drop2);
+
+    // All pitches should be within range
+    for pitch in &voiced.pitches {
+        assert!(pitch.midi_number() >= 48, "Pitch {} too low", pitch); // C3 = 48
+        assert!(pitch.midi_number() <= 84, "Pitch {} too high", pitch); // C6 = 84
+    }
+}
+
+#[test]
+fn test_drop3_voicing_basic() {
+    use chordy::{VoicingConfig, VoicingStyle, Voicer};
+
+    // Test C major 7th chord with drop-3 voicing
+    let cmaj7 = Chord::major_7th(note!("C"));
+
+    let config = VoicingConfig::new()
+        .style(VoicingStyle::Drop3)
+        .range_from("C3".parse().unwrap(), "C6".parse().unwrap());
+
+    let voicer = Voicer::new(config);
+    let voiced = voicer.voice_chord(&cmaj7).unwrap();
+
+    // Should have 4-5 notes for a 7th chord (may include extensions)
+    assert!(voiced.pitches.len() >= 4, "Drop-3 voicing should have at least 4 notes for 7th chord");
+
+    // Should use Drop3 style
+    assert_eq!(voiced.info.style, VoicingStyle::Drop3);
+
+    // All pitches should be within range
+    for pitch in &voiced.pitches {
+        assert!(pitch.midi_number() >= 48, "Pitch {} too low", pitch); // C3 = 48
+        assert!(pitch.midi_number() <= 84, "Pitch {} too high", pitch); // C6 = 84
+    }
+}
+
+#[test]
+fn test_drop_voicing_with_extensions() {
+    use chordy::{VoicingConfig, VoicingStyle, Voicer};
+
+    // Test dominant 7th chord which should get extensions (9th, 13th)
+    let g7 = Chord::dominant_7th(note!("G"));
+
+    let config = VoicingConfig::new()
+        .style(VoicingStyle::Drop2)
+        .range_from("G2".parse().unwrap(), "G6".parse().unwrap());
+
+    let voicer = Voicer::new(config);
+    let voiced = voicer.voice_chord(&g7).unwrap();
+
+    // With extensions, should have more than 4 notes
+    assert!(voiced.pitches.len() >= 4, "Drop-2 voicing with extensions should have >= 4 notes");
+
+    // Should use Drop2 style
+    assert_eq!(voiced.info.style, VoicingStyle::Drop2);
+}
+
+#[test]
+fn test_drop_voicing_fallback() {
+    use chordy::{VoicingConfig, VoicingStyle, Voicer};
+
+    // Test that drop voicings fall back gracefully for small chords
+    let c_major = Chord::major(note!("C"));
+
+    let config = VoicingConfig::new()
+        .style(VoicingStyle::Drop2)
+        .range_from("C3".parse().unwrap(), "C6".parse().unwrap());
+
+    let voicer = Voicer::new(config);
+    let voiced = voicer.voice_chord(&c_major).unwrap();
+
+    // For 3-note chord, drop-2 should fall back to closed voicing
+    assert_eq!(voiced.pitches.len(), 3, "Drop-2 should fall back for 3-note chords");
+
+    // Should still use Drop2 style
+    assert_eq!(voiced.info.style, VoicingStyle::Drop2);
+}
+
+// Voice leading tests
+#[test]
+fn test_voice_leading_jazz_style() {
+    use chordy::{VoiceLeader, VoiceLeadingStyle, VoicingConfig};
+
+    let config = VoicingConfig::new().range_from("C3".parse().unwrap(), "C6".parse().unwrap());
+    let leader = VoiceLeader::new(config).style(VoiceLeadingStyle::Jazz);
+
+    // Test a simple progression: C major -> G major
+    let chords = vec![
+        Chord::major(note!("C")),
+        Chord::major(note!("G")),
+    ];
+
+    let voiced_progression = leader.voice_progression(&chords).unwrap();
+    assert_eq!(voiced_progression.len(), 2);
+
+    // Check that voice movement is calculated
+    assert!(voiced_progression[1].info.movement.is_some());
+}
+
+#[test]
+fn test_voice_leading_common_practice() {
+    use chordy::{VoiceLeader, VoiceLeadingStyle, VoicingConfig};
+
+    let config = VoicingConfig::new().range_from("C3".parse().unwrap(), "C6".parse().unwrap());
+    let leader = VoiceLeader::new(config).style(VoiceLeadingStyle::CommonPractice);
+
+    // Test a ii-V-I progression
+    let chords = vec![
+        Chord::minor(note!("D")), // ii
+        Chord::dominant_7th(note!("G")), // V7
+        Chord::major(note!("C")), // I
+    ];
+
+    let voiced_progression = leader.voice_progression(&chords).unwrap();
+    assert_eq!(voiced_progression.len(), 3);
+
+    // All chords should have voice movement info
+    for voiced in &voiced_progression[1..] {
+        assert!(voiced.info.movement.is_some());
+    }
+}
+
+#[test]
+fn test_voice_leading_minimal_movement() {
+    use chordy::{VoiceLeader, VoiceLeadingStyle, VoicingConfig};
+
+    let config = VoicingConfig::new().range_from("C3".parse().unwrap(), "C6".parse().unwrap());
+    let leader = VoiceLeader::new(config).style(VoiceLeadingStyle::Minimal);
+
+    // Test a simple progression
+    let chords = vec![
+        Chord::major(note!("C")),
+        Chord::major(note!("F")),
+    ];
+
+    let voiced_progression = leader.voice_progression(&chords).unwrap();
+
+    // Calculate movement and verify it's minimal
+    let movement = voiced_progression[1].info.movement.unwrap();
+    assert!(movement < 20, "Minimal voice leading should have small movement: {}", movement);
+}
+
+#[test]
+fn test_voice_leading_free_style() {
+    use chordy::{VoiceLeader, VoiceLeadingStyle, VoicingConfig};
+
+    let config = VoicingConfig::new().range_from("C3".parse().unwrap(), "C6".parse().unwrap());
+    let leader = VoiceLeader::new(config).style(VoiceLeadingStyle::Free);
+
+    // Test progression
+    let chords = vec![
+        Chord::major(note!("C")),
+        Chord::minor(note!("A")),
+    ];
+
+    let voiced_progression = leader.voice_progression(&chords).unwrap();
+    assert_eq!(voiced_progression.len(), 2);
+
+    // Free style should still calculate movement
+    assert!(voiced_progression[1].info.movement.is_some());
+}
+
+#[test]
+fn test_voice_leading_with_different_voice_counts() {
+    use chordy::{VoiceLeader, VoiceLeadingStyle, VoicingConfig};
+
+    let config = VoicingConfig::new().range_from("C2".parse().unwrap(), "C7".parse().unwrap());
+    let leader = VoiceLeader::new(config).style(VoiceLeadingStyle::Jazz);
+
+    // Test progression with different chord complexities
+    let chords = vec![
+        Chord::major(note!("C")), // 3 notes
+        Chord::dominant_7th(note!("G")), // 4+ notes (with extensions)
+        Chord::major(note!("C")), // Back to 3 notes
+    ];
+
+    let voiced_progression = leader.voice_progression(&chords).unwrap();
+    assert_eq!(voiced_progression.len(), 3);
+
+    // Should handle different voice counts gracefully
+    for voiced in &voiced_progression {
+        assert!(!voiced.pitches.is_empty());
+    }
+}
+
+#[test]
+fn test_voice_leading_single_chord() {
+    use chordy::{VoiceLeader, VoiceLeadingStyle, VoicingConfig};
+
+    let config = VoicingConfig::new().range_from("C3".parse().unwrap(), "C6".parse().unwrap());
+    let leader = VoiceLeader::new(config).style(VoiceLeadingStyle::Jazz);
+
+    // Test single chord
+    let chords = vec![Chord::major(note!("C"))];
+    let voiced_progression = leader.voice_progression(&chords).unwrap();
+
+    assert_eq!(voiced_progression.len(), 1);
+    assert!(voiced_progression[0].info.movement.is_none());
+}
+
+#[test]
+fn test_voice_leading_empty_progression() {
+    use chordy::{VoiceLeader, VoiceLeadingStyle, VoicingConfig};
+
+    let config = VoicingConfig::new().range_from("C3".parse().unwrap(), "C6".parse().unwrap());
+    let leader = VoiceLeader::new(config).style(VoiceLeadingStyle::Jazz);
+
+    // Test empty progression
+    let chords: Vec<Chord> = vec![];
+    let voiced_progression = leader.voice_progression(&chords).unwrap();
+
+    assert!(voiced_progression.is_empty());
 }

@@ -11,3 +11,4 @@ mod roman_numeral_tests;
 mod scale_tests;
 mod voicing_details_tests;
 mod voicing_tests;
+mod piano_voicing_tests;

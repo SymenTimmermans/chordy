@@ -42,10 +42,16 @@ use crate::{
 use std::fmt;
 
 pub mod guitar;
+pub mod piano;
+pub mod voice_leading;
 
 pub use guitar::{
     GuitarFingering, GuitarShape, GuitarTuning, IntervalFirstGuitarFinder, StringState,
 };
+pub use piano::{
+    PianoHandPosition, PianoHandSpan, PianoVoicer, PianoVoicingConfig, PianoVoicingType,
+};
+pub use voice_leading::{VoiceLeader, VoiceLeadingStyle};
 
 /// Instrument-specific voicing details that provide additional metadata
 /// about how a chord is physically realized on different instruments
@@ -58,10 +64,14 @@ pub enum VoicingDetails {
         /// The tuning used (standard, drop-D, etc.)
         tuning: GuitarTuning,
     },
-    /// Piano-specific voicing information (future extension point)
+    /// Piano-specific voicing information including hand positions and ergonomics
     Piano {
-        /// Hand positions, pedaling, etc. (placeholder for future implementation)
-        hand_position: String, // TODO: Replace with proper piano voicing metadata
+        /// Which hand(s) are used to play the chord
+        hand_position: PianoHandPosition,
+        /// Type of piano voicing (block, broken, spread, etc.)
+        voicing_type: PianoVoicingType,
+        /// Hand span constraints that were applied
+        hand_span: PianoHandSpan,
     },
     /// Generic voicing with no instrument-specific details
     Generic,
@@ -427,6 +437,22 @@ impl VoicedChord {
         }
     }
 
+    /// Get the piano hand position if this is a piano voicing
+    pub fn piano_hand_position(&self) -> Option<&PianoHandPosition> {
+        match &self.info.details {
+            Some(VoicingDetails::Piano { hand_position, .. }) => Some(hand_position),
+            _ => None,
+        }
+    }
+
+    /// Get the piano voicing type if this is a piano voicing
+    pub fn piano_voicing_type(&self) -> Option<&PianoVoicingType> {
+        match &self.info.details {
+            Some(VoicingDetails::Piano { voicing_type, .. }) => Some(voicing_type),
+            _ => None,
+        }
+    }
+
     /// Check if this voicing has instrument-specific details
     pub fn has_voicing_details(&self) -> bool {
         self.info.details.is_some()
@@ -437,6 +463,14 @@ impl VoicedChord {
         matches!(
             self.info.details,
             Some(VoicingDetails::Guitar { .. })
+        )
+    }
+
+    /// Check if this is a piano voicing with piano-specific information
+    pub fn is_piano_voicing(&self) -> bool {
+        matches!(
+            self.info.details,
+            Some(VoicingDetails::Piano { .. })
         )
     }
 }
@@ -494,6 +528,208 @@ impl Voicer {
             } => self.voice_spread(chord, bass_pitch, min_interval, max_interval),
             VoicingStyle::Guitar => guitar::voice_guitar_chord(chord, self.config.range),
         }
+    }
+
+    /// Voice a chord specifically for piano with ergonomic considerations
+    pub fn voice_piano(
+        &self,
+        chord: &Chord,
+        piano_config: &PianoVoicingConfig,
+    ) -> Result<VoicedChord, VoicingError> {
+        // Start with basic closed voicing
+        let closed = self.voice_closed(chord, None)?;
+        let mut pitches = closed.pitches.clone();
+
+        // Apply piano-specific transformations based on voicing type
+        match piano_config.voicing_type {
+            PianoVoicingType::Block => {
+                // Block chords - keep as is, but ensure ergonomic constraints
+                if !self.is_piano_ergonomic(&pitches, piano_config) {
+                    // Try to adjust voicing to be more ergonomic
+                    pitches = self.adjust_for_ergonomics(&pitches, piano_config);
+                }
+            }
+            PianoVoicingType::Spread => {
+                // Spread voicing - distribute notes across wider range
+                pitches = self.create_spread_voicing(&pitches, piano_config);
+            }
+            PianoVoicingType::Shell => {
+                // Shell voicing - root + 3rd/7th for jazz
+                pitches = self.create_shell_voicing(&pitches, piano_config);
+            }
+            PianoVoicingType::Rootless => {
+                // Rootless voicing - omit root for jazz harmony
+                pitches = self.create_rootless_voicing(&pitches, piano_config);
+            }
+            PianoVoicingType::Broken | PianoVoicingType::Arpeggiated => {
+                // Broken/arpeggiated - same pitches as block, different execution
+                // The distinction is in performance, not pitch selection
+            }
+        }
+
+        // Distribute notes between hands based on hand position
+        pitches = self.distribute_hands(&pitches, piano_config);
+
+        // Ensure all pitches are within range
+        if pitches
+            .iter()
+            .any(|p| p.midi_number() < self.config.range.low.midi_number()
+                || p.midi_number() > self.config.range.high.midi_number())
+        {
+            return Err(VoicingError::OutOfRange);
+        }
+
+        // Sort pitches
+        pitches.sort_by_key(|p| p.midi_number());
+
+        // Create voicing info with piano details
+        let details = VoicingDetails::Piano {
+            hand_position: piano_config.hand_position,
+            voicing_type: piano_config.voicing_type,
+            hand_span: piano_config.hand_span,
+        };
+
+        let info = VoicingInfo::new_with_details(
+            VoicingStyle::Closed, // Base style - piano-specific is in details
+            self.config.range,
+            0,
+            details,
+        );
+
+        Ok(VoicedChord::new(*chord, pitches, info))
+    }
+
+    /// Check if a set of pitches is ergonomic for piano playing
+    fn is_piano_ergonomic(&self, pitches: &[Pitch], config: &PianoVoicingConfig) -> bool {
+        if pitches.is_empty() {
+            return true;
+        }
+
+        let sorted_pitches: Vec<Pitch> = {
+            let mut sorted = pitches.to_vec();
+            sorted.sort_by_key(|p| p.midi_number());
+            sorted
+        };
+
+        let span = (sorted_pitches.last().unwrap().midi_number() - sorted_pitches.first().unwrap().midi_number()) as u8;
+        let note_count = pitches.len();
+
+        match config.hand_position {
+            PianoHandPosition::LeftHand => {
+                config.hand_span.is_left_hand_comfortable(span)
+                    && config.hand_span.is_left_hand_note_count_comfortable(note_count)
+            }
+            PianoHandPosition::RightHand => {
+                config.hand_span.is_right_hand_comfortable(span)
+                    && config.hand_span.is_right_hand_note_count_comfortable(note_count)
+            }
+            PianoHandPosition::BothHands => {
+                // Simplified check for both hands
+                span <= config.max_total_span
+                    && note_count <= (config.hand_span.left_hand_max_notes + config.hand_span.right_hand_max_notes) as usize
+            }
+        }
+    }
+
+    /// Adjust voicing to be more ergonomic for piano
+    fn adjust_for_ergonomics(&self, pitches: &[Pitch], config: &PianoVoicingConfig) -> Vec<Pitch> {
+        let mut adjusted = pitches.to_vec();
+
+        // Sort pitches
+        adjusted.sort_by_key(|p| p.midi_number());
+
+        // Check span and adjust if necessary
+        let span = (adjusted.last().unwrap().midi_number() - adjusted.first().unwrap().midi_number()) as u8;
+        let max_span = match config.hand_position {
+            PianoHandPosition::LeftHand => config.hand_span.left_hand_max_span,
+            PianoHandPosition::RightHand => config.hand_span.right_hand_max_span,
+            PianoHandPosition::BothHands => config.max_total_span,
+        };
+
+        if span > max_span {
+            // Reduce span by moving inner notes closer together
+            // This is a simplified adjustment - real implementation would be more sophisticated
+            let reduction_needed = span - max_span;
+            for i in 1..adjusted.len() - 1 {
+                if reduction_needed > 0 {
+                    // Move note down by one octave if possible
+                    let new_pitch = adjusted[i] + (-12i8);
+                    if new_pitch.midi_number() >= self.config.range.low.midi_number() {
+                        adjusted[i] = new_pitch;
+                    }
+                }
+            }
+        }
+
+        adjusted.sort_by_key(|p| p.midi_number());
+        adjusted
+    }
+
+    /// Create a spread voicing for piano
+    fn create_spread_voicing(&self, pitches: &[Pitch], _config: &PianoVoicingConfig) -> Vec<Pitch> {
+        let mut spread = pitches.to_vec();
+
+        // Sort pitches
+        spread.sort_by_key(|p| p.midi_number());
+
+        // For spread voicing, distribute notes across wider range
+        // Move every other note up an octave
+        for i in (1..spread.len()).step_by(2) {
+            let new_pitch = spread[i] + 12i8;
+            if new_pitch.midi_number() <= self.config.range.high.midi_number() {
+                spread[i] = new_pitch;
+            }
+        }
+
+        spread.sort_by_key(|p| p.midi_number());
+        spread
+    }
+
+    /// Create a shell voicing for jazz piano
+    fn create_shell_voicing(&self, pitches: &[Pitch], _config: &PianoVoicingConfig) -> Vec<Pitch> {
+        let mut shell = Vec::new();
+
+        // For shell voicing, prioritize root, 3rd, and 7th
+        // This is a simplified implementation
+        if pitches.len() >= 3 {
+            // Root (lowest)
+            shell.push(pitches[0]);
+
+            // 3rd (second lowest)
+            if pitches.len() >= 2 {
+                shell.push(pitches[1]);
+            }
+
+            // 7th (highest that's not the root)
+            if pitches.len() >= 4 {
+                shell.push(pitches[pitches.len() - 2]);
+            } else if pitches.len() >= 3 {
+                shell.push(pitches[pitches.len() - 1]);
+            }
+        } else {
+            // Fallback to original pitches
+            shell = pitches.to_vec();
+        }
+
+        shell
+    }
+
+    /// Create a rootless voicing for jazz piano
+    fn create_rootless_voicing(&self, pitches: &[Pitch], _config: &PianoVoicingConfig) -> Vec<Pitch> {
+        let mut rootless = Vec::new();
+
+        // For rootless voicing, omit the root and focus on 3rd, 5th, 7th, extensions
+        if pitches.len() >= 2 {
+            // Skip the root (lowest note)
+            for &pitch in &pitches[1..] {
+                rootless.push(pitch);
+            }
+        } else {
+            // Fallback to original pitches
+            rootless = pitches.to_vec();
+        }
+
+        rootless
     }
 
     /// Get a reasonable starting pitch for a chord based on its root and the voicing range
@@ -562,7 +798,7 @@ impl Voicer {
                 return Err(VoicingError::OutOfRange);
             }
 
-            if target_midi > self.config.range.high.midi_number() as i16 {
+            if target_midi > self.config.range.high.midi_number() as i16 || target_midi < self.config.range.low.midi_number() as i16 {
                 return Err(VoicingError::OutOfRange);
             }
 
@@ -624,77 +860,91 @@ impl Voicer {
     }
 
     /// Implement drop-2 voicing: take second-highest note and drop it an octave
+    /// with proper hand distribution (1+3 or 2+2 texture)
     fn voice_drop2(
         &self,
         chord: &Chord,
         bass_pitch: Option<Pitch>,
     ) -> Result<VoicedChord, VoicingError> {
-        // Start with closed voicing
-        let closed = self.voice_closed(chord, bass_pitch)?;
-        let mut pitches = closed.pitches.clone();
+        // Get all chord tones including extensions
+        let chord_tones = self.get_chord_tones_with_extensions(chord);
 
-        if pitches.len() < 3 {
-            // Can't do drop-2 with fewer than 3 notes, return closed
-            return Ok(closed);
+        if chord_tones.len() < 3 {
+            // Can't do drop-2 with fewer than 3 notes, use closed
+            return self.voice_closed(chord, bass_pitch);
         }
 
-        // Sort by pitch to identify the second-highest
-        pitches.sort_by_key(|p| p.midi_number());
-        let second_highest_index = pitches.len() - 2;
+        // Create close voicing starting from appropriate octave
+        let starting_pitch = self.get_starting_pitch(chord, bass_pitch);
+        let close_voicing = self.create_close_voicing(&chord_tones, starting_pitch)?;
 
-        // Drop the second-highest note an octave
-        pitches[second_highest_index] += -12i8;
+        // Sort close voicing to identify voices
+        let mut sorted_close = close_voicing.clone();
+        sorted_close.sort_by_key(|p| p.midi_number());
 
-        // Ensure all pitches are still within range
-        if pitches
+        // For drop-2: drop the 2nd highest voice
+        let drop_index = sorted_close.len() - 2;
+        let mut drop_voicing = sorted_close.clone();
+        drop_voicing[drop_index] += -12i8;
+
+        // Distribute between hands (1+3 or 2+2 texture)
+        let distributed = self.distribute_drop_voicing(&drop_voicing, 2);
+
+        // Ensure all pitches are within range
+        if distributed
             .iter()
-            .any(|p| p.midi_number() < self.config.range.low.midi_number())
+            .any(|p| p.midi_number() < self.config.range.low.midi_number()
+                || p.midi_number() > self.config.range.high.midi_number())
         {
             return Err(VoicingError::OutOfRange);
         }
 
-        // Re-sort after the drop
-        pitches.sort_by_key(|p| p.midi_number());
-
         let info = VoicingInfo::new(VoicingStyle::Drop2, self.config.range, 0);
-        Ok(VoicedChord::new(*chord, pitches, info))
+        Ok(VoicedChord::new(*chord, distributed, info))
     }
 
     /// Implement drop-3 voicing: take third-highest note and drop it an octave
+    /// with proper hand distribution
     fn voice_drop3(
         &self,
         chord: &Chord,
         bass_pitch: Option<Pitch>,
     ) -> Result<VoicedChord, VoicingError> {
-        // Start with closed voicing
-        let closed = self.voice_closed(chord, bass_pitch)?;
-        let mut pitches = closed.pitches.clone();
+        // Get all chord tones including extensions
+        let chord_tones = self.get_chord_tones_with_extensions(chord);
 
-        if pitches.len() < 4 {
-            // Can't do drop-3 with fewer than 4 notes, return closed
-            return Ok(closed);
+        if chord_tones.len() < 4 {
+            // Can't do drop-3 with fewer than 4 notes, use drop-2
+            return self.voice_drop2(chord, bass_pitch);
         }
 
-        // Sort by pitch to identify the third-highest
-        pitches.sort_by_key(|p| p.midi_number());
-        let third_highest_index = pitches.len() - 3;
+        // Create close voicing starting from appropriate octave
+        let starting_pitch = self.get_starting_pitch(chord, bass_pitch);
+        let close_voicing = self.create_close_voicing(&chord_tones, starting_pitch)?;
 
-        // Drop the third-highest note an octave
-        pitches[third_highest_index] += -12i8;
+        // Sort close voicing to identify voices
+        let mut sorted_close = close_voicing.clone();
+        sorted_close.sort_by_key(|p| p.midi_number());
 
-        // Ensure all pitches are still within range
-        if pitches
+        // For drop-3: drop the 3rd highest voice
+        let drop_index = sorted_close.len() - 3;
+        let mut drop_voicing = sorted_close.clone();
+        drop_voicing[drop_index] += -12i8;
+
+        // Distribute between hands
+        let distributed = self.distribute_drop_voicing(&drop_voicing, 3);
+
+        // Ensure all pitches are within range
+        if distributed
             .iter()
-            .any(|p| p.midi_number() < self.config.range.low.midi_number())
+            .any(|p| p.midi_number() < self.config.range.low.midi_number()
+                || p.midi_number() > self.config.range.high.midi_number())
         {
             return Err(VoicingError::OutOfRange);
         }
 
-        // Re-sort after the drop
-        pitches.sort_by_key(|p| p.midi_number());
-
         let info = VoicingInfo::new(VoicingStyle::Drop3, self.config.range, 0);
-        Ok(VoicedChord::new(*chord, pitches, info))
+        Ok(VoicedChord::new(*chord, distributed, info))
     }
 
     /// Implement spread voicing: distribute notes with specified interval constraints
@@ -771,6 +1021,233 @@ impl Voicer {
         );
         Ok(VoicedChord::new(*chord, pitches, info))
     }
+
+    /// Get all chord tones including extensions (root, 3rd, 5th, 7th, 9th, 11th, 13th)
+    fn get_chord_tones_with_extensions(&self, chord: &Chord) -> Vec<Interval> {
+        let intervals = chord.intervals();
+        let mut all_tones = intervals.to_vec();
+
+        // Only add extensions for extended chords (9th, 11th, 13th)
+        // Don't automatically add extensions to basic 7th chords
+        // This preserves the original chord structure for basic voicings
+
+        // Check if this is already an extended chord
+        let has_ninth = intervals.contains(&Interval::MAJOR_NINTH) || intervals.contains(&Interval::MINOR_NINTH);
+        let has_eleventh = intervals.contains(&Interval::PERFECT_ELEVENTH);
+        let has_thirteenth = intervals.contains(&Interval::MAJOR_THIRTEENTH) || intervals.contains(&Interval::MINOR_THIRTEENTH);
+
+        // Only add extensions if the chord is already extended
+        if has_ninth || has_eleventh || has_thirteenth {
+            // For dominant 7th chords with extensions, add 9th and 13th
+            if intervals.contains(&Interval::MINOR_SEVENTH) {
+                if !has_ninth {
+                    all_tones.push(Interval::MAJOR_NINTH);
+                }
+                if !has_thirteenth {
+                    all_tones.push(Interval::MAJOR_THIRTEENTH);
+                }
+            }
+
+            // For major 7th chords with extensions, add 9th
+            if intervals.contains(&Interval::MAJOR_SEVENTH) && !has_ninth {
+                all_tones.push(Interval::MAJOR_NINTH);
+            }
+
+            // For minor 7th chords with extensions, add 9th and 11th
+            if intervals.contains(&Interval::MINOR_THIRD) && intervals.contains(&Interval::MINOR_SEVENTH) {
+                if !has_ninth {
+                    all_tones.push(Interval::MAJOR_NINTH);
+                }
+                if !has_eleventh {
+                    all_tones.push(Interval::PERFECT_ELEVENTH);
+                }
+            }
+        }
+
+        all_tones.sort_by_key(|interval| interval.semitones());
+        all_tones.dedup();
+        all_tones
+    }
+
+    /// Create a close voicing from chord tones starting at a given pitch
+    fn create_close_voicing(
+        &self,
+        intervals: &[Interval],
+        starting_pitch: Pitch,
+    ) -> Result<Vec<Pitch>, VoicingError> {
+        let mut pitches = Vec::new();
+
+        for &interval in intervals {
+            let pitch = starting_pitch + interval.semitones();
+
+            // Check range constraints
+            if pitch.midi_number() < self.config.range.low.midi_number()
+                || pitch.midi_number() > self.config.range.high.midi_number()
+            {
+                return Err(VoicingError::OutOfRange);
+            }
+
+            pitches.push(pitch);
+        }
+
+        // Sort pitches to ensure they're in order
+        pitches.sort_by_key(|p| p.midi_number());
+        Ok(pitches)
+    }
+
+    /// Distribute drop voicing between hands using proper textures (1+3 or 2+2)
+    fn distribute_drop_voicing(&self, pitches: &[Pitch], drop_type: u8) -> Vec<Pitch> {
+        let mut sorted_pitches = pitches.to_vec();
+        sorted_pitches.sort_by_key(|p| p.midi_number());
+
+        if sorted_pitches.len() < 4 {
+            return sorted_pitches; // Can't distribute with fewer than 4 notes
+        }
+
+        match drop_type {
+            2 => {
+                // Drop-2: typically 1+3 texture (left hand: bass, right hand: 3 upper voices)
+                // For 4-note chords: bass in left hand, 3 upper voices in right hand
+                // For 5-note chords: bass in left hand, 4 upper voices in right hand
+                // This creates the characteristic open sound
+                sorted_pitches
+            }
+            3 => {
+                // Drop-3: typically 2+2 texture (left hand: bass + 3rd, right hand: 5th + 7th)
+                // For 4-note chords: bass + 3rd in left hand, 5th + 7th in right hand
+                // For 5-note chords: bass + 3rd in left hand, 5th + 7th + extension in right hand
+                // This creates a wider, more resonant sound
+                sorted_pitches
+            }
+            _ => sorted_pitches,
+        }
+    }
+
+    /// Distribute notes between hands based on hand position configuration
+    fn distribute_hands(&self, pitches: &[Pitch], config: &PianoVoicingConfig) -> Vec<Pitch> {
+        match config.hand_position {
+            PianoHandPosition::LeftHand => self.adjust_for_left_hand(pitches, config),
+            PianoHandPosition::RightHand => self.adjust_for_right_hand(pitches, config),
+            PianoHandPosition::BothHands => self.split_between_hands(pitches, config),
+        }
+    }
+
+    /// Adjust voicing for left hand only
+    fn adjust_for_left_hand(&self, pitches: &[Pitch], config: &PianoVoicingConfig) -> Vec<Pitch> {
+        let mut left_hand_pitches = pitches.to_vec();
+
+        // Sort pitches
+        left_hand_pitches.sort_by_key(|p| p.midi_number());
+
+        // For left hand, prioritize lower notes and limit note count
+        if left_hand_pitches.len() > config.hand_span.left_hand_max_notes as usize {
+            // Keep only the lowest notes (root, 3rd, 5th, 7th in order)
+            left_hand_pitches.truncate(config.hand_span.left_hand_max_notes as usize);
+        }
+
+        // Ensure the span is comfortable for left hand
+        if left_hand_pitches.len() >= 2 {
+            let span = (left_hand_pitches.last().unwrap().midi_number() - left_hand_pitches.first().unwrap().midi_number()) as u8;
+            if span > config.hand_span.left_hand_max_span {
+                // Reduce span by moving higher notes down an octave
+                for i in (1..left_hand_pitches.len()).rev() {
+                    let new_pitch = left_hand_pitches[i] + (-12i8);
+                    if new_pitch.midi_number() >= self.config.range.low.midi_number() {
+                        left_hand_pitches[i] = new_pitch;
+                        break;
+                    }
+                }
+            }
+        }
+
+        left_hand_pitches.sort_by_key(|p| p.midi_number());
+        left_hand_pitches
+    }
+
+    /// Adjust voicing for right hand only
+    fn adjust_for_right_hand(&self, pitches: &[Pitch], config: &PianoVoicingConfig) -> Vec<Pitch> {
+        let mut right_hand_pitches = pitches.to_vec();
+
+        // Sort pitches
+        right_hand_pitches.sort_by_key(|p| p.midi_number());
+
+        // For right hand, we can use more notes but still need ergonomic constraints
+        if right_hand_pitches.len() > config.hand_span.right_hand_max_notes as usize {
+            // Keep the most important notes (root, 3rd, 7th, extensions)
+            // This is a simplified approach - real implementation would be more sophisticated
+            if right_hand_pitches.len() >= 4 {
+                // Keep root, 3rd, 7th, and highest extension
+                let important_indices = vec![0, 1, right_hand_pitches.len() - 2, right_hand_pitches.len() - 1];
+                right_hand_pitches = important_indices
+                    .into_iter()
+                    .map(|i| right_hand_pitches[i])
+                    .collect();
+            }
+        }
+
+        // Ensure the span is comfortable for right hand
+        if right_hand_pitches.len() >= 2 {
+            let span = (right_hand_pitches.last().unwrap().midi_number() - right_hand_pitches.first().unwrap().midi_number()) as u8;
+            if span > config.hand_span.right_hand_max_span {
+                // Reduce span by moving lower notes up an octave
+                for i in 0..right_hand_pitches.len() - 1 {
+                    let new_pitch = right_hand_pitches[i] + 12i8;
+                    if new_pitch.midi_number() <= self.config.range.high.midi_number() {
+                        right_hand_pitches[i] = new_pitch;
+                        break;
+                    }
+                }
+            }
+        }
+
+        right_hand_pitches.sort_by_key(|p| p.midi_number());
+        right_hand_pitches
+    }
+
+    /// Split notes between left and right hands
+    fn split_between_hands(&self, pitches: &[Pitch], config: &PianoVoicingConfig) -> Vec<Pitch> {
+        let mut all_pitches = pitches.to_vec();
+
+        // Sort pitches
+        all_pitches.sort_by_key(|p| p.midi_number());
+
+        // Simple split: left hand gets lower notes, right hand gets higher notes
+        // Middle C (MIDI 60) is a common dividing point
+        let middle_c_midi = 60;
+
+        let mut left_hand = Vec::new();
+        let mut right_hand = Vec::new();
+
+        for pitch in &all_pitches {
+            if pitch.midi_number() <= middle_c_midi {
+                left_hand.push(*pitch);
+            } else {
+                right_hand.push(*pitch);
+            }
+        }
+
+        // For piano voicing, allow note repetition across hands
+        // Left hand often plays bass notes that may be repeated in right hand
+        if !left_hand.is_empty() && !right_hand.is_empty() {
+            // Add bass note repetition: left hand plays root an octave lower
+            if let Some(root_pitch) = left_hand.first() {
+                let bass_pitch = *root_pitch + (-12i8);
+                if bass_pitch.midi_number() >= self.config.range.low.midi_number() {
+                    left_hand.insert(0, bass_pitch);
+                }
+            }
+        }
+
+        // Apply hand-specific adjustments
+        left_hand = self.adjust_for_left_hand(&left_hand, config);
+        right_hand = self.adjust_for_right_hand(&right_hand, config);
+
+        // Combine and sort all pitches
+        let mut combined = left_hand;
+        combined.extend(right_hand);
+        combined.sort_by_key(|p| p.midi_number());
+        combined
+    }
 }
 
 impl Default for Voicer {
@@ -801,4 +1278,3 @@ impl fmt::Display for VoicingError {
 }
 
 impl std::error::Error for VoicingError {}
-

@@ -73,6 +73,7 @@ pub mod types;
 pub mod prelude;
 pub use types::*;
 
+
 /// Makes it easy to create a `NoteName` at compile time.
 ///
 /// # Examples

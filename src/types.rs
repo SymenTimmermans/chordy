@@ -38,10 +38,12 @@ pub use progression::{
     ProgressionOptions, ProgressionStrength,
 };
 
-mod voicing;
+pub mod voicing;
 pub use voicing::{
     GuitarFingering, GuitarTuning, IntervalFirstGuitarFinder, PitchRange, StringState, VoicedChord,
     Voicer, VoicingConfig, VoicingDetails, VoicingError, VoicingInfo, VoicingStyle,
+    PianoHandPosition, PianoHandSpan, PianoVoicer, PianoVoicingConfig, PianoVoicingType,
+    VoiceLeader, VoiceLeadingStyle,
 };
 
 pub mod guitar_shapes;

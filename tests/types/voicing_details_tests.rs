@@ -1,7 +1,7 @@
 //! Tests for the VoicingDetails system that includes instrument-specific metadata
 
 use chordy::prelude::*;
-use chordy::{VoicingDetails, VoicingStyle, GuitarTuning};
+use chordy::{VoicingDetails, VoicingStyle, GuitarTuning, PianoHandPosition, PianoVoicingType, PianoHandSpan};
 
 #[test]
 fn test_guitar_voicing_includes_fingering_details() {
@@ -102,7 +102,9 @@ fn test_voicing_details_enum_variants() {
     };
     
     let piano_details = VoicingDetails::Piano {
-        hand_position: "RH: C4-E4-G4, LH: C3".to_string(),
+        hand_position: PianoHandPosition::BothHands,
+        voicing_type: PianoVoicingType::Block,
+        hand_span: PianoHandSpan::default(),
     };
     
     let generic_details = VoicingDetails::Generic;
@@ -117,8 +119,8 @@ fn test_voicing_details_enum_variants() {
     }
     
     match piano_details {
-        VoicingDetails::Piano { hand_position } => {
-            assert!(hand_position.contains("RH:"));
+        VoicingDetails::Piano { hand_position, .. } => {
+            assert_eq!(hand_position, PianoHandPosition::BothHands);
         }
         _ => panic!("Expected piano details"),
     }
