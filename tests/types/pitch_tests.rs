@@ -21,13 +21,13 @@ fn test_pitch_creation() {
 
 #[test]
 fn test_midi_number() {
-    assert_eq!(pitch!("B#2").midi_number(), 60);
-    assert_eq!(pitch!("C3").midi_number(), 60);
-    assert_eq!(pitch!("G#5").midi_number(), 92);
-    assert_eq!(pitch!("Ab-1").midi_number(), 20);
-    assert_eq!(pitch!("Cbb3").midi_number(), 58);
-    assert_eq!(pitch!("Dbb3").midi_number(), 60);
-    assert_eq!(pitch!("Dbb4").midi_number(), 72);
+    assert_eq!(pitch!("B#3").midi_number(), 60);
+    assert_eq!(pitch!("C4").midi_number(), 60);
+    assert_eq!(pitch!("G#5").midi_number(), 80);
+    assert_eq!(pitch!("Ab0").midi_number(), 20);
+    assert_eq!(pitch!("Cbb4").midi_number(), 58);
+    assert_eq!(pitch!("Dbb4").midi_number(), 60);
+    assert_eq!(pitch!("Dbb5").midi_number(), 72);
 }
 
 #[test]
@@ -207,4 +207,792 @@ fn test_pitch_transpose() {
     assert_eq!(pitch!("C4").transpose(0), pitch!("C4")); // No change
                                                          //
     assert_eq!(pitch!("G#4").transpose(-2), pitch!("F#4")); // G#-F# not Gb
+}
+
+#[test]
+fn test_pitch_frequency_conversion() {
+    // Test standard concert pitch
+    let a4 = Pitch::new(Letter::A, Accidental::Natural, 4);
+    assert!((a4.to_frequency() - 440.0).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(440.0), a4);
+
+    // Test C4 (middle C)
+    let c4 = Pitch::new(Letter::C, Accidental::Natural, 4);
+    assert!((c4.to_frequency() - 261.63).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(261.63), c4);
+
+    // Test G4
+    let g4 = Pitch::new(Letter::G, Accidental::Natural, 4);
+    assert!((g4.to_frequency() - 392.0).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(392.0), g4);
+
+    // Test E4
+    let e4 = Pitch::new(Letter::E, Accidental::Natural, 4);
+    assert!((e4.to_frequency() - 329.63).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(329.63), e4);
+
+    // Test A3 (octave below A4)
+    let a3 = Pitch::new(Letter::A, Accidental::Natural, 3);
+    assert!((a3.to_frequency() - 220.0).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(220.0), a3);
+
+    // Test A5 (octave above A4)
+    let a5 = Pitch::new(Letter::A, Accidental::Natural, 5);
+    assert!((a5.to_frequency() - 880.0).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(880.0), a5);
+
+    // Test sharp notes
+    let c_sharp4 = Pitch::new(Letter::C, Accidental::Sharp, 4);
+    assert!((c_sharp4.to_frequency() - 277.18).abs() < 0.01);
+    // Note: from_frequency may return either C♯4 or D♭4 due to enharmonic equivalence
+    let freq_pitch = Pitch::from_frequency(277.18);
+    assert!(freq_pitch.is_enharmonic_with(&c_sharp4));
+
+    // Test flat notes
+    let d_flat4 = Pitch::new(Letter::D, Accidental::Flat, 4);
+    assert!((d_flat4.to_frequency() - 277.18).abs() < 0.01);
+    assert!(freq_pitch.is_enharmonic_with(&d_flat4));
+
+    // Test enharmonic equivalence in frequency space
+    assert!(c_sharp4.is_enharmonic_with(&d_flat4));
+    assert!((c_sharp4.to_frequency() - d_flat4.to_frequency()).abs() < 0.01);
+
+    // Test extreme frequencies
+    let c0 = Pitch::new(Letter::C, Accidental::Natural, 0);
+    assert!((c0.to_frequency() - 16.35).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(16.35), c0);
+
+    let c8 = Pitch::new(Letter::C, Accidental::Natural, 8);
+    assert!((c8.to_frequency() - 4186.01).abs() < 0.01);
+    assert_eq!(Pitch::from_frequency(4186.01), c8);
+}
+
+#[test]
+fn test_pitch_midi_conversion() {
+    // Test standard MIDI notes
+    assert_eq!(Pitch::from_midi_number(60), pitch!("C4"));
+    assert_eq!(Pitch::from_midi_number(69), pitch!("A4"));
+    assert_eq!(Pitch::from_midi_number(72), pitch!("C5"));
+
+    // Test that MIDI conversion is consistent with existing midi_number method
+    for midi in 0..=127 {
+        let pitch = Pitch::from_midi_number(midi);
+        assert_eq!(pitch.midi_number(), midi as i8, "MIDI conversion failed for note {}", midi);
+    }
+
+    // Test edge cases
+    assert_eq!(Pitch::from_midi_number(0), pitch!("C-1"));
+    assert_eq!(Pitch::from_midi_number(127), pitch!("G9"));
+}
+
+#[test]
+fn test_pitch_midi_prefer_flats() {
+    // Test black keys with flat preference
+    assert_eq!(Pitch::from_midi_number_prefer_flats(61), pitch!("Db4")); // C#4 -> Db4
+    assert_eq!(Pitch::from_midi_number_prefer_flats(63), pitch!("Eb4")); // D#4 -> Eb4
+    assert_eq!(Pitch::from_midi_number_prefer_flats(66), pitch!("Gb4")); // F#4 -> Gb4
+    assert_eq!(Pitch::from_midi_number_prefer_flats(68), pitch!("Ab4")); // G#4 -> Ab4
+    assert_eq!(Pitch::from_midi_number_prefer_flats(70), pitch!("Bb4")); // A#4 -> Bb4
+
+    // Test white keys (should be the same as default)
+    assert_eq!(Pitch::from_midi_number_prefer_flats(60), pitch!("C4"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(62), pitch!("D4"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(64), pitch!("E4"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(65), pitch!("F4"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(67), pitch!("G4"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(69), pitch!("A4"));
+    assert_eq!(Pitch::from_midi_number_prefer_flats(71), pitch!("B4"));
+
+    // Test that all MIDI conversions are enharmonically equivalent
+    for midi in 0..=127 {
+        let pitch_default = Pitch::from_midi_number(midi);
+        let pitch_flat = Pitch::from_midi_number_prefer_flats(midi);
+        assert!(pitch_default.is_enharmonic_with(&pitch_flat),
+                "MIDI note {}: {} and {} are not enharmonic", midi, pitch_default, pitch_flat);
+    }
+}
+
+#[test]
+fn test_pitch_midi_in_key() {
+    use chordy::Key;
+
+    // Test sharp keys
+    let g_major = Key::Major(chordy::note!("G")); // 1 sharp
+    let d_major = Key::Major(chordy::note!("D")); // 2 sharps
+    let a_major = Key::Major(chordy::note!("A")); // 3 sharps
+
+    // In sharp keys, black keys should use sharps
+    assert_eq!(Pitch::from_midi_number_in_key(61, &g_major), pitch!("C#4")); // C# not Db
+    assert_eq!(Pitch::from_midi_number_in_key(66, &g_major), pitch!("F#4")); // F# not Gb
+    assert_eq!(Pitch::from_midi_number_in_key(68, &g_major), pitch!("G#4")); // G# not Ab
+
+    // Test flat keys
+    let f_major = Key::Major(chordy::note!("F")); // 1 flat
+    let bb_major = Key::Major(chordy::note!("Bb")); // 2 flats
+    let eb_major = Key::Major(chordy::note!("Eb")); // 3 flats
+
+    // In flat keys, black keys should use flats
+    assert_eq!(Pitch::from_midi_number_in_key(61, &f_major), pitch!("Db4")); // Db not C#
+    assert_eq!(Pitch::from_midi_number_in_key(66, &f_major), pitch!("Gb4")); // Gb not F#
+    assert_eq!(Pitch::from_midi_number_in_key(70, &f_major), pitch!("Bb4")); // Bb not A#
+
+    // Test natural keys (C major, A minor)
+    let c_major = Key::Major(chordy::note!("C")); // 0 sharps/flats
+    let a_minor = Key::Minor(chordy::note!("A")); // 0 sharps/flats
+
+    // In natural keys, default to sharps (consistent with from_midi_number)
+    assert_eq!(Pitch::from_midi_number_in_key(61, &c_major), pitch!("C#4"));
+    assert_eq!(Pitch::from_midi_number_in_key(66, &c_major), pitch!("F#4"));
+    assert_eq!(Pitch::from_midi_number_in_key(61, &a_minor), pitch!("C#4"));
+    assert_eq!(Pitch::from_midi_number_in_key(66, &a_minor), pitch!("F#4"));
+
+    // Test that all MIDI conversions are enharmonically equivalent
+    for midi in 0..=127 {
+        let pitch_default = Pitch::from_midi_number(midi);
+        let pitch_in_key = Pitch::from_midi_number_in_key(midi, &c_major);
+        assert!(pitch_default.is_enharmonic_with(&pitch_in_key),
+                "MIDI note {}: {} and {} are not enharmonic", midi, pitch_default, pitch_in_key);
+    }
+}
+
+#[test]
+fn test_pitch_midi_enharmonic_equivalence() {
+    // Test that all MIDI construction methods produce enharmonically equivalent results
+    use chordy::Key;
+
+    let c_major = Key::Major(chordy::note!("C"));
+
+    for midi in 0..=127 {
+        let pitch1 = Pitch::from_midi_number(midi);
+        let pitch2 = Pitch::from_midi_number_prefer_flats(midi);
+        let pitch3 = Pitch::from_midi_number_in_key(midi, &c_major);
+
+        assert!(pitch1.is_enharmonic_with(&pitch2),
+                "MIDI note {}: {} and {} are not enharmonic", midi, pitch1, pitch2);
+        assert!(pitch1.is_enharmonic_with(&pitch3),
+                "MIDI note {}: {} and {} are not enharmonic", midi, pitch1, pitch3);
+        assert!(pitch2.is_enharmonic_with(&pitch3),
+                "MIDI note {}: {} and {} are not enharmonic", midi, pitch2, pitch3);
+    }
+}
+
+#[test]
+fn test_pitch_constants() {
+    assert_eq!(Pitch::A440, 440.0);
+    assert_eq!(Pitch::C0_FREQUENCY, 16.3516);
+}
+
+#[test]
+fn test_pitch_cents_from() {
+    // Test same pitch (0 cents)
+    let a440 = Pitch::new(Letter::A, Accidental::Natural, 4);
+    assert!((a440.cents_from(&a440)).abs() < 0.01);
+
+    // Test octave (1200 cents)
+    let a3 = Pitch::new(Letter::A, Accidental::Natural, 3);
+    let a4 = Pitch::new(Letter::A, Accidental::Natural, 4);
+    assert!((a4.cents_from(&a3) - 1200.0).abs() < 0.01);
+
+    // Test semitone (100 cents)
+    let c4 = Pitch::new(Letter::C, Accidental::Natural, 4);
+    let c_sharp4 = Pitch::new(Letter::C, Accidental::Sharp, 4);
+    assert!((c_sharp4.cents_from(&c4) - 100.0).abs() < 0.01);
+
+    // Test microtonal differences
+    // Since Pitch only represents equal-tempered pitches, we need to test with actual different pitches
+    // and calculate the expected cents difference between them
+    let a4 = Pitch::new(Letter::A, Accidental::Natural, 4);
+    let a_sharp4 = Pitch::new(Letter::A, Accidental::Sharp, 4);
+
+    // A#4 should be 100 cents above A4
+    let cents_diff = a_sharp4.cents_from(&a4);
+    assert!((cents_diff - 100.0).abs() < 0.01);
+
+    // Test negative cents
+    let g_sharp4 = Pitch::new(Letter::G, Accidental::Sharp, 4);
+    let cents_diff = g_sharp4.cents_from(&a4);
+    assert!((cents_diff + 100.0).abs() < 0.01); // G#4 is 100 cents below A4
+
+    // Test enharmonic equivalence
+    let c_sharp4 = Pitch::new(Letter::C, Accidental::Sharp, 4);
+    let d_flat4 = Pitch::new(Letter::D, Accidental::Flat, 4);
+    assert!((c_sharp4.cents_from(&d_flat4)).abs() < 0.01);
+}
+
+#[test]
+fn test_pitch_transpose_cents() {
+    let a440 = Pitch::new(Letter::A, Accidental::Natural, 4);
+
+    // Test zero cents (no change)
+    assert_eq!(a440.transpose_cents(0.0), a440);
+
+    // Test semitone (100 cents)
+    let a_sharp4 = a440.transpose_cents(100.0);
+    assert_eq!(a_sharp4, Pitch::new(Letter::A, Accidental::Sharp, 4));
+
+    // Test octave (1200 cents)
+    let a5 = a440.transpose_cents(1200.0);
+    assert_eq!(a5, Pitch::new(Letter::A, Accidental::Natural, 5));
+
+    // Test negative cents
+    let g_sharp4 = a440.transpose_cents(-100.0);
+    assert_eq!(g_sharp4, Pitch::new(Letter::G, Accidental::Sharp, 4));
+
+    // Test microtonal transposition (should snap to nearest equal-tempered pitch)
+    let slightly_sharp_a = a440.transpose_cents(15.0);
+    // Should still be A4 since 15 cents is closer to A4 than A#4
+    assert_eq!(slightly_sharp_a, a440);
+
+    let slightly_flat_a_sharp = a440.transpose_cents(85.0);
+    // Should be A#4 since 85 cents is closer to A#4 than A4
+    assert_eq!(slightly_flat_a_sharp, Pitch::new(Letter::A, Accidental::Sharp, 4));
+}
+
+#[test]
+fn test_interval_cents() {
+    // Test basic intervals
+    assert_eq!(Interval::PERFECT_UNISON.cents(), 0.0);
+    assert_eq!(Interval::MINOR_SECOND.cents(), 100.0);
+    assert_eq!(Interval::MAJOR_SECOND.cents(), 200.0);
+    assert_eq!(Interval::MINOR_THIRD.cents(), 300.0);
+    assert_eq!(Interval::MAJOR_THIRD.cents(), 400.0);
+    assert_eq!(Interval::PERFECT_FOURTH.cents(), 500.0);
+    assert_eq!(Interval::AUGMENTED_FOURTH.cents(), 600.0);
+    assert_eq!(Interval::PERFECT_FIFTH.cents(), 700.0);
+    assert_eq!(Interval::MINOR_SIXTH.cents(), 800.0);
+    assert_eq!(Interval::MAJOR_SIXTH.cents(), 900.0);
+    assert_eq!(Interval::MINOR_SEVENTH.cents(), 1000.0);
+    assert_eq!(Interval::MAJOR_SEVENTH.cents(), 1100.0);
+    assert_eq!(Interval::OCTAVE.cents(), 1200.0);
+
+    // Test compound intervals
+    assert_eq!(Interval::MAJOR_NINTH.cents(), 1400.0);
+    assert_eq!(Interval::PERFECT_ELEVENTH.cents(), 1700.0);
+    assert_eq!(Interval::MAJOR_THIRTEENTH.cents(), 2100.0); // Octave + major 6th = 12 + 9 = 21 semitones
+
+    // Note: Extreme intervals like DOUBLY_DIMINISHED_UNISON and DOUBLY_AUGMENTED_UNISON
+    // may not work correctly with the current interval system as it's designed for
+    // practical music intervals. These theoretical intervals are not commonly used
+    // in standard music practice.
+}
+
+#[test]
+fn test_pitch_harmonic() {
+    // Test C2 fundamental
+    let c2 = Pitch::new(Letter::C, Accidental::Natural, 2);
+
+    // 1st harmonic = fundamental
+    assert_eq!(c2.harmonic(1), c2);
+
+    // 2nd harmonic = octave above
+    assert_eq!(c2.harmonic(2), pitch!("C3"));
+
+    // 3rd harmonic = perfect fifth above (G3)
+    assert_eq!(c2.harmonic(3), pitch!("G3"));
+
+    // 4th harmonic = two octaves above
+    assert_eq!(c2.harmonic(4), pitch!("C4"));
+
+    // 5th harmonic = major third above (E4)
+    assert_eq!(c2.harmonic(5), pitch!("E4"));
+
+    // 6th harmonic = perfect fifth above (G4)
+    assert_eq!(c2.harmonic(6), pitch!("G4"));
+
+    // 7th harmonic = minor seventh above (Bb4/A#4)
+    let seventh_harmonic = c2.harmonic(7);
+    assert!(seventh_harmonic.is_enharmonic_with(&pitch!("Bb4")));
+
+    // 8th harmonic = three octaves above
+    assert_eq!(c2.harmonic(8), pitch!("C5"));
+
+    // Test A4 fundamental
+    let a4 = Pitch::new(Letter::A, Accidental::Natural, 4);
+
+    // 2nd harmonic = octave above
+    assert_eq!(a4.harmonic(2), pitch!("A5"));
+
+    // 3rd harmonic = perfect fifth above (E6)
+    assert_eq!(a4.harmonic(3), pitch!("E6"));
+}
+
+#[test]
+fn test_pitch_harmonics() {
+    let c2 = Pitch::new(Letter::C, Accidental::Natural, 2);
+
+    // Test harmonics up to 8
+    let harmonics = c2.harmonics(8);
+    assert_eq!(harmonics.len(), 8);
+
+    // Verify the harmonic series: [C2, C3, G3, C4, E4, G4, Bb4/A#4, C5]
+    assert_eq!(harmonics[0], pitch!("C2")); // 1st harmonic
+    assert_eq!(harmonics[1], pitch!("C3")); // 2nd harmonic
+    assert_eq!(harmonics[2], pitch!("G3")); // 3rd harmonic
+    assert_eq!(harmonics[3], pitch!("C4")); // 4th harmonic
+    assert_eq!(harmonics[4], pitch!("E4")); // 5th harmonic
+    assert_eq!(harmonics[5], pitch!("G4")); // 6th harmonic
+    assert!(harmonics[6].is_enharmonic_with(&pitch!("Bb4"))); // 7th harmonic
+    assert_eq!(harmonics[7], pitch!("C5")); // 8th harmonic
+
+    // Test empty harmonics
+    let empty = c2.harmonics(0);
+    assert!(empty.is_empty());
+
+    // Test single harmonic
+    let single = c2.harmonics(1);
+    assert_eq!(single.len(), 1);
+    assert_eq!(single[0], c2);
+}
+
+#[test]
+fn test_pitch_subharmonic() {
+    // Test C4 fundamental
+    let c4 = Pitch::new(Letter::C, Accidental::Natural, 4);
+
+    // 1st subharmonic = fundamental
+    assert_eq!(c4.subharmonic(1), c4);
+
+    // 2nd subharmonic = octave below
+    assert_eq!(c4.subharmonic(2), pitch!("C3"));
+
+    // 3rd subharmonic = major third below (F2)
+    assert_eq!(c4.subharmonic(3), pitch!("F2"));
+
+    // 4th subharmonic = two octaves below
+    assert_eq!(c4.subharmonic(4), pitch!("C2"));
+
+    // 5th subharmonic = major third below (G#1)
+    assert_eq!(c4.subharmonic(5), pitch!("G#1"));
+
+    // Test A4 fundamental
+    let a4 = Pitch::new(Letter::A, Accidental::Natural, 4);
+
+    // 2nd subharmonic = octave below
+    assert_eq!(a4.subharmonic(2), pitch!("A3"));
+
+    // 3rd subharmonic = perfect fifth below (D3)
+    assert_eq!(a4.subharmonic(3), pitch!("D3"));
+}
+
+#[test]
+fn test_pitch_fundamental_of_harmonic() {
+    // Test finding fundamental from G3 (3rd harmonic of C2)
+    let g3 = Pitch::new(Letter::G, Accidental::Natural, 3);
+    let fundamental = g3.fundamental_of_harmonic(3);
+    assert_eq!(fundamental, pitch!("C2"));
+
+    // Test finding fundamental from C5 (8th harmonic of C2)
+    let c5 = Pitch::new(Letter::C, Accidental::Natural, 5);
+    let fundamental = c5.fundamental_of_harmonic(8);
+    assert_eq!(fundamental, pitch!("C2"));
+
+    // Test finding fundamental from E4 (5th harmonic of C2)
+    let e4 = Pitch::new(Letter::E, Accidental::Natural, 4);
+    let fundamental = e4.fundamental_of_harmonic(5);
+    assert_eq!(fundamental, pitch!("C2"));
+
+    // Test finding fundamental from Bb4 (7th harmonic of C2)
+    let bb4 = Pitch::new(Letter::B, Accidental::Flat, 4);
+    let fundamental = bb4.fundamental_of_harmonic(7);
+    assert_eq!(fundamental, pitch!("C2"));
+
+    // Test finding fundamental from A5 (2nd harmonic of A4)
+    let a5 = Pitch::new(Letter::A, Accidental::Natural, 5);
+    let fundamental = a5.fundamental_of_harmonic(2);
+    assert_eq!(fundamental, pitch!("A4"));
+
+    // Test finding fundamental from E6 (3rd harmonic of A4)
+    let e6 = Pitch::new(Letter::E, Accidental::Natural, 6);
+    let fundamental = e6.fundamental_of_harmonic(3);
+    assert_eq!(fundamental, pitch!("A4"));
+}
+
+#[test]
+#[should_panic(expected = "Harmonic number must be positive")]
+fn test_pitch_harmonic_zero_panics() {
+    let c2 = Pitch::new(Letter::C, Accidental::Natural, 2);
+    c2.harmonic(0);
+}
+
+#[test]
+#[should_panic(expected = "Subharmonic number must be positive")]
+fn test_pitch_subharmonic_zero_panics() {
+    let c4 = Pitch::new(Letter::C, Accidental::Natural, 4);
+    c4.subharmonic(0);
+}
+
+#[test]
+#[should_panic(expected = "Harmonic number must be positive")]
+fn test_pitch_fundamental_of_harmonic_zero_panics() {
+    let g3 = Pitch::new(Letter::G, Accidental::Natural, 3);
+    g3.fundamental_of_harmonic(0);
+}
+
+#[test]
+fn test_harmonic_series_relationship() {
+    // Test that harmonic and fundamental_of_harmonic are inverse operations
+    let c2 = Pitch::new(Letter::C, Accidental::Natural, 2);
+
+    for n in 1..=8 {
+        let harmonic = c2.harmonic(n);
+        let recovered_fundamental = harmonic.fundamental_of_harmonic(n);
+
+        // The recovered fundamental should be enharmonically equivalent to the original
+        assert!(recovered_fundamental.is_enharmonic_with(&c2),
+                "Failed for harmonic {}: {} -> {} -> {}", n, c2, harmonic, recovered_fundamental);
+    }
+}
+
+#[test]
+fn test_spelling_strategy_prefer_sharps() {
+    use chordy::SpellingStrategy;
+
+    // MIDI note 61 = C#4/Db4
+    let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::PreferSharps);
+    #[cfg(feature = "utf8_symbols")]
+    assert_eq!(pitch.to_string(), "C♯4");
+    #[cfg(not(feature = "utf8_symbols"))]
+    assert_eq!(pitch.to_string(), "C#4");
+
+    // MIDI note 66 = F#4/Gb4
+    let pitch = Pitch::from_midi_with_strategy(66, SpellingStrategy::PreferSharps);
+    #[cfg(feature = "utf8_symbols")]
+    assert_eq!(pitch.to_string(), "F♯4");
+    #[cfg(not(feature = "utf8_symbols"))]
+    assert_eq!(pitch.to_string(), "F#4");
+
+    // MIDI note 70 = A#4/Bb4
+    let pitch = Pitch::from_midi_with_strategy(70, SpellingStrategy::PreferSharps);
+    #[cfg(feature = "utf8_symbols")]
+    assert_eq!(pitch.to_string(), "A♯4");
+    #[cfg(not(feature = "utf8_symbols"))]
+    assert_eq!(pitch.to_string(), "A#4");
+}
+
+#[test]
+fn test_spelling_strategy_prefer_flats() {
+    use chordy::SpellingStrategy;
+
+    // MIDI note 61 = C#4/Db4
+    let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::PreferFlats);
+    #[cfg(feature = "utf8_symbols")]
+    assert_eq!(pitch.to_string(), "D♭4");
+    #[cfg(not(feature = "utf8_symbols"))]
+    assert_eq!(pitch.to_string(), "Db4");
+
+    // MIDI note 66 = F#4/Gb4
+    let pitch = Pitch::from_midi_with_strategy(66, SpellingStrategy::PreferFlats);
+    #[cfg(feature = "utf8_symbols")]
+    assert_eq!(pitch.to_string(), "G♭4");
+    #[cfg(not(feature = "utf8_symbols"))]
+    assert_eq!(pitch.to_string(), "Gb4");
+
+    // MIDI note 70 = A#4/Bb4
+    let pitch = Pitch::from_midi_with_strategy(70, SpellingStrategy::PreferFlats);
+    #[cfg(feature = "utf8_symbols")]
+    assert_eq!(pitch.to_string(), "B♭4");
+    #[cfg(not(feature = "utf8_symbols"))]
+    assert_eq!(pitch.to_string(), "Bb4");
+}
+
+#[test]
+fn test_spelling_strategy_directional_chromatic() {
+    use chordy::SpellingStrategy;
+
+    // Ascending chromatic motion should use sharps
+    let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::DirectionalChromatic { ascending: true });
+    #[cfg(feature = "utf8_symbols")]
+    assert_eq!(pitch.to_string(), "C♯4");
+    #[cfg(not(feature = "utf8_symbols"))]
+    assert_eq!(pitch.to_string(), "C#4");
+
+    // Descending chromatic motion should use flats
+    let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::DirectionalChromatic { ascending: false });
+    #[cfg(feature = "utf8_symbols")]
+    assert_eq!(pitch.to_string(), "D♭4");
+    #[cfg(not(feature = "utf8_symbols"))]
+    assert_eq!(pitch.to_string(), "Db4");
+}
+
+#[test]
+fn test_spelling_strategy_key_context() {
+    use chordy::{SpellingStrategy, Key};
+
+    // G major (1 sharp) should prefer sharps
+    let g_major = Key::Major(chordy::note!("G"));
+    let pitch = Pitch::from_midi_with_strategy(66, SpellingStrategy::KeyContext(g_major));
+    #[cfg(feature = "utf8_symbols")]
+    assert_eq!(pitch.to_string(), "F♯4"); // F# fits G major
+    #[cfg(not(feature = "utf8_symbols"))]
+    assert_eq!(pitch.to_string(), "F#4");
+
+    // F major (1 flat) should prefer flats
+    let f_major = Key::Major(chordy::note!("F"));
+    let pitch = Pitch::from_midi_with_strategy(66, SpellingStrategy::KeyContext(f_major));
+    #[cfg(feature = "utf8_symbols")]
+    assert_eq!(pitch.to_string(), "G♭4"); // Gb fits F major
+    #[cfg(not(feature = "utf8_symbols"))]
+    assert_eq!(pitch.to_string(), "Gb4");
+
+    // C major (no accidentals) defaults to sharps
+    let c_major = Key::Major(chordy::note!("C"));
+    let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::KeyContext(c_major));
+    #[cfg(feature = "utf8_symbols")]
+    assert_eq!(pitch.to_string(), "C♯4");
+    #[cfg(not(feature = "utf8_symbols"))]
+    assert_eq!(pitch.to_string(), "C#4");
+}
+
+#[test]
+fn test_spelling_strategy_prefer_naturals() {
+    use chordy::SpellingStrategy;
+
+    // Test that naturals are used where possible
+    let pitch = Pitch::from_midi_with_strategy(60, SpellingStrategy::PreferNaturals);
+    assert_eq!(pitch.to_string(), "C4"); // Natural C
+
+    let pitch = Pitch::from_midi_with_strategy(62, SpellingStrategy::PreferNaturals);
+    assert_eq!(pitch.to_string(), "D4"); // Natural D
+
+    // Black keys still use accidentals (no natural equivalent)
+    let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::PreferNaturals);
+    #[cfg(feature = "utf8_symbols")]
+    assert_eq!(pitch.to_string(), "C♯4");
+    #[cfg(not(feature = "utf8_symbols"))]
+    assert_eq!(pitch.to_string(), "C#4");
+}
+
+#[test]
+fn test_spelling_strategy_minimize_accidentals() {
+    use chordy::SpellingStrategy;
+
+    // For now, MinimizeAccidentals defaults to sharps
+    // In a real implementation, this would analyze context
+    let pitch = Pitch::from_midi_with_strategy(61, SpellingStrategy::MinimizeAccidentals);
+    #[cfg(feature = "utf8_symbols")]
+    assert_eq!(pitch.to_string(), "C♯4");
+    #[cfg(not(feature = "utf8_symbols"))]
+    assert_eq!(pitch.to_string(), "C#4");
+}
+
+#[test]
+fn test_spelling_strategy_consistency() {
+    use chordy::SpellingStrategy;
+
+    // Test that all strategies produce enharmonically equivalent pitches
+    let midi_note = 61; // C#3/Db3
+    let strategies = [
+        SpellingStrategy::PreferSharps,
+        SpellingStrategy::PreferFlats,
+        SpellingStrategy::PreferNaturals,
+        SpellingStrategy::DirectionalChromatic { ascending: true },
+        SpellingStrategy::DirectionalChromatic { ascending: false },
+        SpellingStrategy::MinimizeAccidentals,
+    ];
+
+    let pitches: Vec<_> = strategies
+        .iter()
+        .map(|strategy| Pitch::from_midi_with_strategy(midi_note, *strategy))
+        .collect();
+
+    // All pitches should be enharmonically equivalent
+    for i in 0..pitches.len() {
+        for j in i + 1..pitches.len() {
+            assert!(pitches[i].is_enharmonic_with(&pitches[j]),
+                    "Pitches {} and {} are not enharmonically equivalent",
+                    pitches[i], pitches[j]);
+        }
+    }
+}
+
+#[test]
+fn test_pitch_is_harmonic_of() {
+    let c2 = Pitch::new(Letter::C, Accidental::Natural, 2);
+
+    // Test exact harmonics
+    assert_eq!(c2.is_harmonic_of(&c2), Some(1)); // Fundamental is 1st harmonic
+    assert_eq!(pitch!("C3").is_harmonic_of(&c2), Some(2)); // Octave above
+    assert_eq!(pitch!("G3").is_harmonic_of(&c2), Some(3)); // Perfect fifth
+    assert_eq!(pitch!("C4").is_harmonic_of(&c2), Some(4)); // Two octaves above
+    assert_eq!(pitch!("E4").is_harmonic_of(&c2), Some(5)); // Major third
+    assert_eq!(pitch!("G4").is_harmonic_of(&c2), Some(6)); // Perfect fifth
+    assert_eq!(pitch!("Bb4").is_harmonic_of(&c2), Some(7)); // Minor seventh
+    assert_eq!(pitch!("C5").is_harmonic_of(&c2), Some(8)); // Three octaves above
+
+    // Test enharmonic equivalents
+    assert_eq!(pitch!("A#4").is_harmonic_of(&c2), Some(7)); // A#4 is enharmonic with Bb4
+
+    // Test non-harmonics
+    assert_eq!(pitch!("D3").is_harmonic_of(&c2), None); // D3 is not a harmonic of C2
+    assert_eq!(pitch!("F3").is_harmonic_of(&c2), None); // F3 is not a harmonic of C2
+    assert_eq!(pitch!("A3").is_harmonic_of(&c2), None); // A3 is not a harmonic of C2
+
+    // Test with different fundamental
+    let a4 = Pitch::new(Letter::A, Accidental::Natural, 4);
+    assert_eq!(pitch!("A5").is_harmonic_of(&a4), Some(2)); // Octave above A4
+    assert_eq!(pitch!("E6").is_harmonic_of(&a4), Some(3)); // Perfect fifth above A4
+
+    // Test with very high harmonics
+    let c3 = Pitch::new(Letter::C, Accidental::Natural, 3);
+    assert_eq!(pitch!("C6").is_harmonic_of(&c3), Some(8)); // 8th harmonic
+}
+
+#[test]
+fn test_pitch_nearest_harmonic() {
+    let c2 = Pitch::new(Letter::C, Accidental::Natural, 2);
+
+    // Test exact harmonics (accounting for equal temperament deviations)
+    let (harmonic, cents) = pitch!("C2").nearest_harmonic(&c2);
+    assert_eq!(harmonic, 1);
+    assert!((cents - 0.0).abs() < 2.0); // Allow small deviation in equal temperament
+
+    let (harmonic, cents) = pitch!("C3").nearest_harmonic(&c2);
+    assert_eq!(harmonic, 2);
+    assert!((cents - 0.0).abs() < 2.0); // Allow small deviation in equal temperament
+
+    let (harmonic, cents) = pitch!("G3").nearest_harmonic(&c2);
+    assert_eq!(harmonic, 3);
+    assert!((cents - 0.0).abs() < 2.0); // Allow small deviation in equal temperament
+
+    let (harmonic, cents) = pitch!("C4").nearest_harmonic(&c2);
+    assert_eq!(harmonic, 4);
+    assert!((cents - 0.0).abs() < 2.0); // Allow small deviation in equal temperament
+
+    // Test consistency between is_harmonic_of and nearest_harmonic
+    // For exact harmonics, both methods should agree
+    let exact_harmonics = [
+        (pitch!("C2"), 1),
+        (pitch!("C3"), 2),
+        (pitch!("G3"), 3),
+        (pitch!("C4"), 4),
+        (pitch!("E4"), 5),
+        (pitch!("G4"), 6),
+        (pitch!("Bb4"), 7),
+        (pitch!("C5"), 8),
+    ];
+
+    for (harmonic_pitch, expected_n) in exact_harmonics.iter() {
+        // Test that is_harmonic_of returns the expected harmonic number
+        assert_eq!(harmonic_pitch.is_harmonic_of(&c2), Some(*expected_n),
+                   "{} should be harmonic {} of C2", harmonic_pitch, expected_n);
+
+        // Test that nearest_harmonic returns the same harmonic number with ~0 cents
+        let (n, cents) = harmonic_pitch.nearest_harmonic(&c2);
+        assert_eq!(n, *expected_n,
+                   "{} should be nearest harmonic {} of C2", harmonic_pitch, expected_n);
+        // Allow for equal temperament deviations - higher harmonics have larger deviations
+        let max_cents_deviation = match *expected_n {
+            1 | 2 | 4 | 8 => 2.0,    // Octaves have minimal deviation
+            3 | 6 => 2.0,             // Perfect fifths have minimal deviation
+            5 => 15.0,                // Major third has significant deviation (~13.7 cents)
+            7 => 35.0,                // Minor seventh has large deviation (~31.2 cents)
+            _ => 5.0,                 // Default tolerance
+        };
+        assert!((cents - 0.0).abs() < max_cents_deviation,
+                "{} should have <{} cents deviation from harmonic {} of C2, got {} cents",
+                harmonic_pitch, max_cents_deviation, expected_n, cents);
+    }
+
+    // Test pitches that are not exact harmonics
+    let d3 = pitch!("D3");
+    let (harmonic, cents) = d3.nearest_harmonic(&c2);
+    // D3 is closest to the 2nd harmonic (C3) in equal temperament
+    // The ratio is ~2.2449, which rounds to 2
+    assert_eq!(harmonic, 2);
+    // Cents deviation should be significant since D3 is not a harmonic of C2
+    // D3 is a major second above C3, so deviation should be ~200 cents
+    assert!((cents - 200.0).abs() < 1.0);
+
+    // Test with different fundamental
+    let a4 = Pitch::new(Letter::A, Accidental::Natural, 4);
+    let (harmonic, cents) = pitch!("A5").nearest_harmonic(&a4);
+    assert_eq!(harmonic, 2);
+    assert!((cents - 0.0).abs() < 0.1);
+
+    let (harmonic, cents) = pitch!("E6").nearest_harmonic(&a4);
+    assert_eq!(harmonic, 3);
+    // In equal temperament, E6 is about -2 cents from the exact 3rd harmonic of A4
+    assert!((cents - (-2.0)).abs() < 0.5);
+}
+
+#[test]
+fn test_harmonic_analysis_consistency() {
+    // Test that is_harmonic_of and nearest_harmonic are consistent
+    let c2 = Pitch::new(Letter::C, Accidental::Natural, 2);
+
+    // For exact harmonics, is_harmonic_of should return Some and nearest_harmonic should have ~0 cents
+    let exact_harmonics = [
+        (pitch!("C2"), 1),
+        (pitch!("C3"), 2),
+        (pitch!("G3"), 3),
+        (pitch!("C4"), 4),
+        (pitch!("E4"), 5),
+        (pitch!("G4"), 6),
+        (pitch!("Bb4"), 7),
+        (pitch!("C5"), 8),
+    ];
+
+    for (harmonic_pitch, expected_n) in exact_harmonics.iter() {
+        // Test is_harmonic_of
+        assert_eq!(harmonic_pitch.is_harmonic_of(&c2), Some(*expected_n),
+                   "{} should be harmonic {} of C2", harmonic_pitch, expected_n);
+
+        // Test nearest_harmonic
+        let (n, cents) = harmonic_pitch.nearest_harmonic(&c2);
+        assert_eq!(n, *expected_n,
+                   "{} should be nearest harmonic {} of C2", harmonic_pitch, expected_n);
+        // Allow for equal temperament deviations - higher harmonics have larger deviations
+        let max_cents_deviation = match *expected_n {
+            1 | 2 | 4 | 8 => 2.0,    // Octaves have minimal deviation
+            3 | 6 => 2.0,             // Perfect fifths have minimal deviation
+            5 => 15.0,                // Major third has significant deviation (~13.7 cents)
+            7 => 35.0,                // Minor seventh has large deviation (~31.2 cents)
+            _ => 5.0,                 // Default tolerance
+        };
+        assert!((cents - 0.0).abs() < max_cents_deviation,
+                "{} should have <{} cents deviation from harmonic {} of C2, got {} cents",
+                harmonic_pitch, max_cents_deviation, expected_n, cents);
+    }
+
+    // Test that non-harmonics return None for is_harmonic_of
+    let non_harmonics = [
+        pitch!("D3"),
+        pitch!("F3"),
+        pitch!("A3"),
+        pitch!("B3"),
+    ];
+
+    for non_harmonic in non_harmonics.iter() {
+        assert_eq!(non_harmonic.is_harmonic_of(&c2), None,
+                   "{} should not be a harmonic of C2", non_harmonic);
+    }
+}
+
+#[test]
+fn test_debug_harmonic_issue() {
+    let c2 = Pitch::new(Letter::C, Accidental::Natural, 2);
+    let e4 = Pitch::new(Letter::E, Accidental::Natural, 4);
+
+    let c2_freq = c2.to_frequency();
+    let e4_freq = e4.to_frequency();
+
+    println!("C2 frequency: {}", c2_freq);
+    println!("E4 frequency: {}", e4_freq);
+
+    let ratio = e4_freq / c2_freq;
+    println!("Ratio: {}", ratio);
+    println!("Expected ratio for 5th harmonic: 5.0");
+    println!("Difference: {}", (ratio - 5.0).abs());
+
+    let tolerance = 0.015; // This matches the actual tolerance in the implementation
+    println!("Tolerance: {}", tolerance);
+    println!("Within tolerance: {}", (ratio - 5.0).abs() < tolerance);
+
+    // Check what the 5th harmonic of C2 actually is
+    let harmonic_5 = c2.harmonic(5);
+    println!("5th harmonic of C2: {}", harmonic_5);
+    println!("E4 == 5th harmonic: {}", e4.is_enharmonic_with(&harmonic_5));
+
+    // Test the is_harmonic_of method
+    println!("is_harmonic_of result: {:?}", e4.is_harmonic_of(&c2));
 }

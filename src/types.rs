@@ -1,6 +1,6 @@
 //! This module defines the types used in the music theory library.
 mod pitch;
-pub use pitch::Pitch;
+pub use pitch::{Pitch, SpellingStrategy};
 
 mod letter;
 pub use letter::Letter;
@@ -28,6 +28,9 @@ pub use interval_set::IntervalSet;
 
 mod roman_numeral;
 pub use roman_numeral::{RomanChord, RomanDegree, RomanNumeral};
+
+mod pitch_class_set;
+pub use pitch_class_set::PitchClassSet;
 
 pub mod progression;
 pub use progression::{

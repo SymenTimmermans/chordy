@@ -33,6 +33,7 @@ assert_ne!(c_sharp, d_flat); // Different note names
 - **Chord Progression Analysis**: Built-in progression maps with jazz harmony support
 - **Roman Numeral Analysis**: Complete system for harmonic analysis and chord functions
 - **Chord Identification**: Advanced chord naming with proper jazz conventions
+- **Frequency Ratio Analysis**: Support for equal temperament, just intonation, and Pythagorean tuning
 - **Zero Dependencies**: Pure Rust implementation with no external dependencies
 - **WebAssembly Compatible**: Use in browsers without modification
 - **Theoretically Sound**: Built with accuracy and musical principles as the highest priority
@@ -60,7 +61,7 @@ let e_flat = NoteName::new(Letter::E, Accidental::Flat);
 let middle_e_flat = Pitch::new(Letter::E, Accidental::Flat, 4);
 
 // Get the MIDI note number
-assert_eq!(middle_e_flat.midi_number(), 75);
+assert_eq!(middle_e_flat.midi_number(), 63);
 ```
 
 ### Transposition
@@ -81,6 +82,28 @@ let c_sharp = Pitch::new(Letter::C, Accidental::Sharp, 4);
 let e_sharp = c_sharp.transpose(4);
 assert_eq!(e_sharp.name.letter(), Letter::E);
 assert_eq!(e_sharp.name.accidental(), Accidental::Sharp);
+```
+
+### Frequency Ratios and Tuning Systems
+
+```rust
+use chordy::Interval;
+
+// Equal temperament ratios
+let fifth = Interval::PERFECT_FIFTH;
+assert!((fifth.frequency_ratio() - 1.4983).abs() < 0.001);
+
+// Just intonation (pure integer ratios)
+let (num, den) = fifth.just_intonation_ratio();
+assert_eq!((num, den), (3, 2)); // Perfect 3:2 ratio
+
+// Pythagorean tuning
+let (num, den) = fifth.pythagorean_ratio();
+assert_eq!((num, den), (3, 2)); // Pure fifth
+
+// Identify intervals from frequency ratios
+let interval = Interval::from_ratio(1.5).unwrap();
+assert_eq!(interval, Interval::PERFECT_FIFTH);
 ```
 
 ### Scales and Chords
@@ -183,9 +206,24 @@ Chordy is built on these core principles:
 3. **Zero Dependencies**: Pure Rust implementation for maximum portability and WebAssembly
    compatibility
 
+## MIDI Standard
+
+Chordy uses the standard MIDI note numbering convention where **MIDI note 60 = C4** (middle C). This is the most widely adopted standard in the music industry.
+
+### MIDI Note Mapping
+
+- **MIDI note 0**: C-1 (8.18 Hz)
+- **MIDI note 60**: C4 (261.63 Hz) - Middle C
+- **MIDI note 69**: A4 (440.00 Hz) - Concert pitch
+- **MIDI note 127**: G9 (12543.85 Hz)
+
+### Migration Note
+
+Previous versions of Chordy used a non-standard MIDI mapping where MIDI note 60 = C3. If you're upgrading from an older version, you'll need to update any code that relies on specific MIDI note numbers or octave calculations.
+
 ## Features
 
-- **utf8_symbols** (enabled by default): Uses proper UTF-8 musical symbols (♭, ♯, etc.) 
+- **utf8_symbols** (enabled by default): Uses proper UTF-8 musical symbols (♭, ♯, etc.)
   in string representations. Disable this feature with `default-features = false` if you
   need ASCII-only output (for compatibility with terminals or systems that don't support
   these characters).
