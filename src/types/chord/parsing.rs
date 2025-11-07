@@ -43,7 +43,7 @@ impl FromStr for Chord {
         }
 
         // Create chord from notes
-        Ok(Chord::from_notes(&notes))
+        Ok(Chord::from_notes_ordered_root_first(&notes))
     }
 }
 
