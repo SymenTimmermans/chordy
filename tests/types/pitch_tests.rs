@@ -16,7 +16,6 @@ fn test_pitch_creation() {
     assert_eq!(pitch.to_string(), "B♭5");
     #[cfg(not(feature = "utf8_symbols"))]
     assert_eq!(note.to_string(), "Bb5");
-
 }
 
 #[test]

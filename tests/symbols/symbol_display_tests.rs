@@ -1,4 +1,4 @@
-use chordy::types::{NoteName, Letter, Accidental};
+use chordy::types::{Accidental, Letter, NoteName};
 
 #[test]
 fn test_note_display() {
@@ -7,7 +7,6 @@ fn test_note_display() {
     assert_eq!(note.to_string(), "F♯");
     #[cfg(not(feature = "utf8_symbols"))]
     assert_eq!(note.to_string(), "F#");
-
 
     let note = NoteName::new(Letter::B, Accidental::Flat);
     #[cfg(feature = "utf8_symbols")]

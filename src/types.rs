@@ -3,16 +3,16 @@ use std::{fmt, str::FromStr};
 use crate::error::ParseError;
 
 /// Represents a musical note name with a letter and accidental
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use chordy::NoteName;
 /// use chordy::{Letter, Accidental};
-/// 
+///
 /// let c_sharp = NoteName::new(Letter::C, Accidental::Sharp);
 /// assert_eq!(c_sharp.to_string(), "C♯");
-/// 
+///
 /// // Enharmonic equivalence check
 /// let d_flat = NoteName::new(Letter::D, Accidental::Flat);
 /// assert!(c_sharp.is_enharmonic_with(&d_flat));
@@ -82,7 +82,7 @@ impl Pitch {
         // MIDI octaves start at -2, where C-2 is note 0
         self.name.base_midi_number() + ((self.octave + 2) * 12)
     }
-    
+
     /// Checks if two pitches represent the same frequency
     pub fn is_enharmonic_with(&self, other: &Self) -> bool {
         self.midi_number() == other.midi_number()
@@ -126,7 +126,7 @@ impl Scale {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Key {
     tonic: NoteName,
-    mode: Mode,  // Usually just Major or Minor
+    mode: Mode, // Usually just Major or Minor
 }
 
 /// Musical letter names A through G, with numeric backing
@@ -146,7 +146,7 @@ pub enum Letter {
 impl fmt::Display for Letter {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use crate::symbols::*;
-        
+
         match self {
             Letter::C => write!(f, "{}", C),
             Letter::D => write!(f, "{}", D),
@@ -164,7 +164,7 @@ impl Letter {
     pub fn base_midi_number(&self) -> i8 {
         *self as i8
     }
-    
+
     /// Gets the next letter in the sequence (wrapping from G to A)
     pub fn _next(&self) -> Self {
         match self {
@@ -177,7 +177,7 @@ impl Letter {
             Letter::G => Letter::A,
         }
     }
-    
+
     /// Gets the previous letter in the sequence (wrapping from A to G)
     pub fn _prev(&self) -> Self {
         match self {
@@ -214,7 +214,7 @@ impl Accidental {
 impl fmt::Display for Accidental {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use crate::symbols::*;
-        
+
         match self {
             Accidental::Flat => write!(f, "{}", FLAT),
             Accidental::Sharp => write!(f, "{}", SHARP),
@@ -227,7 +227,7 @@ impl fmt::Display for Accidental {
 
 impl FromStr for Accidental {
     type Err = ParseError;
-    
+
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "b" | "♭" => Ok(Accidental::Flat),
@@ -276,28 +276,28 @@ pub enum Mode {
 pub enum ChordExtension {
     /// 7th chords (dominant 7, major 7, etc.)
     Seventh(SeventhType),
-    
+
     /// 9th extension (adds 9th above root)
     Ninth(NinthType),
-    
+
     /// 11th extension (adds 11th above root)
     Eleventh(EleventhType),
-    
+
     /// 13th extension (adds 13th above root)
     Thirteenth(ThirteenthType),
-    
+
     /// Added notes that aren't standard extensions (add2, add4, etc.)
     Add(AddedNote),
-    
+
     /// Suspended notes (sus2, sus4)
     Sus(SuspendedType),
-    
+
     /// Altered fifth (e.g., ♭5, ♯5)
     AlteredFifth(AlteredFifthType),
-    
+
     /// Altered ninth (e.g., ♭9, ♯9)
     AlteredNinth(AlteredNinthType),
-    
+
     /// Omitted notes (e.g., no3, no5)
     Omit(OmittedNote),
 }
@@ -307,16 +307,16 @@ pub enum ChordExtension {
 pub enum SeventhType {
     /// Dominant seventh (♭7)
     Dominant,
-    
+
     /// Major seventh (major triad with major 7th)
     Major,
-    
+
     /// Minor seventh (minor triad with minor 7th)
     Minor,
-    
+
     /// Half-diminished seventh (diminished triad with minor 7th)
     HalfDiminished,
-    
+
     /// Diminished seventh (diminished triad with diminished 7th)
     Diminished,
 }
@@ -326,10 +326,10 @@ pub enum SeventhType {
 pub enum NinthType {
     /// Standard ninth (major 9th)
     Natural,
-    
+
     /// Flat ninth (♭9)
     Flat,
-    
+
     /// Sharp ninth (♯9)
     Sharp,
 }
@@ -339,7 +339,7 @@ pub enum NinthType {
 pub enum EleventhType {
     /// Standard eleventh (perfect 11th)
     Natural,
-    
+
     /// Sharp eleventh (♯11)
     Sharp,
 }
@@ -349,7 +349,7 @@ pub enum EleventhType {
 pub enum ThirteenthType {
     /// Standard thirteenth (major 13th)
     Natural,
-    
+
     /// Flat thirteenth (♭13)
     Flat,
 }
@@ -359,13 +359,13 @@ pub enum ThirteenthType {
 pub enum AddedNote {
     /// Added 2nd/9th without 7th
     Add2,
-    
+
     /// Added 4th/11th without 7th and 9th
     Add4,
-    
+
     /// Added 6th
     Add6,
-    
+
     /// Added ♭6th
     AddFlat6,
 }
@@ -375,7 +375,7 @@ pub enum AddedNote {
 pub enum SuspendedType {
     /// Suspended 2nd (replaces 3rd with 2nd)
     Sus2,
-    
+
     /// Suspended 4th (replaces 3rd with 4th)
     Sus4,
 }
@@ -385,7 +385,7 @@ pub enum SuspendedType {
 pub enum AlteredFifthType {
     /// Flat fifth (♭5)
     Flat,
-    
+
     /// Sharp fifth (♯5)
     Sharp,
 }
@@ -395,7 +395,7 @@ pub enum AlteredFifthType {
 pub enum AlteredNinthType {
     /// Flat ninth (♭9)
     Flat,
-    
+
     /// Sharp ninth (♯9)
     Sharp,
 }
@@ -405,7 +405,7 @@ pub enum AlteredNinthType {
 pub enum OmittedNote {
     /// Omitted 3rd
     No3,
-    
+
     /// Omitted 5th
     No5,
 }
