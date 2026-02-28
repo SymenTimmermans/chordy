@@ -1,4 +1,4 @@
-use chordy::types::{NoteName, Letter, Accidental};
+use chordy::types::{Accidental, Letter, NoteName};
 
 #[test]
 fn test_note_name_creation() {
@@ -10,7 +10,7 @@ fn test_note_name_creation() {
 fn test_base_midi_number() {
     let note = NoteName::new(Letter::C, Accidental::Natural);
     assert_eq!(note.base_midi_number(), 0);
-    
+
     let note = NoteName::new(Letter::A, Accidental::Flat);
     assert_eq!(note.base_midi_number(), 8); // A (9) + Flat (-1)
 }
